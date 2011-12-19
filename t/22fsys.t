@@ -1,0 +1,13 @@
+#!/usr/bin/env perl
+use lib 'lib', 'blib/lib', 'blib/arch';
+use warnings;
+use strict;
+
+use Test::More tests => 1;
+
+use POSIX::1003::FileSystem qw(PATH_MAX);
+
+# constant from POSIX.xs
+cmp_ok(PATH_MAX, '>', 10, 'PATH_MAX='.PATH_MAX);
+
+use POSIX::1003::FileSystem;  # try load all
