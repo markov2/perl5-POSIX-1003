@@ -36,7 +36,10 @@ POSIX::1003::Proc - POSIX handling processes
 
 =chapter SYNOPSIS
 
-  use POSIX::1003::Proc qw/abort/;
+  use POSIX::1003::Proc qw/abort setpgid/;
+
+  abort();
+  setpgid($pid, $pgid);
 
 =chapter DESCRIPTION
 Functions which are bound to each separate process.

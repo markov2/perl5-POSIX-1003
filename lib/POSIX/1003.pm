@@ -3,7 +3,7 @@ use warnings;
 
 package POSIX::1003;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use Carp 'croak';
 
 { use XSLoader;

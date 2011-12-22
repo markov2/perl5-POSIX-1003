@@ -100,10 +100,12 @@ by Perl.  See L<perlthrtut> on the thread implementation of Perl.
 =head2 Asynchronous Input and Output Interfaces
 
 These functions are provided by L<IO::AIO>:
+
   aio_cancel, aio_error, aio_fsync, aio_read, aio_return, aio_suspend,
   aio_write
 
 Not supported:
+
   lio_listio
 
 =head2 Jump Interfaces
@@ -130,6 +132,7 @@ The modules L<Math::BigInt> and L<Math::BigFloat> offer a wide range
 of mathematical functions with flexible precission.
 
 These are specified in POSIX:
+
   acosh                           Math::Trig
   acos                            ::Math
   asinh                           Math::Trig
@@ -165,11 +168,13 @@ These are specified in POSIX:
   tan                             ::Math
 
 Complex numbers only in Perl with L<Math::Complex>:
+
   cabs, cacos, cacosh, carg, casin, casinh, catan, catanh, cbrt,
   ccos, ccosh, cexp, cimag, clog, conj, cpow, cproj, creal, csin,
   csinh, csqrt, ctan, ctanh
 
 Probably not supported:
+
   copysign, erf, erfc, exp2, expm1, fdim, fma, fpclassify, hypot,
   ilogb, isfinite, isinf, isnan, isnormal, isunordered, lgamma,
   llround, log1p, log2, logb, lround, nan, nearbyint, nextafter,
@@ -291,6 +296,7 @@ equivalent.
 The following functions where first defined by C99, and describe
 the handling of floating-point rounding and exceptions.  They are
 not supported:
+
   feclearexcept, fegetenv, fegetexceptflag, fegetround, feholdexcept,
   feraiseexcept, fesetenv, fesetexceptflag, fesetround, fetestexcept,
   feupdateenv
@@ -346,6 +352,7 @@ and C<realloc>.
 =head3 Var-args
 
 All functions in Perl can handle a variable list of arguments, so
+
   va_arg      not needed
   va_copy     not needed
   va_end      not needed
@@ -372,6 +379,7 @@ interface specifications, but that is getting rare.
 Not provided are all function wide versions of character classes, like
 C<iswalnum>, all functions which start with C<tow>, C<wcs>, C<wct> or
 C<wmem>.  Additionally, missing are
+
   mbsrtowcs, mbsinit, swprintf, swscanf, vswprintf, vswscanf, wcrtomb
   mbsnrtowcs, wcpcpy, wcpncpy
 
@@ -392,7 +400,8 @@ which are more platform indepent and more flexible than the POSIX version
 (therefore they are missing)
   getopt, getsubopt, optarg, opterr, optind, optopt
 
-Some string functions have simple Perl work-arounds
+Some string functions have simple Perl work-arounds:
+
   strcasecmp  lc($a) cmp lc($b)
   strdup      $b = $a
   strncasecmp substr($a,$n) cmp substr($b,$n)
@@ -409,6 +418,7 @@ Some string functions have simple Perl work-arounds
 =head2 Device Input and Output Interfaces
 
 Where Perl always uses flexible lists, these are not useful:
+
   vfprintf, vfscanf, vprintf, vscanf
 
 =head3 File-descriptor based
@@ -473,10 +483,12 @@ provided.  However, they can be simulated easily with L<perlfunc/vec>
 =head2 Extended Device Input and Output Interfaces
 
 Probably not supported:
+
   dprintf, vdprintf
 
 The functions C<fmemopen> and C<open_memstream> by opening a scalar
 as file handle.  See L<perlfunc/open>
+
   open $fh, '>', \$buffer;
 
 =head2 General Terminal Interfaces
@@ -503,6 +515,7 @@ L<POSIX::Termios> module.  See its manpage for the usage.
 The loading of shared libraries in organized by its XS wrapper.  The
 module L<XSLoader> opens both the wrapper and the wrapped library.
 Therefore, there is no need for
+
   dlclose, dlerror, dlopen, dlsym
 
 =head2 File Descriptor Management Interfaces
@@ -522,6 +535,7 @@ On file handles:
   rewind      POSIX.pm
 
 Using file-descriptors
+
   dup         perlopentut/<&=     ::FdIO/dupfd
   dup2                            ::FdIO/dup2fd
   lseek                           ::FdIO/seekfd       
@@ -534,10 +548,6 @@ by L<Fcntl>.
   mkfifo                          ::FileSystem
   mkfifoat     not supported
   mknodat      not supported
-
-Example:
-  use POSIX::1003::FileSystem 'mkfifo';
-  mkfifo($path, 0600) or die $!;
 
 =head2 File Attribute Interfaces
 
@@ -559,6 +569,7 @@ POSIX.pm)
 
 Perl does support the non-portable flock (see L<perlfunc/flock>)
 in core, but the POSIX C<flockfile> mechanism is probably unsupported:
+
   flockfile, ftrylockfile, funlockfile, getc_unlocked,
   getchar_unlocked, putc_unlocked, putchar_unlocked
 
@@ -569,7 +580,7 @@ These functions work with filehandles:
   chdir       perlfunc      
   closedir    perlfunc            IO::Dir/close
   fchdir      perlfunc         
-  getcwd                          Cwd/getpwd
+  getcwd                          Cwd/getcwd
   link        perlfunc         
   mkdir       perlfunc         
   mkstemp                         File::Temp/mkstemp
@@ -584,25 +595,30 @@ These functions work with filehandles:
   tmpfile                         File::Temp IO::File/new_tmpfile
   tmpnam      (insecure!)         File::Temp POSIX.pm
   unlink      perlfunc       
-  utime       perlfunc            POSIX.pm (see warning!)
+  utime       perlfunc            ::FileSystem POSIX.pm
+
+B<Warning:>
+
+  POSIX::utime($filename, $atime, $mtime);
+  CORE::utime($atime, $mtime, @filenames);
 
 The symbolic constants needed to understand the result of C<stat>
 are provided by L<Fcntl>.
 
 These work on file descriptors
+
   creat       perlfunc/sysopen    ::FdIO/creatfd
   fpathconf                       ::Pathconf
   fstat       perlfunc/stat       File::stat POSIX.pm
 
 Working on filenames
+
   truncate      perlfunc/truncate
 
 Provided by L<Filesys::statvfs>
+
   fstatvfs, statvfs
 
-Warning:
-  POSIX::utime($filename, $atime, $mtime);
-  CORE::utime($atime, $mtime, @filenames);
 
 =head2 File System Interfaces
 
@@ -619,6 +635,7 @@ Warning:
 None of the functions of the 'at' interface is supported: they provide
 a way to use paths relative to a file-descriptor.  This POSIX module only
 supports their absolute brothers:
+
   faccessat, fstatat, linkat, mkdirat, openat, renameat,
   unlinkat, utimensat
 
@@ -629,11 +646,15 @@ supports their absolute brothers:
 Access to message categories via L<Locale::Msgcat>.  This interface
 is far to simple to really translate messages into various languages.
 You may have a look at various implementations of C<gettext>.
+
   catclose, catgets, catopen
 
 An Object Oriented wrapper to the iconv interface is provided
 by L<Text::Iconv>.  Better have a look at the L<Encode> first.
-  iconv, iconv_close, iconv_open
+
+  iconv                           Text::Iconv/convert
+  iconv_open                      Text::Iconv/new
+  iconv_close                     Text::Iconv/Destroy
 
 =head2 Job Control Interfaces
 
@@ -642,14 +663,12 @@ by L<Text::Iconv>.  Better have a look at the L<Encode> first.
   tcsetpgrp                       ::Proc
   tcgetsid    not supported
 
-Examples:
-  setpgid($pid, $pgid);
-
 =head2 Memory Interfaces
 
 Memory management is done by the language.  It is difficult to allocate
 data structures on specific locations, although there are various mmap
 interfaces.
+
   mmap                            Sys::Mmap   Mmap
   munmap                          Sys::Mmap   Mmap
   mprotect                        IO::AIO/aio_mprotect
@@ -684,11 +703,13 @@ all ending on C<_l>, like C<isalnum_l()>.
   fexecve       not supported
 
 B<Warning,> different return parameters for POSIX.pm
+
           ($user, $sys, $cuser, $csys) = CORE::times();
  ($elapse, $user, $sys, $cuser, $csys) = POSIX::times();
  ($elapse, $user, $sys, $cuser, $csys) = ::Proc::times5();
 
 B<Warning,> different return value for POSIX.pm
+
   $slept = CORE::sleep(10);
   $early = POSIX::sleep(10); # $slept+$early=10
 
@@ -699,6 +720,7 @@ B<Warning,> different return value for POSIX.pm
 =head3 handling sockets
 
 Most code uses the Object Oriented approach via L<IO::Socket::INET>.
+
   accept      perlfunc            IO::Socket
   bind        perlfunc            IO::Socket
   connect     perlfunc            IO::Socket::INET
@@ -721,6 +743,7 @@ Most code uses the Object Oriented approach via L<IO::Socket::INET>.
 If you use the right functions of L<IO::Socket::INET> you will not
 need these.  Otherwise, you should take a look at L<perlfunc/pack>
 and C<unpack>.
+
   htonl, htons, ntohl, ntohs
   inet_addr, inet_ntoa, inet_ntop, inet_pton
 
@@ -728,6 +751,7 @@ and C<unpack>.
 
 Most network configuration functions are provided in CORE.  There
 are also object wrappers in various C<Net::> modules.
+
   getaddrinfo      perlfunc       Net::addrinfo
   gethostbyaddr    perlfunc       Net::hostent
   gethostbyname    perlfunc       Net::hostent
@@ -749,10 +773,12 @@ are also object wrappers in various C<Net::> modules.
   setservent       perlfunc       Net::servent
 
 Never needed, memory automatically freed:
+
   endhostent, endnetent, endprotoent, endservent, freeaddrinfo,
   if_freenameindex
 
 Not supported:
+
   gai_strerror, if_indextoname, if_nameindex, if_nametoindex
 
 =head2 Pipe Interfaces
@@ -763,6 +789,7 @@ descriptors.  The CORE version of pipe uses file handles.
   pipe        perlfunc            ::FdIO/pipefd
 
 B<Warning,> different return parameters for POSIX.pm
+
   my ($r_fh, $w_fh) = CORE::pipe();
   my ($r_fd, $w_fd) = POSIX::pipe();
   my ($r_fd, $w_fd) = ::FdIO::pipefd();
@@ -776,13 +803,26 @@ B<Warning,> different return parameters for POSIX.pm
 =head2 Regular Expression Interfaces
 
 Perl's regular expressions are much more powerful.  See L<perlre>.
-  regcomp, regerror, regexec, regfree
+
+  regcomp     qr//
+  regerror    not needed
+  regexec     perlop/=~
+  regfree     not needed
 
 =head2 Semaphore Interfaces
 
 POSIX semaphores are supported by L<POSIX::RT::Semaphore>:
-  sem_close, sem_destroy, sem_getvalue, sem_init, sem_open,
-  sem_post, sem_timedwait, sem_trywait, sem_unlink, sem_wait,
+
+  sem_close                       POSIX::RT::Semaphore/close
+  sem_destroy                     POSIX::RT::Semaphore/destroy
+  sem_getvalue                    POSIX::RT::Semaphore/getvalue
+  sem_init                        POSIX::RT::Semaphore/init
+  sem_open                        POSIX::RT::Semaphore/open
+  sem_post                        POSIX::RT::Semaphore/post
+  sem_timedwait                   POSIX::RT::Semaphore/timedwait
+  sem_trywait                     POSIX::RT::Semaphore/trywait
+  sem_unlink                      POSIX::RT::Semaphore/unlink
+  sem_wait                        POSIX::RT::Semaphore/wait
 
 =head2 Shell and Utilities Interfaces
 
@@ -818,6 +858,7 @@ L<POSIX::SigSet>. Take a look at those manuals.
   strsignal    not supported
 
 B<Warning>, parameter order in POSIX.pm
+
   CORE::kill($signal, $pid);
   ::Signals::kill($signal, $pid);
   POSIX::kill($pid, $signal);
@@ -845,6 +886,7 @@ The error constants are provided by M<Errno>.
   symlink     perlfunc
 
 B<Warning,> POSIX.pm accepts only one filename
+
   CORE::chown($uid, $gid, @filename);
   ::FileSystem::lchown($uid, $gid, @symlinks);
   POSIX::lchown($uid, $gid, $symlink); # !!!
@@ -871,16 +913,16 @@ B<Warning,> POSIX.pm accepts only one filename
 =head2 User and Group Interfaces
 
   cuserid                         ::Proc
-  getegid     perlvar/$EGID     $)
-  geteuid     perlvar/$EUID     $>
-  getgid      perlvar/$GID      $(  (split ' ', $GID)[0]
-  getgroups   perlvar/$GID      $(  split ' ', $GID
+  getegid     perlvar/$EGID $)
+  geteuid     perlvar/$EUID $>
+  getgid      perlvar/$GID  $(  (split ' ', $GID)[0]
+  getgroups   perlvar/$GID  $(  split ' ', $GID
   getlogin    perlfunc
-  getuid      perlvar/$UID      $<              # warning
-  setegid     perlvar/$EGID     $)              # warning
-  seteuid     perlvar/$EUID     $>              # warning
-  setgid      perlvar/$GID      $(    POSIX.pm  # warning
-  setuid      perlvar/$UID      $<    POSIX.pm  # warning
+  getuid      perlvar/$UID  $<              # warning
+  setegid     perlvar/$EGID $)              # warning
+  seteuid     perlvar/$EUID $>              # warning
+  setgid      perlvar/$GID  $(    POSIX.pm  # warning
+  setuid      perlvar/$UID  $<    POSIX.pm  # warning
 
 B<Warning:> The special variables for user- and group-ids try to be smart:
 they are implemented using C<getreuid> and/or friends.  POSIX.pm provides
@@ -892,6 +934,7 @@ these>, but L<UNIX::SavedIDs> instead!
 =head2 Wide Character Device Input and Output Interfaces
 
 No useful support for wide characters, so no
+
   fgetwc, fgetws, fputwc, fputws, fwide, fwprintf, fwscanf,
   getwc, getwchar, putwc, putwchar, ungetwc, vfwprintf, vfwscanf,
   vwprintf, vwscanf, wprintf, wscanf
@@ -899,6 +942,7 @@ No useful support for wide characters, so no
 =head2 Process CPU-Time Clocks Interfaces
 
 Probably unsupported:
+
   clock_getcpuclockid             POSIX::RT::Clock/get_cpuclock
 
 =head2 File Synchronization Interfaces
@@ -939,11 +983,13 @@ Probably unsupported:
 
 No tracing support on POSIX level via C<posix_trace>.  There are
 various ways to debug Perl, however.  For instance try
+
   perl -s script.pl
 
 =head2 XSI General C Library Interfaces
 
 Comparible functionality for functions which never made it into POSIX:
+
   a64l                            MIME::Base64/encode
   daylight                        ::Time/tzname
   ffs          perlfunc/vec
@@ -960,24 +1006,29 @@ Comparible functionality for functions which never made it into POSIX:
   _toupper     perlfunc/lu
 
 No support for alternative random generators
+
   drand48, erand48, jrand48, lcong48, lrand48, mrand48, nrand48,
   seed48, srand48, initstate, random, setstate, srandom
 
 Perl supports HASHes by itself, so no need for
+
   hcreate, hdestroy, hsearch
 
 No need for double linked lists and table management
+
   insque, remque, lfind, lsearch
 
 Binary trees are less efficient than HASHes, which are much simpler to
 use as well.  You may take a look at L<Tree> or L<Tree::Binary>, because
 these are missing:
+
   tdelete, tfind, tsearch, twalk
 
 =head2 XSI Database Management Interfaces
 
 Some simple database which probably no-one uses anymore.  See C<DBI>,
 for instance L<DBI::DBM>.
+
   dbm_clearerr, dbm_close, dbm_delete, dbm_error, dbm_fetch,
   dbm_firstkey, dbm_nextkey, dbm_open, dbm_store
 
@@ -986,6 +1037,7 @@ for instance L<DBI::DBM>.
   fmtmsg                          Sys::Syslog
 
 Probably not supported:
+
   grantpt, posix_openpt, ptsname, readv, unlockpt, write
 
 =head2 XSI File System Interfaces
@@ -1039,6 +1091,7 @@ No C<j0>, C<j>1, C<jn>, C<y>0, C<y>1, C<yn>
 =head2 XSI Signal Interfaces
 
 The XSI signal interface is not supported, so no
+
   killpg, sigaltstack, sighold, sigignore, siginterrupt, sigpause,
   sigrelse, sigset
 
@@ -1047,9 +1100,6 @@ The XSI signal interface is not supported, so no
   gethostid    not supported
   gettimeofday                    Time::HiRes
   putenv       perlvar/%ENV
-
-=example
-  $ENV{HOME} = '/tmp';
 
 =head2 XSI System Logging Interfaces
 
@@ -1088,6 +1138,7 @@ M<Log::Dispatch>, or M<Log::Report>.
   ioctl        perlfunc
 
 Streams are not supported.  So no:
+
   fattach, fdetach, getmsg, getpmsg, isastream, putmsg, putpmsg
 
 =head1 CONSTANTS

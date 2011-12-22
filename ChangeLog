@@ -3,6 +3,11 @@
 
 All changes are made by Mark Overmeer, unless stated otherwise.
 
+0.04: Thu Dec 22 12:22:14 CET 2011
+	- many doc fixed in POSIX::Overview
+	- document %rlimit and other minor mistakes in ::Limit
+	- add utime() to ::FileSystem
+
 0.03: Thu Dec 22 10:20:29 CET 2011
 	- fixed formatting of some manual pages, based in search.cpan.org
 	  presentation.

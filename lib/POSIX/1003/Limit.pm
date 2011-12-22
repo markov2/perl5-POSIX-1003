@@ -47,7 +47,7 @@ sub RLIM_INFINITY  { $rlim_infinity  }
 
 =chapter NAME
 
-POSIX::1003::Limit - POSIX access to ulimit()
+POSIX::1003::Limit - POSIX access to ulimit and rlimit
 
 =chapter SYNOPSIS
 
@@ -57,15 +57,15 @@ POSIX::1003::Limit - POSIX access to ulimit()
 
   use POSIX::1003::Limit qw(ulimit);
   # keys are strings!
-  $size = ulimit('UL_GET');
+  $size = ulimit('UL_GETFSIZE');
 
   use POSIX::1003::Limit qw(ulimit UL_GETFSIZE);
-  $ticks  = UL_GETFSIZE;   # constants are subs
+  $size = UL_GETFSIZE;   # constants are subs
 
   use POSIX::1003::Limit '%ulimit';
   my $key = $ulimit{UL_GETFSIZE};
   $ulimit{_SC_NEW_KEY} = $key_code;
-  $ticks  = ulimit($key);
+  $size = ulimit($key);
 
   print "$_\n" for keys %ulimit;
 
@@ -95,7 +95,7 @@ by C<rlimit()> hence provides a very limited set of features.
 Returns the ulimit value related to the NAMEd constant.  The NAME
 must be a string. C<undef> will be returned when the NAME is not
 known by the system.
-=example
+
   my $filesize = ulimit('UL_GETFSIZE') || SSIZE_MAX;
 =cut
 
@@ -129,7 +129,7 @@ sub _create_constant($)
 }
 
 =function getrlimit RESOURCE
-=example
+
   my ($cur, $max, $success) = getrlimit('RLIMIT_CORE');
   my ($cur, $max) = getrlimit('RLIMIT_CORE');
 =cut
@@ -184,7 +184,11 @@ sub rlimit_names() { keys %$rlimit }
 =over 4
 =item B<%ulimit>
 This exported variable is a tied HASH which maps C<UL_*> names
-on unique numbers, to be used with the system's C<ulimit()> function.
+on unique numbers, to be used with M<ulimit()>.
+
+=item B<%rlimit>
+This exported variable is a tied HASH which maps C<RLIMIT_*> names
+on unique numbers, to be used with M<getrlimit()> and M<setrlimit()>.
 =back
 =cut
 

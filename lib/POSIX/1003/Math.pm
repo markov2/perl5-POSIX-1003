@@ -136,7 +136,7 @@ sub tanh(;$)  { POSIX::tanh (@_ ? shift : $_) }
 Devide NUMER by DENOminator. The result is a list of two: quotient and
 remainder.  Implemented in Perl for completeness, currently not with the
 speed of XS.
-=example
+
   my ($quotient, $remainder) = div($number, $denom);
 =cut
 

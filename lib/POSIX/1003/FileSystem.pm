@@ -15,14 +15,17 @@ my @constants = qw/
 
 # POSIX.xs defines L_ctermid L_cuserid L_tmpname: useless!
 
-# Blocks resp from sys/stat.h, unistd.h
+# Blocks resp from sys/stat.h, unistd.h, utime.h
 my @functions = qw/
  mkfifo
 
  access lchown
+
+ utime
  /;
 
-our @EXPORT_OK   = (@constants, @functions);
+our @IN_CORE     = qw(utime);
+
 our %EXPORT_TAGS =
  ( constants => \@constants
  , functions => \@functions
@@ -36,6 +39,10 @@ POSIX::1003::FileSystem - POSIX for the file-system
 
   use POSIX::1003::FileSystem qw(access R_OK);
   if(access($fn, R_OK)) # $fn is readible?
+
+  use POSIX::1003::FileSystem qw(mkfifo);
+  use Fcntl ':mode';
+  mkfifo($path, S_IRUSR|S_IWUSR) or die $!;
 
 =chapter DESCRIPTION
 You may also need M<POSIX::1003::Pathconf>.
@@ -100,5 +107,15 @@ sub lchown($$@)
     POSIX::lchown($uid, $gid, $_) && $successes++ for @_;
     $successes;
 }
+
+=function utime ATIME, MTIME, FILENAMES
+Simply C<CORE::utime()>
+
+B<Warning,> M<POSIX> uses different parameter order:
+
+  POSIX::utime($filename, $atime, $mtime);
+  CORE::utime($atime, $mtime, @filenames);
+
+=cut
 
 1;
