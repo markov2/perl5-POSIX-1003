@@ -51,12 +51,12 @@ Get the name of current operating system.
  my ($sysname, $node, $release, $version, $machine) = uname();
 
 Note that the actual meanings of the various fields are not
-that well standardized, do not expect any great portability.
-The $sysname might be the name of the operating system, the
-$nodename might be the name of the host, the $release might be
+that well standardized: do not expect any great portability.
+The C<$sysname> might be the name of the operating system, the
+C<$nodename> might be the name of the host, the C<$release> might be
 the (major) release number of the operating system, the
-$version might be the (minor) release number of the operating
-system, and the $machine might be a hardware identifier.
+C<$version> might be the (minor) release number of the operating
+system, and C<$machine> might be a hardware identifier.
 Maybe.
 
 =cut

@@ -1,7 +1,41 @@
+#define PERL_EXT_POSIX_1003
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 #include <unistd.h>
+
+#ifndef HAS_CONFSTR
+#define HAS_CONFSTR
+#endif
+
+#ifndef HAS_ULIMIT
+#define HAS_ULIMIT
+#endif
+
+#ifndef HAS_RLIMIT
+#define HAS_RLIMIT
+#endif
+
+#ifdef HAS_RLIMIT
+#ifdef __USE_FILE_OFFSET64
+#define HAS_RLIMIT_64
+#endif
+#endif
+
+/*
+ * work-arounds for various operating systems
+ */
+
+#include "system.c"
+
+#ifdef HAS_ULIMIT
+#include <ulimit.h>
+#endif
+
+#ifdef HAS_RLIMIT
+#include <sys/resource.h>
+#endif
 
 HV * sc_table = NULL;
 HV *
@@ -44,6 +78,26 @@ fill_properties()
     return pr_table;
 }
 
+HV * ul_table = NULL;
+HV *
+fill_ulimit()
+{   if(ul_table) return ul_table;
+
+    ul_table = newHV();
+#include "ulimit.c"
+    return ul_table;
+}
+
+HV * rl_table = NULL;
+HV *
+fill_rlimit()
+{   if(rl_table) return rl_table;
+
+    rl_table = newHV();
+#include "rlimit.c"
+    return rl_table;
+}
+
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Sysconf
 
 HV *
@@ -69,8 +123,12 @@ _confstr(name)
 	char 		buf[4096];
 	STRLEN		len;
     CODE:
+#ifdef HAS_CONFSTR
 	len = confstr(name, buf, sizeof(buf));
 	RETVAL = len==0 ? &PL_sv_undef : newSVpv(buf, len-1);
+#else
+	RETVAL = &PL_sv_undef;
+#endif
     OUTPUT:
 	RETVAL
 
@@ -92,3 +150,102 @@ property_table()
 	RETVAL = fill_properties();
     OUTPUT:
 	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Limit
+
+HV *
+ulimit_table()
+    CODE:
+	RETVAL = fill_ulimit();
+    OUTPUT:
+	RETVAL
+
+HV *
+rlimit_table()
+    CODE:
+	RETVAL = fill_rlimit();
+    OUTPUT:
+	RETVAL
+
+SV *
+_ulimit(cmd, value)
+	int		cmd;
+	long		value;
+    PREINIT:
+	long		result;
+    CODE:
+#ifdef HAS_ULIMIT
+	result = ulimit(cmd, value);
+	RETVAL = result==-1 ? &PL_sv_undef : newSViv(result);
+#else
+	RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
+
+#ifdef HAS_RLIMIT
+#ifdef HAS_RLIMIT_64
+
+void
+_getrlimit(resource)
+	int		resource;
+    PREINIT:
+	struct rlimit64	rlim;
+	int		result;
+    PPCODE:
+	/* on linux, rlim64_t is a __UQUAD_TYPE */
+	result = getrlimit64(resource, &rlim);
+	PUSHs(sv_2mortal(newSVuv(rlim.rlim_cur)));
+	PUSHs(sv_2mortal(newSVuv(rlim.rlim_max)));
+	PUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
+
+SV *
+_setrlimit(resource, cur, max)
+	int		resource;
+	unsigned long   cur;
+	unsigned long	max;
+    PREINIT:
+	struct rlimit64	rlim;
+	int		result;
+    CODE:
+	rlim.rlim_cur = cur;
+	rlim.rlim_max = max;
+	result = setrlimit64(resource, &rlim);
+	RETVAL = result==-1 ? &PL_sv_no : &PL_sv_yes;
+    OUTPUT:
+	RETVAL
+
+#else /* HAS_RLIMIT_64 */
+
+
+void
+_getrlimit(resource)
+	int		resource;
+    PREINIT:
+	struct rlimit	rlim;
+	int		result;
+    PPCODE:
+	/* on linux, rlim64_t is a __ULONGWORD_TYPE */
+	result = getrlimit(resource, &rlim);
+	PUSHs(sv_2mortal(newSVuv(rlim.rlim_cur)));
+	PUSHs(sv_2mortal(newSVuv(rlim.rlim_max)));
+	PUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
+
+SV *
+_setrlimit(resource, cur, max)
+	int		resource;
+	unsigned long   cur;
+	unsigned long	max;
+    PREINIT:
+	struct rlimit	rlim;
+	int		result;
+    CODE:
+	rlim.rlim_cur = cur;
+	rlim.rlim_max = max;
+	result = setrlimit(resource, &rlim);
+	RETVAL = result==-1 ? &PL_sv_no : &PL_sv_yes;
+    OUTPUT:
+	RETVAL
+
+#endif /* HAS_RLIMIT_64 */
+#endif /* HAS_RLIMIT */

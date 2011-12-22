@@ -14,7 +14,7 @@ WriteMakefile
   , AUTHOR      => 'Mark Overmeer'
   , ABSTRACT    => 'POSIX::1003, alternative for POSIX in core'
   , LICENSE     => 'perl'
-  , realclean   => {FILES => 'confstr.c pathconf.c properties.c sysconf.c'}
+  , realclean   => {FILES => '*.c'}
   );
 
 #### the next lines are added for OODoc, which generates the

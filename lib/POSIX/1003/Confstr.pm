@@ -81,8 +81,13 @@ Returns a list with all known names, unsorted.
 sub confstr_names() { keys %$confstr }
 
 =chapter CONSTANTS
-The exported variable C<%confstr> is a HASH which maps C<_CS_*> names
-on unique numbers, to be used with the system's C<confstr()> function.
+
+=over 4
+=item B<%confstr>
+This exported variable is a (tied) HASH which maps C<_CS_*>
+names to the unique numbers to be used with the system's C<confstr()>
+function.
+=back
 =cut
 
 1;

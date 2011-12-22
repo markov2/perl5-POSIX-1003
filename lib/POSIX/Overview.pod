@@ -1028,13 +1028,13 @@ No C<j0>, C<j>1, C<jn>, C<y>0, C<y>1, C<yn>
 =head2 XSI Multiple Process Interfaces
 
   getpriority  perlfunc           BSD::Resource
-  getrlimit                       BSD::Resource
+  getrlimit                       ::Limit BSD::Resource
   getrusage                       BSD::Resource
   nice                            ::Proc
   setpgrp      perlfunc
   setpriority  perlfunc           BSD::Resource
-  setrlimit                       BSD::Resource
-  ulimit       not supported
+  setrlimit                       ::Limit BSD::Resource
+  ulimit                          ::Limit
 
 =head2 XSI Signal Interfaces
 

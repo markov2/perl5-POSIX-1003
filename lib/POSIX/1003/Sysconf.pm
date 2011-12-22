@@ -58,7 +58,7 @@ Returns the sysconf value related to the NAMEd constant.  The NAME
 must be a string. C<undef> will be returned when the NAME is not
 known by the system.
 =example
-  my $ticks = confstr('_SC_CLK_TCK') || 1000;
+  my $ticks = sysconf('_SC_CLK_TCK') || 1000;
 =cut
 
 sub sysconf($)
@@ -86,8 +86,12 @@ Returns a list with all known names, unsorted.
 sub sysconf_names() { keys %$sysconf }
 
 =chapter CONSTANTS
-The exported variable C<%sysconf> is a HASH which maps C<_SC_*> names
+
+=over 4
+=item B<%sysconf>
+This exported variable is a tied HASH which maps C<_SC_*> names
 on unique numbers, to be used with the system's C<sysconf()> function.
+=back
 =cut
 
 

@@ -57,14 +57,18 @@ POSIX::1003::FdIO - POSIX handling file descriptors
 =chapter DESCRIPTION
 Most people believe that the C<sys*> commands in Perl-Core are not
 capable of doing unbuffered IO. For those people, we have this module.
+Whether C<sysread()> or M<readfd()> is meassurable faster cannot be
+answered.
 
 =chapter CONSTANTS
 
 =section Constants from unistd.h
+
  #name             #fixed value
  STDIN_FILENO      0
  STDOUT_FILENO     1
  STDERR_FILENO     2
+
 =cut
 
 use constant
@@ -74,6 +78,7 @@ use constant
  };
 
 =section Constants from limits.h
+
  PIPE_BUF
  STREAM_MAX == _POSIX_STREAM_MAX
             Minimum nr of streams supported by POSIX compliant
@@ -84,6 +89,7 @@ use constant
 =section Constants from stdio.h
 There is no C<POSIX::1003::Stdio> (yet), but these values may
 also be useful in non-buffered IO.
+
  BUFSIZ     Common IO buffer size
  EOF        End of file
 
@@ -168,6 +174,8 @@ Returns the reader and writer file descriptors.
   readfd($r, $buf, 5 );
 
 =function statfd FD
+Request file administration information about an open file. It returns
+the same list of values as C<stat> on filenames.
 
 =function creatfd FILENAME, MODE
 Implemented via M<openfd()>, which is true by definition of POSIX.
@@ -189,7 +197,9 @@ Zillions of Perl programs reimplement these functions. Let's simplify
 code.
 
 =function tellfd FD
-Reports the location in the file.
+Reports the location in the file. This call does not exist (not in POSIX,
+nor on other UNIXes), however is a logical counterpart of the C<tell()> on
+filenames.
 =cut
 
 sub tellfd($) {seekfd $_[0], 0, SEEK_CUR() }

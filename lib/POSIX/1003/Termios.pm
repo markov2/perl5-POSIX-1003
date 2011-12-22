@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::Termios;
-use base 'POSIX::1003';
+use base 'POSIX::1003', 'POSIX::Termios';
 
 my @speed = qw/
  B0 B110 B1200 B134 B150 B1800 B19200 B200 B2400
@@ -17,13 +17,12 @@ my @flags   = qw/
  /;
 
 my @actions = qw/
- TCSADRAIN TCSANOW TCOON TCIOFLUSH TCOFLUSH TCION TCIFLUSH
- TCSAFLUSH TCIOFF TCOOFF
+ TCSADRAIN TCSANOW TCOON TCION TCSAFLUSH TCIOFF TCOOFF
  /;
 
+my @flush     = qw/TCIOFLUSH TCOFLUSH TCIFLUSH/;
 my @functions = qw/
- cfgetispeed cfgetospeed cfsetispeed cfsetospeed
- tcdrain tcflow tcflush tcgetattr tcsendbreak tcsetattr
+ tcdrain tcflow tcflush tcsendbreak 
  ttyname
  /;
 
@@ -31,7 +30,8 @@ our %EXPORT_TAGS =
  ( speed     => \@speed
  , flags     => \@flags
  , actions   => \@actions
- , constants => [@speed, @flags, @actions]
+ , flush     => \@flush
+ , constants => [@speed, @flags, @actions, @flush]
  , functions => \@functions
  );
 
@@ -41,12 +41,12 @@ POSIX::1003::Termios - POSIX general terminal interface
 
 =chapter SYNOPSIS
 
-  use POSIX::Termios qw(:speed);
-  $termios = POSIX::Termios->new;
+  use POSIX::1003::Termios qw(:speed);
+  $termios = POSIX::1003::Termios->new;
   $ispeed = $termios->getispeed;
   $termios->setospeed(B9600);
 
-  use POSIX::Termios qw(:functions :actions);
+  use POSIX::1003::Termios qw(:functions :actions);
   tcsendbreak($fd, $duration);
   tcflush($fd, TCIFLUSH);
 
@@ -149,13 +149,27 @@ Set the c_oflag field of a termios object.
 Set the output baud rate.
   $termios->setospeed( B9600 );
 
-=method ttyname FD
+=chapter FUNCTIONS
+
+=function tcdrain FD
+
+=function tcflow FD, ACTION
+See the possible ACTION values in L</CONSTANTS>, import tag C<:action>
+
+=function tcflush FD, QUEUE
+See the possible QUEUE values in L</CONSTANTS>, import tag C<:flush>
+
+=function tcsendbreak FD, DURATION
+DURATION is system dependent.
+
+=function ttyname FD
 Returns the path to the special device which relates to the file-descriptor.
 See also M<POSIX::1003::Proc::ctermid()>
+
   $tty  = ttyname($fd);
   $tty  = ttyname($fh->fileno);
 
-=section Constants
+=chapter CONSTANTS
 
 =over 4
 
@@ -166,8 +180,11 @@ See also M<POSIX::1003::Proc::ctermid()>
 
 =item Interface values (getattr and setattr), export tag C<:actions>.
 
-  TCSADRAIN TCSANOW TCOON TCIOFLUSH TCOFLUSH TCION TCIFLUSH
-  TCSAFLUSH TCIOFF TCOOFF
+  TCSADRAIN TCSANOW TCOON TCION TCSAFLUSH TCIOFF TCOOFF
+
+=item To be used as M<tcflush()> parameter QUEUE
+
+  TCIOFLUSH TCOFLUSH TCIFLUSH
 
 =item c_cc field values, export tag C<:flags> as have all following constants.
 

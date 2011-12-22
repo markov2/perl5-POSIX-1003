@@ -61,7 +61,7 @@ Returns the property value related to NAME.
 
 sub property($)
 {   my $key = shift // return;
-    $key =~ /^_POSIX_/
+    $key =~ /^_POSIX/
         or croak "pass the constant name as string";
 
     $property->{$key};
@@ -80,8 +80,12 @@ Returns a list with all known names, unsorted.
 sub property_names() { keys %$property }
 
 =chapter CONSTANTS
-The exported variable C<%property> is a HASH which contains the
-values related to the names.
+
+=over 4
+=item B<%property>
+This exported variable is a tie HASH which contains the
+values related to the system property names.
+=back
 =cut
 
 1;

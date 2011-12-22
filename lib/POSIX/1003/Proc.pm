@@ -45,7 +45,8 @@ Functions which are bound to each separate process.
 
 =section Constants from stdlib.h
 
- EXIT_FAILURE EXIT_SUCCESS
+ EXIT_FAILURE
+ EXIT_SUCCESS
 
 =section Constants from limits.h
 

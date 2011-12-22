@@ -45,6 +45,7 @@ You may also need M<POSIX::1003::Pathconf>.
 =section Constants from unistd.h
 
 To be used with M<access()>
+
  F_OK          File exists
  R_OK          is readable for me
  W_OK          is writable for mee
@@ -78,9 +79,15 @@ Use the C<*_OK> constants for FLAGS.
 Like C<chown()>, but does not follow symlinks when encountered. Returns
 the number of files successfully changed.
 
-B<Warning>, M<POSIX> uses different parameter order
+B<Warning>, M<POSIX> uses different parameter order:
 
-  my $successes = CORE::chown($uid, $gid, @filenames);
+  # POSIX specification:
+  # int lchown(const char *path, uid_t owner, gid_t group);
+
+  # Perl core implementation:
+  my $successes = chown($uid, $gid, @filenames);
+
+  use POSIX;
   POSIX::lchown($uid, $gid, $filename) or die $!;
 
   use POSIX::1003::FileSystem 'lchown';

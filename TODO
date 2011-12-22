@@ -1,4 +1,4 @@
 
 POSIX::SchedYield supports sched_yield
 
-ulimit with constants
+add (get|set)rlimit to ulimit

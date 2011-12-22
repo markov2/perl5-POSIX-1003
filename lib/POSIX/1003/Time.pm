@@ -75,9 +75,11 @@ not 1.  The year (C<year>) is given in years since 1900.  I.e., the year
 =function asctime SEC, MIN, HOUR, MDAY, MON, YEAR, ...
 The C<asctime> function uses C<strftime> with a fixed format, to produce
 timestamps with a trailing new-line.  Example:
+
   "Sun Sep 16 01:03:52 1973\n"
 
-The parameter order is the same as for M<strftime()> without the C<$fmt>.
+The parameter order is the same as for M<strftime()> without the C<$fmt>:
+
   my $str = asctime($sec, $min, $hour, $mday, $mon, $year,
                  $wday, $yday, $isdst);
 

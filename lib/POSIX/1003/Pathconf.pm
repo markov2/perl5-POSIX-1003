@@ -102,7 +102,10 @@ Returns a list with all known names, unsorted.
 sub pathconf_names() { keys %$pathconf }
 
 =chapter CONSTANTS
-The exported variable C<%pathconf> is a HASH which maps C<_PC_*> names
+
+=over 4
+=item B<%pathconf>
+This exported variable is a tied HASH which maps C<_PC_*> names
 on unique numbers, to be used with the system's C<pathconf()>
 and C<fpathconf()> functions.
 =cut

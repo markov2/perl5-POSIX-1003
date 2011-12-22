@@ -3,7 +3,7 @@ use warnings;
 
 package POSIX::1003;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 use Carp 'croak';
 
 { use XSLoader;
@@ -56,18 +56,22 @@ sub import(@)
         {   # reuse the already created function; might also be a function
             # which is actually implemented in the $class namespace.
         }
-        elsif( $f =~ m/^_(SC|CS|PC|POSIX)_/ )
+        elsif( $f =~ m/^(_SC|_CS|_PC|_POSIX|UL|RLIMIT)_/ )
         {   $export = $class->_create_constant($f);
         }
         elsif( $f !~ m/[^A-Z0-9_]/ )  # faster than: $f =~ m!^[A-Z0-9_]+$!
         {   # other all-caps names are always from POSIX.xs
-            exists $POSIX::{$f} && defined *{"POSIX::$f"}{CODE}
-                or croak "internal error: unknown POSIX constant $f";
-
-            # POSIX.xs croaks on undefined constants, we will return undef
-            my $const = eval "POSIX::$f()";
-            *{$class.'::'.$f} = $export
-              = defined $const ? sub {$const} : sub {undef};
+            if(exists $POSIX::{$f} && defined *{"POSIX::$f"}{CODE})
+            {   # POSIX.xs croaks on undefined constants, we will return undef
+                my $const = eval "POSIX::$f()";
+                *{$class.'::'.$f} = $export
+                  = defined $const ? sub() {$const} : sub() {undef};
+            }
+            else
+            {   # ignore the missing value
+#               warn "missing constant in POSIX.pm $f" && next;
+                *{$class.'::'.$f} = $export = sub() {undef};
+            }
         }
         elsif(exists $POSIX::{$f} && defined *{"POSIX::$f"}{CODE})
         {   # normal functions implemented in POSIX.xs
@@ -84,7 +88,6 @@ sub import(@)
         {   croak "unable to load $f";
         }
 
-#warn "${pkg}::$f = $export";
         no warnings 'once';
         *{"${pkg}::$f"} = $export;
     }
@@ -95,20 +98,23 @@ POSIX::1003 - POSIX 1003.1 extensions to Perl
 
 =chapter SYNOPSIS
    # use the specific extensions
+   # see POSIX::Overview
 
 =chapter DESCRIPTION
-The M<POSIX> module in Core (distributed with Perl itself) is ancient,
-the documentation is usually wrong, and it has too much garbage in it.
-The C<POSIX::1003> tries to provide cleaner access to the Operating
-System.  More about the choices in section L</Rationale>,
+The M<POSIX> module in I<core> (distributed with Perl itself) is ancient,
+the documentation is usually wrong, and it has too much unusable code in it.
+C<POSIX::1003> tries to provide cleaner access to the operating
+system.  More about the choices made can be found in section L</Rationale>,
 
-The POSIX standard is large, over 1200 functions; M<POSIX::Overview>
-does list them all. The POSIX module in Core lists a small subset. This
-C<POSIX::1003> might get extended with additional functions itself.
+The official POSIX standard is large, with over 1200 functions;
+M<POSIX::Overview> does list them all. This collection of C<POSIX::1003>
+extension provides access to quite a number of those functions, when they
+are not provided by "core". They also define as many system constants
+as possible. More functions may get added in the future.
 
-B<Start looking> in M<POSIX::Overview>, to discover which module
-provides access to certain functionality. You may also guess from
-the module names, here below.
+B<Start looking in POSIX::Overview>, to discover which module
+provides certain functionality. You may also guess the location from
+the module names listed in L</DETAILS>, below.
 
 =chapter DETAILS
 
@@ -135,13 +141,15 @@ Provide access to the C<pathconf()> and its trillion C<_PC_*> constants.
 =item M<POSIX::1003::Properties>
 Provide access to the C<_POSIX_*> constants.
 =item M<POSIX::1003::Signals>
-With helper modules M<POSIX::SigSet> and M<POSIX::1003::SigAction>.
+With helper modules M<POSIX::SigSet> and M<POSIX::SigAction>.
 =item M<POSIX::1003::Sysconf>
 Provide access to the C<sysconf> and its zillion C<_SC_*> constants.
 =item M<POSIX::1003::Termios>
 Terminal IO
 =item M<POSIX::1003::Time>
 Time-stamp processing
+=item M<POSIX::1003::Limit>
+For getting and setting resource limits.
 =back
 
 =section Other modules
@@ -196,34 +204,37 @@ When you are used to POSIX.pm but want to move to M<POSIX::1003>,
 you must be aware about the following differences:
 
 =over 4
-=item .
+=item *
 the constants and functions are spread over many separate modules,
 based on their purpose, where M<POSIX> uses a header filename as
 tag to group provided functionality.
 
-=item .
+=item *
 functions provided by CORE are usually not exported again by
 POSIX::1003 (unless to avoid confusion, for instance: is
 C<atan2()> in core or ::Math?)
 
-=item .
+=item *
 constants which are already provided via M<Fcntl> or M<Errno> are
 not provided by this module as well. This should reduce the chance
 for confusion.
 
-=item .
+=item *
 functions which are also in CORE can be imported, but will silently
 be ignored. In C<POSIX>, functions with the same name get exported
 without prototype, which does have consequences for interpretation of
 your program.  This module uses prototypes on all exported functions,
 like CORE does.
 
-=item .
-an attempt is made to collect all C<_SC_*>, C<_CS_*>, C<_PC_*>, and
-C<_POSIX_*> constants, not just a static subset. When an user program
-addresses a constant which is not defined by the system, POSIX
-will croak.  Modules in POSIX::1003 on the other hand, will
-return C<undef>.
+=item *
+hundreds of C<_SC_*>, C<_CS_*>, C<_PC_*>, C<_POSIX_*>, C<UL_*>,
+and C<RLIMIT_*> constants were collected from various sources, not just
+a minimal subset. You get access to all defined on your system.
+
+=item *
+when an user program addresses a constant which is not defined by the
+system, POSIX will croak. Modules in POSIX::1003 on the other hand,
+will return C<undef>.
 
 This simplifies code like this:
 

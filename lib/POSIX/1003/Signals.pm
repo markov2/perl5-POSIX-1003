@@ -36,16 +36,18 @@ POSIX::1003::Signals - POSIX using signals
 
 =chapter SYNOPSIS
 
-  use POSIX::1003::Signals ':functions';
+  use POSIX::1003::Signals qw(:functions SIGPOLL SIGHUP);
   sigaction($signal, $action, $oldaction);
   sigpending($sigset);
   sigprocmask($how, $sigset, $oldsigset)
   sigsuspend($signal_mask);
 
+  kill SIGPOLL//SIGHUP, $$;
+
 =chapter DESCRIPTION
 This manual page explains the access to the POSIX C<sigaction>
 functions and its relatives. This module uses two helper objects:
-M<POSIX::SigSet> and M<POSIX::1003::SigAction>.
+M<POSIX::SigSet> and M<POSIX::SigAction>.
 
 =chapter CONSTANTS
 
@@ -74,7 +76,7 @@ not a string (like "SIGHUP").  The  C<action> and C<oldaction> arguments
 are C<POSIX::SigAction> objects. Returns C<undef> on failure. 
 
 Consult your system's C<sigaction> manpage for details.
-See also C<POSIX::1003::SigRt>.
+See also C<POSIX::SigRt>.
 
 If you use the C<SA_SIGINFO flag>, the signal handler will in addition to
 the first argument (the signal name) also receive a second argument: a
@@ -119,7 +121,7 @@ Note that you can't reliably block or unblock a signal from its own signal
 handler if you're using safe signals. Other signals can be blocked or
 unblocked reliably.
 
-=function sigsuspend
+=function sigsuspend SIGSET
 
 Install a signal mask and suspend process until signal arrives.
 This uses C<POSIX::SigSet> objects for the C<signal_mask> argument.
@@ -150,6 +152,10 @@ See L<perlvar/%SIG>.
    $SIG{SIGINT} = \&handler;  # same
 =cut
 
-sub signal($$) { $SIG{$_[0]} = $_[1] }
+sub sigaction($$;$)   {goto &POSIX::sigaction }
+sub sigpending($)     {goto &POSIX::sigpending }
+sub sigprocmask($$;$) {goto &POSIX::sigprocmask }
+sub sigsuspend($)     {goto &POSIX::sigsuspend }
+sub signal($$)        { $SIG{$_[0]} = $_[1] }
 
 1;

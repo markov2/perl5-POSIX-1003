@@ -1,15 +1,16 @@
 use warnings;
 use strict;
-
-package POSIX::SigSet;
 # Implemented in XS
+
+=package POSIX::SigSet
+
 =chapter NAME
 POSIX::SigSet - collect signal flags
 
 =chapter SYNOPSIS
 
+  use POSIX::SigSet ();
   use POSIX::1003::Signals;
-  use POSIX::1003::SigAction ();
 
   $sigset = POSIX::SigSet->new;
   $sigset = POSIX::SigSet->new(SIGUSR1);
@@ -22,7 +23,7 @@ POSIX::SigSet - collect signal flags
 =chapter DESCRIPTION
 
 The C<POSIX::SigSet> object is simple a collection of signal flags. The
-object is administered in POSIX.xs.  See M<POSIX::1003::SigAction> for
+object is administered in POSIX.xs.  See M<POSIX::SigAction> for
 examples of its usage.
 
 =chapter METHODS
