@@ -14,6 +14,7 @@ WriteMakefile
   , AUTHOR      => 'Mark Overmeer'
   , ABSTRACT    => 'POSIX::1003, alternative for POSIX in core'
   , LICENSE     => 'perl'
+  , PL_FILES    => {}
   , realclean   => {FILES => '*.c'}
   );
 
@@ -22,7 +23,11 @@ WriteMakefile
 sub MY::postamble { <<'__POSTAMBLE' }
 
 config::
-	$(FULLPERLRUNINST) gen.PL
+	$(FULLPERLRUNINST) ./lists.PL
+
+linkext::
+	$(FULLPERLRUNINST) ./symbols.PL
+	$(FULLPERLRUNINST) ./manuals.PL $(MAN3PODS)
 
 # for DIST
 RAWDIR          = ../public_html/posix/raw

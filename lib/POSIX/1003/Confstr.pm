@@ -88,6 +88,19 @@ This exported variable is a (tied) HASH which maps C<_CS_*>
 names to the unique numbers to be used with the system's C<confstr()>
 function.
 =back
+
+The following constants where detected on your system when the
+module got installed.  The second column shows the value which
+where returned at that time.
+
+=for comment
+#TABLE_CONFSTR_START
+
+   If you install the module, the table will be filled-in here
+
+=for comment
+#TABLE_CONFSTR_END
+
 =cut
 
 1;

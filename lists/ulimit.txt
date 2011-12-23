@@ -2,6 +2,7 @@
 
 UL_GETFSIZE
 UL_SETFSIZE
+UL_GETOPENMAX
 
 # http://h21007.www2.hp.com/portal/download/files/unprot/stk/solaris_stk/impacts/i186.html
 UL_GMEMLIM

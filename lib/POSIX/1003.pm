@@ -3,7 +3,7 @@ use warnings;
 
 package POSIX::1003;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 use Carp 'croak';
 
 { use XSLoader;
@@ -27,7 +27,10 @@ sub import(@)
     {   @{$ok}{@{$tags->{$_}}} = () for keys %$tags;
     }
 
-    @_ or @_ = ':all';
+    my $level = @_ && $_[0] =~ m/^\+(\d+)$/ ? shift : 0;
+    return if @_==1 && $_[0] eq ':none';
+    @_ = ':all' if !@_;
+
     my %take;
     foreach (@_)
     {   if( $_ eq ':all')
@@ -46,7 +49,7 @@ sub import(@)
 
     my $in_core = \@{$class.'::IN_CORE'} || [];
 
-    my $pkg = caller;
+    my $pkg = (caller $level)[0];
     foreach my $f (sort keys %take)
     {   my $export;
         exists ${$pkg.'::'}{$f} && *{$pkg.'::'.$f}{CODE}
@@ -98,7 +101,7 @@ POSIX::1003 - POSIX 1003.1 extensions to Perl
 
 =chapter SYNOPSIS
    # use the specific extensions
-   # see POSIX::Overview
+   # and see POSIX::Overview and POSIX::3
 
 =chapter DESCRIPTION
 The M<POSIX> module in I<core> (distributed with Perl itself) is ancient,
@@ -116,6 +119,23 @@ B<Start looking in POSIX::Overview>, to discover which module
 provides certain functionality. You may also guess the location from
 the module names listed in L</DETAILS>, below.
 
+=section Exporter
+All modules provide a C<:constants> and a C<:functions> tag, sometimes
+more.  The default is C<:all>, which means: everthing. You may also
+specify C<:none> (of course: nothing).
+
+When the import list is preceeded by C<+1>, the symbols will get published
+into the namespace of the caller namespace.
+
+  use POSIX::1003::Pathconf;
+  use POSIX::1003::Pathconf ':all';  # same
+  use POSIX::3 ':pc';                # same, for the lazy
+  use POSIX::3 ':pathconf';          # same, less lazy
+
+  sub MyModule::import(@)   # your own tricky exporter
+  {   POSIX::1003::Pathconf->import('+1', @_);
+  }
+
 =chapter DETAILS
 
 =section Modules in this distribution
@@ -125,7 +145,7 @@ the module names listed in L</DETAILS>, below.
 Provide access to the C<_CS_*> constants.
 =item M<POSIX::1003::FdIO>
 Provides unbuffered IO handling; based on file-descriptors.
-=item M<POSIX::1003::FileSystem>
+=item M<POSIX::1003::FS>
 Some generic file-system information. See also M<POSIX::1003::Pathconf>
 for more precise info.
 =item M<POSIX::1003::Locale>
@@ -238,7 +258,7 @@ will return C<undef>.
 
 This simplifies code like this:
 
-  use POSIX::1003::FileSystem 'PATH_MAX';
+  use POSIX::1003::FS         'PATH_MAX';
   use POSIX::1003::PathConfig '_PC_PATH_MAX';
   my $max_fn = _PC_PATH_MAX($fn) // PATH_MAX // 1024;
 

@@ -92,7 +92,19 @@ sub sysconf_names() { keys %$sysconf }
 This exported variable is a tied HASH which maps C<_SC_*> names
 on unique numbers, to be used with the system's C<sysconf()> function.
 =back
-=cut
 
+The following constants where detected on your system when the
+module got installed.  The second column shows the value which
+where returned at that time.
+
+=for comment
+#TABLE_SYSCONF_START
+
+   If you install the module, the table will be filled-in here
+
+=for comment
+#TABLE_SYSCONF_END
+
+=cut
 
 1;

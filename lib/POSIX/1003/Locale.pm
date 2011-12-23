@@ -12,12 +12,8 @@ my @constants = qw/
   LC_TIME
  /;
 
-my @functions = qw/
- localeconv
- setlocale
- /;
+my @functions = qw/localeconv setlocale/;
 
-our @EXPORT_OK   = (@constants, @functions);
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions

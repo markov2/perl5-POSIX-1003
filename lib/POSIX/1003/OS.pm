@@ -10,11 +10,8 @@ my @constants = qw/
  /;
 
 # Blocks resp from sys/utsname.h
-my @functions = qw/
- uname
- /;
+my @functions = qw/uname/;
 
-our @EXPORT_OK   = (@constants, @functions);
 our %EXPORT_TAGS =
  ( constants => \@constants
  , functions => \@functions

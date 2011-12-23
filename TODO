@@ -1,2 +1,10 @@
 
 POSIX::SchedYield supports sched_yield
+
+getpriority/setpriority in ::Proc ?
+getrusage in ::Proc ?
+
+gethostid
+gettimeofday ?
+mknod
+

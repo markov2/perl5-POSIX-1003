@@ -3,6 +3,14 @@
 
 All changes are made by Mark Overmeer, unless stated otherwise.
 
+0.05: Fri Dec 23 23:06:27 CET 2011
+	- implemented POSIX::3 and tables.PL
+	- detected constant names are filled-in in the man-pages.
+	- ::Overview  stdin/stdout/stderr only in POSIX.pm
+	- ::Overview  setpgid also via ::Proc
+	- more consistency in ::Overview
+	- renamed gen.PL into lists.PL
+
 0.04: Thu Dec 22 12:22:14 CET 2011
 	- many doc fixed in POSIX::Overview
 	- document %rlimit and other minor mistakes in ::Limit

@@ -108,7 +108,18 @@ sub pathconf_names() { keys %$pathconf }
 This exported variable is a tied HASH which maps C<_PC_*> names
 on unique numbers, to be used with the system's C<pathconf()>
 and C<fpathconf()> functions.
+
+The following constants where detected on your system when the
+module got installed.  The second column shows the value which
+where returned for a random file at the time.
+=back
+
+=for comment
+#TABLE_PATHCONF_START
+
+   If you install the module, the table will be filled-in here
+
+=for comment
+#TABLE_PATHCONF_END
+
 =cut
-
-
-1;

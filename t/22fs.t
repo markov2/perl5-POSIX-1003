@@ -5,9 +5,9 @@ use strict;
 
 use Test::More tests => 1;
 
-use POSIX::1003::FileSystem qw(PATH_MAX);
+use POSIX::1003::FS qw(PATH_MAX);
 
 # constant from POSIX.xs
 cmp_ok(PATH_MAX, '>', 10, 'PATH_MAX='.PATH_MAX);
 
-use POSIX::1003::FileSystem;  # try load all
+use POSIX::1003::FS;  # try load all

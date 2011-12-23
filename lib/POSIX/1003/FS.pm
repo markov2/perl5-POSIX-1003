@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-package POSIX::1003::FileSystem;
+package POSIX::1003::FS;
 use base 'POSIX::1003';
 
 # Blocks resp from unistd.h, stdio.h, limits.h
@@ -33,14 +33,14 @@ our %EXPORT_TAGS =
 
 =chapter NAME
 
-POSIX::1003::FileSystem - POSIX for the file-system
+POSIX::1003::FS - POSIX for the file-system
 
 =chapter SYNOPSIS
 
-  use POSIX::1003::FileSystem qw(access R_OK);
+  use POSIX::1003::FS qw(access R_OK);
   if(access($fn, R_OK)) # $fn is readible?
 
-  use POSIX::1003::FileSystem qw(mkfifo);
+  use POSIX::1003::FS qw(mkfifo);
   use Fcntl ':mode';
   mkfifo($path, S_IRUSR|S_IWUSR) or die $!;
 
@@ -97,7 +97,7 @@ B<Warning>, M<POSIX> uses different parameter order:
   use POSIX;
   POSIX::lchown($uid, $gid, $filename) or die $!;
 
-  use POSIX::1003::FileSystem 'lchown';
+  use POSIX::1003::FS 'lchown';
   my @successes = lchown($uid, $gid, @filenames);
 =cut
 

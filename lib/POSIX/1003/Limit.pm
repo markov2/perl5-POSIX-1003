@@ -190,6 +190,34 @@ on unique numbers, to be used with M<ulimit()>.
 This exported variable is a tied HASH which maps C<RLIMIT_*> names
 on unique numbers, to be used with M<getrlimit()> and M<setrlimit()>.
 =back
+
+The following constants where detected on your system when the
+module got installed.  The second column shows the value which
+where returned at that time.
+
+For ulimit, with a value when it is a getter:
+
+=for comment
+#TABLE_ULIMIT_START
+
+   If you install the module, the table will be filled-in here
+
+=for comment
+#TABLE_ULIMIT_END
+
+The constant names for rlimit, with the hard and soft limits that
+M<getrlimit()> returned during installation of the module.
+
+=for comment
+#TABLE_RLIMIT_START
+
+   If you install the module, the table will be filled-in here
+
+=for comment
+#TABLE_RLIMIT_END
+
+
+
 =cut
 
 

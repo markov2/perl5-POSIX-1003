@@ -204,27 +204,27 @@ of character-sets are hidden for the user, as long as the user provides
 encoding details at all entry and exit points of the program.  See
 L<perlunicode>, L<Encode> and L<encoding>.
 
-  strtok      perlfunc/split
   strcat      perlop/.=
   strchr      perlfunc/index
   strcmp      perlop/cmp perlop/eq
   strcpy      perlop/=
+  strcspn     $a =~ m/^([^$b]*)/ && length $1
   strerror    perlvar/$ERRNO   "$!"
   strlen      perlvar/length
+  strncat     $a .= substr $b, 0, $n;
+  strncmp     (substr $a, 0, $n) eq (substr $b, 0, $n)
+  strncpy     $a = substr $b, 0, $n;
+  strpbrk     $a =~ m/(.*?)[$b]/ && length $1
+  strrchr     $a =~ m/(.*)$b/    && length $1
+  strspn      $a =~ m/^([$b]*)/  && length $1
   strstr      perlop/index
+  strtok      perlfunc/split
   tolower     perlfunc/lc      "\L$str\E"  "\l$str"
   toupper     perlfunc/uc      "\U$str\E"  "\u$str"
 
-The functions C<strcspn>, C<strpbrk>, C<strrchr>, and C<strspn> can
-best be translated into regular expressions.  See L<perlre>.
-
-The functions C<strncat>, C<strncmp>, and C<strncpy> are used for various
-purposes which let themselves usually translate into various
-C<perlfunc/substr> features.
-
-C<POSIX.pm> provides functions named C<tolower> and C<toupper>, which
-simply call C<lc> and C<uc> respectively. Be warned that the latter
-work on (utf-8 aware) strings, not ascii characters.
+B<Warning:> C<POSIX.pm> provides functions named C<tolower> and
+C<toupper>, which simply call C<lc> and C<uc> respectively. They take
+their parameter as string, maybe even ut8-string, not raw ascii bytes.
 
 =head3 sprintf and scanf
 
@@ -417,10 +417,6 @@ Some string functions have simple Perl work-arounds:
 
 =head2 Device Input and Output Interfaces
 
-Where Perl always uses flexible lists, these are not useful:
-
-  vfprintf, vfscanf, vprintf, vscanf
-
 =head3 File-descriptor based
 See C<perlopentut> section "Open a la C".
 
@@ -462,9 +458,9 @@ See C<perlopentut> section "Open a la C".
   setvbuf                         IO::Handle
   ungetc                          IO::Handle
   perror      perlfunc/warn  perlvar/$ERRNO  POSIX.pm  "$!"
-  stderr      *STDERR             ::FdIO            
-  stdin       *STDIN              ::FdIO            
-  stdout      *STDOUT             ::FdIO            
+  stderr      *STDERR             POSIX.pm
+  stdin       *STDIN              POSIX.pm
+  stdout      *STDOUT             POSIX.pm
 
 =head3 Event driven
 
@@ -475,26 +471,31 @@ L<POE>, L<IO::Multiplex>, ...and many more
 
   poll                            IO::Poll
   pselect                         POSIX::pselect
-  select      perlfunc/select     IO::Select
+  select      perlfunc            IO::Select
 
 Macros C<FD_CLR>, C<FD_ISSET>, C<FD_SET>, C<FD_ZERO> and not
 provided.  However, they can be simulated easily with L<perlfunc/vec>
 
 =head2 Extended Device Input and Output Interfaces
 
-Probably not supported:
+Where Perl always uses flexible lists, the followin are not adding
+anything. See L<perlfunc/open>
 
-  dprintf, vdprintf
+  vfprintf       perlfunc/printf
+  vprintf        (same)
+  vfscanf        use regex
+  vscanf         (same)
+  dprintf        write $fd, sprintf $fmt, @data
+  vdprint        (same)
+  fmemopen       open $fh, '>', \$buffer;
+  open_memstream (same)
 
-The functions C<fmemopen> and C<open_memstream> by opening a scalar
-as file handle.  See L<perlfunc/open>
-
-  open $fh, '>', \$buffer;
 
 =head2 General Terminal Interfaces
 
 Most terminal interface functions are provided by the separate
-L<POSIX::Termios> module.  See its manpage for the usage.
+L<POSIX::1003::Termios> module, which is the same as the C<POSIX::Termios>
+component in C<POSIX.pm>  See its manpage for the usage.
 
   cfgetispeed                     ::Termios
   cfgetospeed                     ::Termios
@@ -524,6 +525,7 @@ Although the name of this section suggests differently, actually
 most of these functions use a file handle, not a descriptor.
 
 On file handles:
+
   fcntl       perlfunc            IO::Handle
   fgetpos     perlfunc/tell       IO::Seekable/getpos
   fseek       perlfunc/seek       IO::Seekable/seek
@@ -545,9 +547,9 @@ by L<Fcntl>.
 
 =head2 FIFO Interfaces
 
-  mkfifo                          ::FileSystem
-  mkfifoat     not supported
-  mknodat      not supported
+  mkfifo                          ::FS
+  mkfifoat    not supported
+  mknodat     not supported
 
 =head2 File Attribute Interfaces
 
@@ -575,11 +577,14 @@ in core, but the POSIX C<flockfile> mechanism is probably unsupported:
 
 =head2 File System Interfaces
 
-These functions work with filehandles:
-  access      filetest            ::FileSystem
+  access      filetest            ::FS
   chdir       perlfunc      
   closedir    perlfunc            IO::Dir/close
+  creat       perlfunc/sysopen    ::FdIO/creatfd
   fchdir      perlfunc         
+  fpathconf                       ::Pathconf
+  fstat       perlfunc/stat       File::stat POSIX.pm
+  fstatvfs                        Filesys::statvfs
   getcwd                          Cwd/getcwd
   link        perlfunc         
   mkdir       perlfunc         
@@ -592,10 +597,12 @@ These functions work with filehandles:
   rewinddir   perlfunc            IO::Dir/rewind
   rmdir       perlfunc
   stat        perlfunc            File::stat
+  statvfs                         Filesys::statvfs
   tmpfile                         File::Temp IO::File/new_tmpfile
   tmpnam      (insecure!)         File::Temp POSIX.pm
+  truncate    perlfunc/truncate
   unlink      perlfunc       
-  utime       perlfunc            ::FileSystem POSIX.pm
+  utime       perlfunc            ::FS POSIX.pm
 
 B<Warning:>
 
@@ -605,22 +612,7 @@ B<Warning:>
 The symbolic constants needed to understand the result of C<stat>
 are provided by L<Fcntl>.
 
-These work on file descriptors
-
-  creat       perlfunc/sysopen    ::FdIO/creatfd
-  fpathconf                       ::Pathconf
-  fstat       perlfunc/stat       File::stat POSIX.pm
-
-Working on filenames
-
-  truncate      perlfunc/truncate
-
-Provided by L<Filesys::statvfs>
-
-  fstatvfs, statvfs
-
-
-=head2 File System Interfaces
+=head2 File System Extension Interfaces
 
   alphasort   perlfunc/sort
   getdelim    perlvar/$INPUT_RECORD_SEPARATOR
@@ -643,18 +635,19 @@ supports their absolute brothers:
 
   nl_langinfo                     I18N::Langinfo/langinfo
 
-Access to message categories via L<Locale::Msgcat>.  This interface
-is far to simple to really translate messages into various languages.
-You may have a look at various implementations of C<gettext>.
+This interface is far to simple to really translate messages into various
+languages.  You may have a look at various implementations of C<gettext>.
 
-  catclose, catgets, catopen
+  catclose                        Locale::Msgcat
+  catgets                         Locale::Msgcat
+  catopen                         Locale::Msgcat
 
 An Object Oriented wrapper to the iconv interface is provided
 by L<Text::Iconv>.  Better have a look at the L<Encode> first.
 
   iconv                           Text::Iconv/convert
   iconv_open                      Text::Iconv/new
-  iconv_close                     Text::Iconv/Destroy
+  iconv_close                     Text::Iconv/DESTROY
 
 =head2 Job Control Interfaces
 
@@ -878,7 +871,7 @@ The error constants are provided by M<Errno>.
 
 =head2 Symbolic Link Interfaces
 
-  lchown                          ::FileSystem
+  lchown                          ::FS
   lstat       perlfunc
   readlinkat  not supported
   readlink    perlfunc
@@ -888,7 +881,7 @@ The error constants are provided by M<Errno>.
 B<Warning,> POSIX.pm accepts only one filename
 
   CORE::chown($uid, $gid, @filename);
-  ::FileSystem::lchown($uid, $gid, @symlinks);
+  ::FS::lchown($uid, $gid, @symlinks);
   POSIX::lchown($uid, $gid, $symlink); # !!!
 
 =head2 System Database Interfaces
@@ -996,7 +989,7 @@ Comparible functionality for functions which never made it into POSIX:
   getdate                         ::Time/strftime
   isascii      perlre/ [[:ascii:]]  \p{Ascii}
   l64a                            MIME::Base64/decode
-  memccpy      not needed
+  memccpy      $b = $1 if $a =~ m/(.*{,n}?)(?:c|$)/
   signgam      math, probably not supported
   strptime                        POSIX::strptime
   swab         ($b,$a) = ($a,$b)
@@ -1081,9 +1074,9 @@ No C<j0>, C<j>1, C<jn>, C<y>0, C<y>1, C<yn>
 
   getpriority  perlfunc           BSD::Resource
   getrlimit                       ::Limit BSD::Resource
-  getrusage                       BSD::Resource
+  getrusage                       Unix::Getrusage BSD::Resource
   nice                            ::Proc
-  setpgrp      perlfunc
+  setpgrp      perlfunc           ::Proc
   setpriority  perlfunc           BSD::Resource
   setrlimit                       ::Limit BSD::Resource
   ulimit                          ::Limit
