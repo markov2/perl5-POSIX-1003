@@ -17,6 +17,10 @@
 #define HAS_RLIMIT
 #endif
 
+#ifndef HAS_MKNOD
+#define HAS_MKNOD
+#endif
+
 #ifdef HAS_RLIMIT
 #ifdef __USE_FILE_OFFSET64
 #define HAS_RLIMIT_64
@@ -46,7 +50,6 @@ fill_sysconf()
 #include "sysconf.c"
     return sc_table;
 }
-
 
 HV * cs_table = NULL;
 HV *
@@ -102,6 +105,7 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::Sysconf
 
 HV *
 sysconf_table()
+    PROTOTYPE:
     CODE:
 	RETVAL = fill_sysconf();
     OUTPUT:
@@ -111,6 +115,7 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::Confstr
 
 HV *
 confstr_table()
+    PROTOTYPE:
     CODE:
 	RETVAL = fill_confstr();
     OUTPUT:
@@ -119,6 +124,7 @@ confstr_table()
 SV *
 _confstr(name)
 	int		name;
+    PROTOTYPE: $
     PREINIT:
 	char 		buf[4096];
 	STRLEN		len;
@@ -137,6 +143,7 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::Pathconf
 
 HV *
 pathconf_table()
+    PROTOTYPE:
     CODE:
 	RETVAL = fill_pathconf();
     OUTPUT:
@@ -146,6 +153,7 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::Properties
 
 HV *
 property_table()
+    PROTOTYPE:
     CODE:
 	RETVAL = fill_properties();
     OUTPUT:
@@ -155,6 +163,7 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::Limit
 
 HV *
 ulimit_table()
+    PROTOTYPE:
     CODE:
 	RETVAL = fill_ulimit();
     OUTPUT:
@@ -162,6 +171,7 @@ ulimit_table()
 
 HV *
 rlimit_table()
+    PROTOTYPE:
     CODE:
 	RETVAL = fill_rlimit();
     OUTPUT:
@@ -171,6 +181,7 @@ SV *
 _ulimit(cmd, value)
 	int		cmd;
 	long		value;
+    PROTOTYPE: $$
     PREINIT:
 	long		result;
     CODE:
@@ -189,6 +200,7 @@ _ulimit(cmd, value)
 void
 _getrlimit(resource)
 	int		resource;
+    PROTOTYPE: $
     PREINIT:
 	struct rlimit64	rlim;
 	int		result;
@@ -204,6 +216,7 @@ _setrlimit(resource, cur, max)
 	int		resource;
 	unsigned long   cur;
 	unsigned long	max;
+    PROTOTYPE: $$$
     PREINIT:
 	struct rlimit64	rlim;
 	int		result;
@@ -221,6 +234,7 @@ _setrlimit(resource, cur, max)
 void
 _getrlimit(resource)
 	int		resource;
+    PROTOTYPE: $
     PREINIT:
 	struct rlimit	rlim;
 	int		result;
@@ -236,6 +250,7 @@ _setrlimit(resource, cur, max)
 	int		resource;
 	unsigned long   cur;
 	unsigned long	max;
+    PROTOTYPE: $$$
     PREINIT:
 	struct rlimit	rlim;
 	int		result;
@@ -248,4 +263,61 @@ _setrlimit(resource, cur, max)
 	RETVAL
 
 #endif /* HAS_RLIMIT_64 */
+#else  /* HAS_RLIMIT */
+
+void
+_getrlimit(resource)
+	int		resource;
+    PROTOTYPE: $
+    PPCODE:
+	PUSHs(&PL_sv_undef);
+	PUSHs(&PL_sv_undef);
+	PUSHs(&PL_sv_no);
+
+SV *
+_setrlimit(resource, cur, max)
+	int		resource;
+	unsigned long   cur;
+	unsigned long	max;
+    PROTOTYPE: $$$
+    CODE:
+	RETVAL = &PL_sv_no;
+    OUTPUT:
+	RETVAL
+
 #endif /* HAS_RLIMIT */
+
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::FS
+
+#ifdef HAS_SYSMKDEV
+#include <sys/mkdev.h>
+#endif
+
+/* major, minor, and makedev usually are macro's */
+
+dev_t
+makedev(dev_t major, dev_t minor)
+    PROTOTYPE: $$
+
+dev_t
+major(dev_t dev)
+    PROTOTYPE: $
+
+dev_t
+minor(dev_t dev)
+    PROTOTYPE: $
+
+int
+mknod(filename, mode, dev)
+	char *  filename
+	mode_t  mode
+	dev_t   dev
+    CODE:
+#ifdef HAS_MKNOD
+	RETVAL = mknod(filename, mode, dev);
+#else
+	RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL

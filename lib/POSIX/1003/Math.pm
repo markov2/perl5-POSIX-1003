@@ -63,36 +63,6 @@ B<Be warned> that these functions do not have an obligatory scalar
 parameter, but only an optional parameter (defaults to C<$_>). This
 means that they have the lowest (is list) priority.
 
-=chapter CONSTANTS
-
-=section Math constants from float.h or limits.h
-
- DBL_DIG DBL_EPSILON DBL_MANT_DIG DBL_MAX DBL_MAX_10_EXP
- DBL_MAX_EXP DBL_MIN DBL_MIN_10_EXP DBL_MIN_EXP FLT_DIG
- FLT_EPSILON FLT_MANT_DIG FLT_MAX FLT_MAX_10_EXP FLT_MAX_EXP
- FLT_MIN FLT_MIN_10_EXP FLT_MIN_EXP FLT_RADIX FLT_ROUNDS
- LDBL_DIG LDBL_EPSILON LDBL_MANT_DIG LDBL_MAX LDBL_MAX_10_EXP
- LDBL_MAX_EXP LDBL_MIN LDBL_MIN_10_EXP LDBL_MIN_EXP
-
-=section Math constants from math.h
-
- HUGE_VAL
-
-=section Math constants from stdlib.h
-
- RAND_MAX
-
-=section Math related constants in limits.h
-
- CHAR_BIT CHAR_MAX CHAR_MIN UCHAR_MAX SCHAR_MAX SCHAR_MIN
- SHRT_MAX SHRT_MIN USHRT_MAX
- INT_MAX INT_MIN UINT_MAX
- LONG_MAX LONG_MIN ULONG_MAX
-
-=cut
-
-# All constants in XS
-
 =chapter FUNCTIONS
 
 =section Standard POSIX via this module (via POSIX.xs)
@@ -219,5 +189,20 @@ as a hexadecimal number.
 String to unsigned integer translation, which behaves like C<strtol>.
 =cut
 
+=chapter CONSTANTS
+
+The following constants are exported, shown here with the values
+discovered during installation of this module:
+
+=for comment
+#TABLE_MATH_START
+
+The constant names for this math module are inserted here during
+installation.
+
+=for comment
+#TABLE_MATH_END
+
+=cut
 
 1;

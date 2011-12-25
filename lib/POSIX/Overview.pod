@@ -1039,7 +1039,7 @@ Probably not supported:
   dirname                         File::Basename
   ftw                             File::Find/find
   lockf        			  File::lockf
-  mknod                           Mknod UNIX::Mknod Sys::Mknod
+  mknod                           ::FS Unix::Mknod Mknod
   nftw                            File::Find/find
   realpath                        File::Spec/canonpath
   seekdir      perlfunc           IO::Dir/seek

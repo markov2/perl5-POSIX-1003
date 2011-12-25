@@ -210,6 +210,18 @@ See also M<POSIX::1003::Proc::ctermid()>
 
 =back
 
+All constants, shown here with the values discovered during installation
+of this module:
+
+=for comment
+#TABLE_TERMIOS_START
+
+The constant names for this math module are inserted here during
+installation.
+
+=for comment
+#TABLE_TERMIOS_END
+
 =cut
 
 1;

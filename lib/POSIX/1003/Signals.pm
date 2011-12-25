@@ -49,21 +49,6 @@ This manual page explains the access to the POSIX C<sigaction>
 functions and its relatives. This module uses two helper objects:
 M<POSIX::SigSet> and M<POSIX::SigAction>.
 
-=chapter CONSTANTS
-
-=section Signal names
-
- SIGABRT SIGALRM SIGCHLD SIGCONT SIGFPE SIGHUP SIGILL SIGINT SIGKILL
- SIGPIPE SIGRTMIN SIGRTMAX SIGQUIT SIGSEGV SIGSTOP SIGTERM SIGTSTP
- SIGTTIN SIGTTOU SIGUSR1 SIGUSR2 SIGBUS SIGPOLL SIGPROF SIGSYS SIGTRAP
- SIGURG SIGVTALRM SIGXCPU SIGXFSZ SIG_BLOCK SIG_DFL SIG_ERR SIG_IGN
- SIG_SETMASK SIG_UNBLOCK
-
-=section Signals actions
-
- SA_NOCLDSTOP SA_NOCLDWAIT SA_NODEFER SA_ONSTACK SA_RESETHAND
- SA_RESTART SA_SIGINFO
-
 =chapter FUNCTIONS
 These functions are implemened in POSIX.xs
 
@@ -74,9 +59,6 @@ These functions are implemened in POSIX.xs
 Detailed signal management.  The C<signal> must be a number (like SIGHUP),
 not a string (like "SIGHUP").  The  C<action> and C<oldaction> arguments
 are C<POSIX::SigAction> objects. Returns C<undef> on failure. 
-
-Consult your system's C<sigaction> manpage for details.
-See also C<POSIX::SigRt>.
 
 If you use the C<SA_SIGINFO flag>, the signal handler will in addition to
 the first argument (the signal name) also receive a second argument: a
@@ -157,5 +139,21 @@ sub sigpending($)     {goto &POSIX::sigpending }
 sub sigprocmask($$;$) {goto &POSIX::sigprocmask }
 sub sigsuspend($)     {goto &POSIX::sigsuspend }
 sub signal($$)        { $SIG{$_[0]} = $_[1] }
+
+=chapter CONSTANTS
+
+The following constants are exported, shown here with the values
+discovered during installation of this module:
+
+=for comment
+#TABLE_SIGNALS_START
+
+The constant names for this math module are inserted here during
+installation.
+
+=for comment
+#TABLE_SIGNALS_END
+
+=cut
 
 1;

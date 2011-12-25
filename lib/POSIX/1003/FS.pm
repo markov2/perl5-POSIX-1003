@@ -15,13 +15,15 @@ my @constants = qw/
 
 # POSIX.xs defines L_ctermid L_cuserid L_tmpname: useless!
 
-# Blocks resp from sys/stat.h, unistd.h, utime.h
+# Blocks resp from sys/stat.h, unistd.h, utime.h, sys/types
 my @functions = qw/
- mkfifo
+ mkfifo mknod
 
  access lchown
 
  utime
+
+ major minor makedev
  /;
 
 our @IN_CORE     = qw(utime);
@@ -44,33 +46,16 @@ POSIX::1003::FS - POSIX for the file-system
   use Fcntl ':mode';
   mkfifo($path, S_IRUSR|S_IWUSR) or die $!;
 
+  # Absorbed from Unix::Mknod
+  use POSIX::1003::FS qw(mknod major minor makedev);
+  use File::stat
+  my $st    = stat '/dev/null';
+  my $major = major $st->rdev;
+  my $minor = minor $st->rdev;
+  mknod '/tmp/special', S_IFCHR|0600, makedev($major,$minor+1);
+
 =chapter DESCRIPTION
 You may also need M<POSIX::1003::Pathconf>.
-
-=chapter CONSTANTS
-
-=section Constants from unistd.h
-
-To be used with M<access()>
-
- F_OK          File exists
- R_OK          is readable for me
- W_OK          is writable for mee
- X_OK          is executable for me
-
-=section Constants from limits.h
-
- FILENAME_MAX  Maximum length of a filename
-
-=section Constants from stdio.h
-
- LINK_MAX      Maximum number of hard-links
- MAX_CANON
- NAME_MAX
- PATH_MAX
- TMP_MAX       The minimum number of unique filenames generated
-               by tmpnam (and tempnam when it uses tmpnam's name-
-               space), or tempnam (the two are separate).
 
 =chapter FUNCTIONS
 
@@ -111,10 +96,46 @@ sub lchown($$@)
 =function utime ATIME, MTIME, FILENAMES
 Simply C<CORE::utime()>
 
-B<Warning,> M<POSIX> uses different parameter order:
+B<Warning,> C<POSIX.pm> uses a different parameter order than core.
 
   POSIX::utime($filename, $atime, $mtime);
   CORE::utime($atime, $mtime, @filenames);
+
+=function mknod PATH, MODE, DEVICE
+Create a special device node on PATH. Useful symbols for MODE can be
+collected from M<Fcntl> (import tag C<:mode>).  The DEVICE number is
+a combination from the type (I<major> number), a sequence number and
+usage information (combined in a I<minor> number).
+
+ 
+
+=section Additional
+
+=function major DEVICE
+=function minor DEVICE
+=function makedev MAJOR, MINOR
+Combine MAJOR and MINOR into a single DEVICE number.
+
+ my $device      = (stat $filename)[6];
+ my $device_type = major $device;
+ my $sequence_nr = minor $device;
+
+ my $device = makedev $major, $minor;
+ mknod $specialfile, $mode, $device;
+
+=chapter CONSTANTS
+
+The following constants are exported, shown here with the values
+discovered during installation of this module:
+
+=for comment
+#TABLE_FSYS_START
+
+The constant names for this math module are inserted here during
+installation.
+
+=for comment
+#TABLE_FSYS_END
 
 =cut
 

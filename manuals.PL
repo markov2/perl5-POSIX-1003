@@ -9,8 +9,13 @@ use POSIX::1003::Confstr;
 use POSIX::1003::Sysconf;
 use POSIX::1003::Pathconf;
 use POSIX::1003::Limit;
+use POSIX::1003::Math;
+use POSIX::1003::Signals;
+use POSIX::1003::FdIO;
+use POSIX::1003::FS;
+use POSIX::1003::Termios;
 
-my @pods = @ARGV;
+my @pods = map { ($_, "blib/$_") } @ARGV;
 
 sub produce_table($);
 
@@ -98,13 +103,70 @@ warn "TABLE $table\n";
             push @rows, [ $name, defined $val ? $val : 'undef' ]
         }
     }
-
-else
-{ return }
+    elsif($table eq 'math')
+    {   my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
+        no strict 'refs';
+        foreach my $name (sort @$constants)
+        {   my $val = &{"POSIX::1003::Math::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    elsif($table eq 'math')
+    {   my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
+        no strict 'refs';
+        foreach my $name (sort @$constants)
+        {   my $val = &{"POSIX::1003::Math::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    elsif($table eq 'signals')
+    {   my $constants = $POSIX::1003::Signals::EXPORT_TAGS{constants};
+        no strict 'refs';
+        foreach my $name (sort @$constants)
+        {   my $val = &{"POSIX::1003::Signals::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    elsif($table eq 'fdio')
+    {   my $constants = $POSIX::1003::FdIO::EXPORT_TAGS{constants};
+        no strict 'refs';
+        foreach my $name (sort @$constants)
+        {   my $val = &{"POSIX::1003::FdIO::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    elsif($table eq 'fsys')
+    {   my $constants = $POSIX::1003::FS::EXPORT_TAGS{constants};
+        no strict 'refs';
+        foreach my $name (sort @$constants)
+        {   my $val = &{"POSIX::1003::FS::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    elsif($table eq 'termios')
+    {   my $constants = $POSIX::1003::Termios::EXPORT_TAGS{constants};
+        no strict 'refs';
+        foreach my $name (sort @$constants)
+        {   my $val = &{"POSIX::1003::Termios::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    else
+    {   die "do not know how to make table $table";
+    }
 
     my $longest_name = 0;
-    ($longest_name < length $_->[0]) && ($longest_name = length $_->[0])
-        for @rows;
+    my $longest_val  = 5;  # at least 'undef'
+    for (@rows)
+    {   $longest_name = length $_->[0] if $longest_name < length $_->[0];
+        $longest_val  = length $_->[1] if $longest_val  < length $_->[1];
+    }
 
     my @lines;
     foreach (@rows)
@@ -113,5 +175,27 @@ else
         push @lines, "  $name   $value\n";
     }
 
+    if($longest_name+$longest_val < 20)
+    {    push @lines, "\n" while @lines %3;
+         my $rows   = @lines / 3;
+         my @left   = splice @lines, 0, $rows;
+         chomp @left;
+         my @middle = splice @lines, 0, $rows;
+         chomp @middle;
+         my @right = @lines;
+         @lines = ();
+         push @lines, sprintf "%-21s %-21s %s"
+           , shift @left, shift @middle, shift @right
+                 while @left;
+    }
+    elsif($longest_name+$longest_val < 30)
+    {    push @lines, "\n" if @lines %2;
+         my @left  = splice @lines, 0, @lines/2;
+         chomp @left;
+         my @right = @lines;
+         @lines = ();
+         push @lines, sprintf "%-31s  %s", shift @left, shift @right
+             while @left;
+    }
     @lines;
 }

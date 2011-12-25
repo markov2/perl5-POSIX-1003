@@ -27,6 +27,7 @@ POSIX::3 - help POSIX::1003 modules
   # overview about all exported symbols (by a module)
   show_posix_names 'POSIX::1003::Pathconf';
   show_posix_names ':pc';
+  perl -MPOSIX::3 'show_posix_names'
 
 =chapter DESCRIPTION
 The M<POSIX::1003> suite implements access to many POSIX functions. It
@@ -150,6 +151,7 @@ sub import(@)
     foreach (@_)
     {   if($_ eq ':all')
         {   $mods{$_}++ for values %mod_tag;
+            *{$to.'::'.$_} = \&$_ for keys %own_functions;
         }
         elsif(m/^\:(.*)/)
         {   exists $tags{$1} or croak "unknown tag '$_'";
