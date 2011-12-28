@@ -83,8 +83,8 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
 my %tags =
   ( confstr =>     'POSIX::1003::Confstr'
   , cs =>          'POSIX::1003::Confstr'
-# , events =>      'POSIX::1003::Events'
-# , ev =>          'POSIX::1003::Events'
+  , events =>      'POSIX::1003::Events'
+  , ev =>          'POSIX::1003::Events'
   , fdio =>        'POSIX::1003::FdIO'
   , fd =>          'POSIX::1003::FdIO'
   , filesystem =>  'POSIX::1003::FS'

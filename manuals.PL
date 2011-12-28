@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 #
 # Generate tables in manual pages and for the lazy importer POSIX::3
+# For unclear reason, it only works when both lib and blib versions of
+# a pod get modified.
 
 use warnings;
 use strict;
@@ -14,6 +16,7 @@ use POSIX::1003::Signals;
 use POSIX::1003::FdIO;
 use POSIX::1003::FS;
 use POSIX::1003::Termios;
+use POSIX::1003::Events;
 
 my @pods = map { ($_, "blib/$_") } @ARGV;
 
@@ -45,12 +48,7 @@ foreach my $pod (@pods)
         print NEW produce_table(lc $table);
         $changes++;
 
-        print NEW <<_END;
-
-=for comment
-$old
-
-_END
+        print NEW "\n\n=for comment\n$old\n\n";
     }
 
     close NEW or die "write error in $podtmp: $!\n";
@@ -65,7 +63,7 @@ sub produce_table($)
 
     my @rows;
 
-warn "TABLE $table\n";
+#warn "TABLE $table\n";
     if($table eq 'confstr')
     {   my @names = confstr_names;
         foreach my $name (sort @names)
@@ -153,6 +151,15 @@ warn "TABLE $table\n";
         no strict 'refs';
         foreach my $name (sort @$constants)
         {   my $val = &{"POSIX::1003::Termios::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    elsif($table eq 'poll')
+    {   my $poll = $POSIX::1003::Events::EXPORT_TAGS{poll};
+        no strict 'refs';
+        foreach my $name (sort @$poll)
+        {   my $val = &{"POSIX::1003::Events::$name"};
             defined $val or $val = 'undef';
             push @rows, [ $name, $val ];
         }

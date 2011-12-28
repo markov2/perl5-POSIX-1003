@@ -21,6 +21,10 @@
 #define HAS_MKNOD
 #endif
 
+#ifndef HAS_POLL
+#define HAS_POLL
+#endif
+
 #ifdef HAS_RLIMIT
 #ifdef __USE_FILE_OFFSET64
 #define HAS_RLIMIT_64
@@ -39,6 +43,10 @@
 
 #ifdef HAS_RLIMIT
 #include <sys/resource.h>
+#endif
+
+#ifdef HAS_POLL
+#include <poll.h>
 #endif
 
 HV * sc_table = NULL;
@@ -99,6 +107,16 @@ fill_rlimit()
     rl_table = newHV();
 #include "rlimit.c"
     return rl_table;
+}
+
+HV * poll_table = NULL;
+HV *
+fill_poll()
+{   if(poll_table) return poll_table;
+
+    poll_table = newHV();
+#include "poll.c"
+    return poll_table;
 }
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Sysconf
@@ -294,8 +312,6 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::FS
 #include <sys/mkdev.h>
 #endif
 
-/* major, minor, and makedev usually are macro's */
-
 dev_t
 makedev(dev_t major, dev_t minor)
     PROTOTYPE: $$
@@ -321,3 +337,61 @@ mknod(filename, mode, dev)
 #endif
     OUTPUT:
 	RETVAL
+
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Events
+
+HV *
+poll_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_poll();
+    OUTPUT:
+	RETVAL
+
+
+HV *
+_poll(handles, timeout)
+	HV *	handles;
+	int	timeout;
+    PREINIT:
+	struct pollfd * fds;
+	HV            * ret;
+	char          * key;
+        char            key_str[8];
+	int             rc;
+        HE            * entry;
+        I32		len;
+	int		j;
+    PPCODE:
+#ifdef HAS_POLL
+	const int nfd = hv_iterinit(handles);
+	Newx(fds, nfd, struct pollfd);
+	for(j=0; j < nfd; j++)
+        {   entry          = hv_iternext(handles);
+	    key            = hv_iterkey(entry, &len);
+	    key[len]       = 0;
+            fds[j].fd      = atoi(key_str);
+	    fds[j].events  = SvUV(hv_iterval(handles, entry));
+	    fds[j].revents = 0;    // returned events
+	}
+	rc = poll(fds, nfd, timeout);
+        if(rc==-1)
+        {   XPUSHs(&PL_sv_undef);
+        }
+        else
+	{   ret = newHV();
+            {   if(rc > 0)
+                {   for(j=0 ; j < nfd ; j++)
+                    {   if(fds[j].revents)
+	                {   sprintf((char *)key_str, "%d", fds[j].fd);
+                            (void)hv_store(ret, key_str, strlen(key_str), newSVuv(fds[j].revents), 0);
+                        }
+                    }
+                }
+	    }
+	    XPUSHs((SV*)ret);
+	}
+	XSRETURN(1);
+#endif
+

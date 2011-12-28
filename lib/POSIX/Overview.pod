@@ -471,10 +471,11 @@ L<POE>, L<IO::Multiplex>, ...and many more
 
   poll                            IO::Poll
   pselect                         POSIX::pselect
-  select      perlfunc            IO::Select
-
-Macros C<FD_CLR>, C<FD_ISSET>, C<FD_SET>, C<FD_ZERO> and not
-provided.  However, they can be simulated easily with L<perlfunc/vec>
+  select      perlfunc            ::Events IO::Select
+  FD_CLR                          ::Events
+  FD_ISSET                        ::Events
+  FD_SET                          ::Events
+  FD_ZERO                         ::Events
 
 =head2 Extended Device Input and Output Interfaces
 
