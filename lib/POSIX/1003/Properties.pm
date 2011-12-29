@@ -86,6 +86,19 @@ sub property_names() { keys %$property }
 This exported variable is a tie HASH which contains the
 values related to the system property names.
 =back
+
+The following constants where detected on your system when the
+module got installed.  The second column shows the value which
+where returned at that time.
+
+=for comment
+#TABLE_PROPERTY_START
+
+   If you install the module, the table will be filled-in here
+
+=for comment
+#TABLE_PROPERTY_END
+
 =cut
 
 1;

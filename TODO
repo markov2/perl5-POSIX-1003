@@ -6,4 +6,3 @@ getrusage in ::Proc ?
 
 gethostid
 gettimeofday ?
-mknod

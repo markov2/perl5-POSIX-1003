@@ -6,9 +6,11 @@ use base 'POSIX::1003';
 
 my @constants;
 my @functions = qw/
- FD_CLR FD_ISSET FD_SET FD_ZERO 
- select poll
+  FD_CLR FD_ISSET FD_SET FD_ZERO select
+  poll poll_names
  /;
+
+my @poll = qw(poll poll_names);
 
 our %EXPORT_TAGS =
  ( constants => \@constants
@@ -16,7 +18,6 @@ our %EXPORT_TAGS =
  );
 
 my  $poll;
-our %poll;
 
 BEGIN {
     $poll = poll_table;
@@ -34,6 +35,8 @@ POSIX::1003::Events - POSIX for the file-system
 =chapter DESCRIPTION
 
 =chapter FUNCTIONS
+
+=section Standard POSIX
 
 =function select RBITS, WBITS, EBITS, [TIMEOUT]
 Perl core contains two functions named C<select>.  The second is the
@@ -94,6 +97,24 @@ sub poll($;$)
     _poll($data, $timeout);
 }
 
+#----------------------
+=section Additional
+
+=function poll_names
+Returns a list with all known names, unsorted.
+=cut
+
+sub poll_names() { keys %$poll }
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    $name =~ m/^POLL/
+        or die "constants expected to start with POLL, not $name\n";
+    my $val = $poll->{$name} // return sub() {undef};
+    sub() {$val};
+
+}
+#----------------------
 =chapter CONSTANTS
 
 The following constants where detected on your system when the

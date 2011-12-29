@@ -17,6 +17,7 @@ use POSIX::1003::FdIO;
 use POSIX::1003::FS;
 use POSIX::1003::Termios;
 use POSIX::1003::Events;
+use POSIX::1003::Properties;
 
 my @pods = map { ($_, "blib/$_") } @ARGV;
 
@@ -156,10 +157,19 @@ sub produce_table($)
         }
     }
     elsif($table eq 'poll')
-    {   my $poll = $POSIX::1003::Events::EXPORT_TAGS{poll};
+    {   my $poll = $POSIX::1003::Events::EXPORT_TAGS{constants};
+        no strict 'refs';
+        foreach my $name (grep /^POLL/, sort @$poll)
+        {   my $val = &{"POSIX::1003::Events::$name"};
+            defined $val or $val = 'undef';
+            push @rows, [ $name, $val ];
+        }
+    }
+    elsif($table eq 'property')
+    {   my $poll = $POSIX::1003::Properties::EXPORT_TAGS{constants};
         no strict 'refs';
         foreach my $name (sort @$poll)
-        {   my $val = &{"POSIX::1003::Events::$name"};
+        {   my $val = &{"POSIX::1003::Properties::$name"};
             defined $val or $val = 'undef';
             push @rows, [ $name, $val ];
         }
