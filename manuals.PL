@@ -67,6 +67,8 @@ foreach $pod (@pods)
     else         { unlink $podtmp       or die "unlink $podtmp: $!"  }
 }
 
+sub sorted(@) { sort {lc($a) cmp lc($b)} @_ }
+
 sub produce_table($$)
 {   my ($fn, $name) = @_;
     my $table = $tables{$name}
@@ -77,143 +79,97 @@ sub produce_table($$)
     return "Compilation errors in module $pkg: $@" if $@;
 
     $pkg->import(':all');
-    $handler->();
+    $handler->($pkg);
 }
 
-sub table_confstr()
-{   my @names = confstr_names();
-
-    my @rows;
-    foreach my $name (sort @names)
-    {   my $val = confstr($name);
-        push @rows, [ $name, defined $val ? "'$val'" : 'undef' ]
-    }
+sub table_confstr($)
+{   my $pkg = shift;
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted confstr_names();
     format_rows confstr => \@rows;
 }
 
-sub table_sysconf()
-{   my @names = sysconf_names();
-    my @rows;
-    foreach my $name (sort @names)
-    {   my $val = sysconf($name);
-        push @rows, [ $name, defined $val ? $val : 'undef' ]
-    }
+sub table_sysconf($)
+{   my $pkg = shift;
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted sysconf_names();
     format_rows sysconf => \@rows;
-} 
+}
 
-sub table_pathconf()
-{   my @names = pathconf_names();
-    my @rows;
-    foreach my $name (sort @names)
-    {   my $val = pathconf(__FILE__, $name);
-        push @rows, [ $name, defined $val ? $val : 'undef' ]
-    }
+sub table_pathconf($)
+{   my $pkg = shift;
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted pathconf_names();
     format_rows pathconf => \@rows;
 }
 
-sub table_rlimit()
-{   my @names = rlimit_names();
-    my @rows;
-    foreach my $name (sort @names)
-    {   my ($soft, $hard, $success) = getrlimit($name);
-        $soft //= 'undef';
-        $hard //= 'undef';
-        push @rows, [ $name, sprintf "%-25s %s", $soft, $hard ]
-    }
+sub table_rlimit($)
+{   my $pkg = shift;
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted rlimit_names();
     format_rows rlimit => \@rows;
 }
 
-sub table_ulimit()
-{   my @names = ulimit_names();
-    my @rows;
-    foreach my $name (sort @names)
-    {   my $val = $name =~ m/GET/ ? ulimit($name) : '(setter)';
-        push @rows, [ $name, defined $val ? $val : 'undef' ]
-    }
+sub table_ulimit($)
+{   my $pkg = shift;
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted ulimit_names();
     format_rows ulimit => \@rows;
 }
 
-sub table_math()
-{   my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
-    my @rows;
-    no strict 'refs';
-    foreach my $name (sort @$constants)
-    {   my $val = &{"POSIX::1003::Math::$name"};
-        defined $val or $val = 'undef';
-        push @rows, [ $name, $val ];
-    }
+sub table_math($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
     format_rows math => \@rows;
 }
 
-sub table_signals()
-{   my $constants = $POSIX::1003::Signals::EXPORT_TAGS{constants};
-    my @rows;
-    no strict 'refs';
-    foreach my $name (sort @$constants)
-    {   my $val = &{"POSIX::1003::Signals::$name"};
-        defined $val or $val = 'undef';
-        push @rows, [ $name, $val ];
-    }
+sub table_signals($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::Signals::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
     format_rows signals => \@rows;
 }
 
-sub table_fdio()
-{   my $constants = $POSIX::1003::FdIO::EXPORT_TAGS{constants};
-    my @rows;
-    no strict 'refs';
-    foreach my $name (sort @$constants)
-    {   my $val = &{"POSIX::1003::FdIO::$name"};
-        defined $val or $val = 'undef';
-        push @rows, [ $name, $val ];
-    }
+sub table_fdio($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::FdIO::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
     format_rows fdio => \@rows;
 }
 
-sub table_fsys()
-{   my $constants = $POSIX::1003::FS::EXPORT_TAGS{constants};
-    my @rows;
-    no strict 'refs';
-    foreach my $name (sort @$constants)
-    {   my $val = &{"POSIX::1003::FS::$name"};
-        defined $val or $val = 'undef';
-        push @rows, [ $name, $val ];
-    }
+sub table_fsys($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::FS::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
     format_rows fsys => \@rows;
 }
 
-sub table_termios()
-{   my $constants = $POSIX::1003::Termios::EXPORT_TAGS{constants};
-    my @rows;
-    no strict 'refs';
-    foreach my $name (sort @$constants)
-    {   my $val = &{"POSIX::1003::Termios::$name"};
-        defined $val or $val = 'undef';
-        push @rows, [ $name, $val ];
-    }
+sub table_termios($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::Termios::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
     format_rows termios => \@rows;
 }
 
-sub table_poll()
-{   my $poll = $POSIX::1003::Events::EXPORT_TAGS{constants};
-    my @rows;
-    no strict 'refs';
-    foreach my $name (grep /^POLL/, sort @$poll)
-    {   my $val = &{"POSIX::1003::Events::$name"};
-        defined $val or $val = 'undef';
-        push @rows, [ $name, $val ];
-    }
+sub table_poll($)
+{   my $pkg   = shift;
+    my $poll = $POSIX::1003::Events::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted grep /^POLL/, sort @$poll;
     format_rows poll => \@rows;
 }
 
-sub table_props()
-{   my $poll = $POSIX::1003::Properties::EXPORT_TAGS{constants};
-    my @rows;
-    no strict 'refs';
-    foreach my $name (sort @$poll)
-    {   my $val = &{"POSIX::1003::Properties::$name"};
-        defined $val or $val = 'undef';
-        push @rows, [ $name, $val ];
-    }
+sub table_props($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::Properties::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
     format_rows property => \@rows;
 }
 
@@ -231,16 +187,18 @@ sub format_rows($$)
         $longest_val  = length $_->[1] if $longest_val  < length $_->[1];
     }
 
+    my $longest_row   = 0;
     my @lines;
     foreach (@$rows)
     {   my ($name, $value) = @$_;
         $name .= ' ' x ($longest_name - length $name);
-        push @lines, "  $name   $value";
+        push @lines, "$name  $value";
+        $longest_row  = length $lines[-1] if $longest_row < length $lines[-1];
         $nr_undef++ if $value eq 'undef';
     }
 
-    if($longest_name+$longest_val < 20)
-    {    push @lines, "\n" while @lines %3;
+    if($longest_row < 20)
+    {    push @lines, '' while @lines %3;
          my $rows   = @lines / 3;
          my @left   = splice @lines, 0, $rows;
          chomp @left;
@@ -248,16 +206,16 @@ sub format_rows($$)
          chomp @middle;
          my @right = @lines;
          @lines = ();
-         push @lines, sprintf "%-21s %-21s %s"
+         push @lines, sprintf "%-20s  %-20s  %s"
            , shift @left, shift @middle, shift @right
                  while @left;
     }
-    elsif($longest_name+$longest_val < 30)
-    {    push @lines, "\n" if @lines %2;
+    elsif($longest_row < 30)
+    {    push @lines, '' if @lines %2;
          my @left  = splice @lines, 0, @lines/2;
          my @right = @lines;
          @lines = ();
-         push @lines, sprintf "%-31s  %s", shift @left, shift @right
+         push @lines, sprintf "%-30s  %s", shift @left, shift @right
              while @left;
     }
 
@@ -265,7 +223,7 @@ sub format_rows($$)
         $manual, $nr_rows, $nr_undef
             if $pod !~ m/blib/;
 
-    return join "\n", @lines, ''
+    return "  ".join("\n  ", @lines)."\n"
         if @lines;
 
     <<_NONE;

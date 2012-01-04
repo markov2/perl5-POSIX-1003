@@ -25,6 +25,8 @@ BEGIN {
     tie %pathconf, 'POSIX::1003::ReadOnlyTable', $pathconf;
 }
 
+sub pathconf($$);
+
 =chapter NAME
 
 POSIX::1003::Pathconf - POSIX access to pathconf()
@@ -54,6 +56,18 @@ POSIX::1003::Pathconf - POSIX access to pathconf()
   foreach my $pc (pathconf_names) ...
 
 =chapter DESCRIPTION
+With C<pathconf()> you query filesystem limits for a certain existing
+location.
+
+=chapter METHODS
+=cut
+
+sub exampleValue($)
+{   my ($class, $name) = @_;
+    $name =~ m/^_PC_/ or return;
+    my $val = pathconf __FILE__, $name;
+    defined $val ? $val : 'undef';
+}
 
 =chapter FUNCTIONS
 

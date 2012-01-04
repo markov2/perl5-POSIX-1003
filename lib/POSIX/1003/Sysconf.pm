@@ -25,6 +25,8 @@ BEGIN {
     tie %sysconf, 'POSIX::1003::ReadOnlyTable', $sysconf;
 }
 
+sub sysconf($);
+
 =chapter NAME
 
 POSIX::1003::Sysconf - POSIX access to sysconf()
@@ -48,6 +50,18 @@ POSIX::1003::Sysconf - POSIX access to sysconf()
   print "$_\n" for keys %sysconf;
 
 =chapter DESCRIPTION
+The C<sysconf()> interface can be used to query system information
+in numerical form, where C<confstr()> returns strings.
+
+=chapter METHODS
+=cut
+
+sub exampleValue($)
+{   my ($class, $name) = @_;
+    $name =~ m/^_SC_/ or return;
+    my $val = sysconf $name;
+    defined $val ? $val : 'undef';
+}
 
 =chapter FUNCTIONS
 

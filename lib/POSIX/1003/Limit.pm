@@ -10,6 +10,7 @@ my (@ulimit, @rlimit, @constants, @functions);
 our %EXPORT_TAGS =
   ( ulimit    => \@ulimit
   , rlimit    => \@rlimit
+  , constants => \@constants
   , functions => \@functions
   , table     => [ qw/%ulimit %rlimit/ ]
   );
@@ -44,6 +45,10 @@ BEGIN {
 sub RLIM_SAVED_MAX { $rlim_saved_max }
 sub RLIM_SAVED_CUR { $rlim_saved_cur }
 sub RLIM_INFINITY  { $rlim_infinity  }
+
+sub getrlimit($);
+sub setrlimit($$;$);
+sub ulimit($;$);
 
 =chapter NAME
 
@@ -86,6 +91,29 @@ POSIX::1003::Limit - POSIX access to ulimit and rlimit
 This module provides access to the "ulimit" (user limit) and "rlimit"
 (resource limit) handling.  On most systems, C<ulimit()> is succeeded
 by C<rlimit()> hence provides a very limited set of features.
+
+=chapter METHODS
+=cut
+
+sub exampleValue($)
+{   my ($class, $name) = @_;
+    if($name =~ m/^RLIMIT_/)
+    {   my ($soft, $hard, $success) = getrlimit $name;
+        $soft //= 'undef';
+        $hard //= 'undef';
+        return "$soft, $hard";
+    }
+    elsif($name =~ m/^UL_GET|^GET_/)
+    {   my $val = ulimit $name;
+        return defined $val ? $val : 'undef';
+    }
+    elsif($name =~ m/^UL_SET|^SET_/)
+    {   return '(setter)';
+    }
+    else
+    {   $class->SUPER::exampleValue($name);
+    }
+}
 
 =chapter FUNCTIONS
 
@@ -205,7 +233,7 @@ For ulimit, with a value when it is a getter:
 =for comment
 #TABLE_ULIMIT_END
 
-The constant names for rlimit, with the hard and soft limits that
+The constant names for rlimit, with the soft and hard limits that
 M<getrlimit()> returned during installation of the module.
 
 =for comment

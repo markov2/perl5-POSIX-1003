@@ -25,6 +25,8 @@ BEGIN {
     tie %confstr, 'POSIX::1003::ReadOnlyTable', $confstr;
 }
 
+sub confstr($);
+
 =chapter NAME
 
 POSIX::1003::Confstr - POSIX access to confstr()
@@ -44,7 +46,21 @@ POSIX::1003::Confstr - POSIX access to confstr()
   $confstr{_CS_NEW_CONF} = $key;
 
 =chapter DESCRIPTION
+With C<confstr()> you can retreive string values from the operating
+system. It is the counterpart of C<sysconf()> which can only return
+numeric values.
 
+=chapter METHODS
+=cut
+
+sub exampleValue($)
+{   my ($class, $name) = @_;
+    $name =~ m/^_CS_/ or return;
+    my $val = confstr $name;
+    defined $val ? "'$val'" : 'undef';
+}
+
+#-----------------------
 =chapter FUNCTIONS
 
 =section Standard POSIX

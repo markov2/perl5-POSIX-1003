@@ -20,12 +20,12 @@ my @functions = qw/
  signal_names
  /;
 
-my @constants = (@signals, @actions);
+my @constants = (@signals, @states, @actions);
 
 our %EXPORT_TAGS =
   ( signals   => \@signals
   , actions   => \@actions
-  , states    => \@states
+  , status    => \@states
   , constants => \@constants
   , functions => \@functions
   , table     => [ '%signals' ]

@@ -9,4 +9,4 @@ gettimeofday ?
 
 test _poll
 
-autodetect signals, SIGIO is missing on Linux
+why are all SIG_ undef?

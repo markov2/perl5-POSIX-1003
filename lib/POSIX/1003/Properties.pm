@@ -25,6 +25,8 @@ BEGIN {
     tie %property, 'POSIX::1003::ReadOnlyTable', $property;
 }
 
+sub property($);
+
 =chapter NAME
 
 POSIX::1003::Properties - POSIX access to _POSIX_ constants
@@ -46,6 +48,19 @@ POSIX::1003::Properties - POSIX access to _POSIX_ constants
   foreach my $prop (property_names) ...
 
 =chapter DESCRIPTION
+When you compile C/C++ programs, the header files provide you with
+a long list of C<_POSIX> constants. This module pass these values
+on to Perl.
+
+=chapter METHODS
+=cut
+
+sub exampleValue($)
+{   my ($class, $name) = @_;
+    $name =~ m/^_POSIX/ or return;
+    my $val = property $name;
+    defined $val ? $val : 'undef';
+}
 
 =chapter FUNCTIONS
 
