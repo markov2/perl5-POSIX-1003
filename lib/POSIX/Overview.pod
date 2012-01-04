@@ -790,9 +790,9 @@ B<Warning,> different return parameters for POSIX.pm
 
 =head2 Realtime Signal Interfaces
 
-  sigqueue                        Signal::More
-  sigtimedwait                    Signal::More
-  sigwaitinfo                     Signal::More
+  sigqueue                        POSIX::RT::Signal
+  sigtimedwait                    POSIX::RT::Signal
+  sigwaitinfo                     POSIX::RT::Signal
 
 =head2 Regular Expression Interfaces
 

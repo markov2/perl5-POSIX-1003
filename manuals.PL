@@ -7,23 +7,31 @@
 use warnings;
 use strict;
 
-use POSIX::1003::Confstr;
-use POSIX::1003::Sysconf;
-use POSIX::1003::Pathconf;
-use POSIX::1003::Limit;
-use POSIX::1003::Math;
-use POSIX::1003::Signals;
-use POSIX::1003::FdIO;
-use POSIX::1003::FS;
-use POSIX::1003::Termios;
-use POSIX::1003::Events;
-use POSIX::1003::Properties;
+my @pods   = map { ($_, "blib/$_") } @ARGV;
 
-my @pods = map { ($_, "blib/$_") } @ARGV;
+my %tables =
+  ( confstr  => [ 'POSIX::1003::Confstr',  \&table_confstr  ]
+  , sysconf  => [ 'POSIX::1003::Sysconf',  \&table_sysconf  ]
+  , pathconf => [ 'POSIX::1003::Pathconf', \&table_pathconf ]
+  , ulimit   => [ 'POSIX::1003::Limit',    \&table_ulimit   ]
+  , rlimit   => [ 'POSIX::1003::Limit',    \&table_rlimit   ]
+  , math     => [ 'POSIX::1003::Math',     \&table_math     ]
+  , signals  => [ 'POSIX::1003::Signals',  \&table_signals  ]
+  , fdio     => [ 'POSIX::1003::FdIO',     \&table_fdio     ]
+  , fsys     => [ 'POSIX::1003::FS',       \&table_fsys     ]
+  , termios  => [ 'POSIX::1003::Termios',  \&table_termios  ]
+  , poll     => [ 'POSIX::1003::Events',   \&table_poll     ]
+  , property => [ 'POSIX::1003::Properties', \&table_props  ]
+  );
 
-sub produce_table($);
+sub produce_table($$);
+sub format_rows($$);
 
-foreach my $pod (@pods)
+print "**** adding tables to manuals\n";
+
+our $pod;   # sorry :(
+
+foreach $pod (@pods)
 {   $pod =~ m/\.pod$/
         or next;
 
@@ -46,7 +54,7 @@ foreach my $pod (@pods)
         until $old =~ m/^\#TABLE_${table}_END/;
 
         print NEW "\n";
-        print NEW produce_table(lc $table);
+        print NEW produce_table($pod, lc $table);
         $changes++;
 
         print NEW "\n\n=for comment\n$old\n\n";
@@ -59,137 +67,176 @@ foreach my $pod (@pods)
     else         { unlink $podtmp       or die "unlink $podtmp: $!"  }
 }
 
-sub produce_table($)
-{   my $table = shift;
+sub produce_table($$)
+{   my ($fn, $name) = @_;
+    my $table = $tables{$name}
+        or die "unknown table $name";
+
+    my ($pkg, $handler) = @$table;
+    eval "require $pkg";
+    return "Compilation errors in module $pkg: $@" if $@;
+
+    $pkg->import(':all');
+    $handler->();
+}
+
+sub table_confstr()
+{   my @names = confstr_names();
 
     my @rows;
+    foreach my $name (sort @names)
+    {   my $val = confstr($name);
+        push @rows, [ $name, defined $val ? "'$val'" : 'undef' ]
+    }
+    format_rows confstr => \@rows;
+}
 
-#warn "TABLE $table\n";
-    if($table eq 'confstr')
-    {   my @names = confstr_names;
-        foreach my $name (sort @names)
-        {   my $val = confstr $name;
-            push @rows, [ $name, defined $val ? "'$val'" : 'undef' ]
-        }
+sub table_sysconf()
+{   my @names = sysconf_names();
+    my @rows;
+    foreach my $name (sort @names)
+    {   my $val = sysconf($name);
+        push @rows, [ $name, defined $val ? $val : 'undef' ]
     }
-    elsif($table eq 'sysconf')
-    {   my @names = sysconf_names;
-        foreach my $name (sort @names)
-        {   my $val = sysconf $name;
-            push @rows, [ $name, defined $val ? $val : 'undef' ]
-        }
+    format_rows sysconf => \@rows;
+} 
+
+sub table_pathconf()
+{   my @names = pathconf_names();
+    my @rows;
+    foreach my $name (sort @names)
+    {   my $val = pathconf(__FILE__, $name);
+        push @rows, [ $name, defined $val ? $val : 'undef' ]
     }
-    elsif($table eq 'pathconf')
-    {   my @names = pathconf_names;
-        foreach my $name (sort @names)
-        {   my $val = pathconf __FILE__, $name;
-            push @rows, [ $name, defined $val ? $val : 'undef' ]
-        }
+    format_rows pathconf => \@rows;
+}
+
+sub table_rlimit()
+{   my @names = rlimit_names();
+    my @rows;
+    foreach my $name (sort @names)
+    {   my ($soft, $hard, $success) = getrlimit($name);
+        $soft //= 'undef';
+        $hard //= 'undef';
+        push @rows, [ $name, sprintf "%-25s %s", $soft, $hard ]
     }
-    elsif($table eq 'rlimit')
-    {   my @names = rlimit_names;
-        foreach my $name (sort @names)
-        {   my ($soft, $hard, $success) = getrlimit $name;
-            $soft //= 'undef';
-            $hard //= 'undef';
-            push @rows, [ $name, sprintf "%-25s %s", $soft, $hard ]
-        }
+    format_rows rlimit => \@rows;
+}
+
+sub table_ulimit()
+{   my @names = ulimit_names();
+    my @rows;
+    foreach my $name (sort @names)
+    {   my $val = $name =~ m/GET/ ? ulimit($name) : '(setter)';
+        push @rows, [ $name, defined $val ? $val : 'undef' ]
     }
-    elsif($table eq 'ulimit')
-    {   my @names = ulimit_names;
-        foreach my $name (sort @names)
-        {   my $val = $name =~ m/GET/ ? ulimit $name : '(setter)';
-            push @rows, [ $name, defined $val ? $val : 'undef' ]
-        }
+    format_rows ulimit => \@rows;
+}
+
+sub table_math()
+{   my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
+    my @rows;
+    no strict 'refs';
+    foreach my $name (sort @$constants)
+    {   my $val = &{"POSIX::1003::Math::$name"};
+        defined $val or $val = 'undef';
+        push @rows, [ $name, $val ];
     }
-    elsif($table eq 'math')
-    {   my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (sort @$constants)
-        {   my $val = &{"POSIX::1003::Math::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
+    format_rows math => \@rows;
+}
+
+sub table_signals()
+{   my $constants = $POSIX::1003::Signals::EXPORT_TAGS{constants};
+    my @rows;
+    no strict 'refs';
+    foreach my $name (sort @$constants)
+    {   my $val = &{"POSIX::1003::Signals::$name"};
+        defined $val or $val = 'undef';
+        push @rows, [ $name, $val ];
     }
-    elsif($table eq 'math')
-    {   my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (sort @$constants)
-        {   my $val = &{"POSIX::1003::Math::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
+    format_rows signals => \@rows;
+}
+
+sub table_fdio()
+{   my $constants = $POSIX::1003::FdIO::EXPORT_TAGS{constants};
+    my @rows;
+    no strict 'refs';
+    foreach my $name (sort @$constants)
+    {   my $val = &{"POSIX::1003::FdIO::$name"};
+        defined $val or $val = 'undef';
+        push @rows, [ $name, $val ];
     }
-    elsif($table eq 'signals')
-    {   my $constants = $POSIX::1003::Signals::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (sort @$constants)
-        {   my $val = &{"POSIX::1003::Signals::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
+    format_rows fdio => \@rows;
+}
+
+sub table_fsys()
+{   my $constants = $POSIX::1003::FS::EXPORT_TAGS{constants};
+    my @rows;
+    no strict 'refs';
+    foreach my $name (sort @$constants)
+    {   my $val = &{"POSIX::1003::FS::$name"};
+        defined $val or $val = 'undef';
+        push @rows, [ $name, $val ];
     }
-    elsif($table eq 'fdio')
-    {   my $constants = $POSIX::1003::FdIO::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (sort @$constants)
-        {   my $val = &{"POSIX::1003::FdIO::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
+    format_rows fsys => \@rows;
+}
+
+sub table_termios()
+{   my $constants = $POSIX::1003::Termios::EXPORT_TAGS{constants};
+    my @rows;
+    no strict 'refs';
+    foreach my $name (sort @$constants)
+    {   my $val = &{"POSIX::1003::Termios::$name"};
+        defined $val or $val = 'undef';
+        push @rows, [ $name, $val ];
     }
-    elsif($table eq 'fsys')
-    {   my $constants = $POSIX::1003::FS::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (sort @$constants)
-        {   my $val = &{"POSIX::1003::FS::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
+    format_rows termios => \@rows;
+}
+
+sub table_poll()
+{   my $poll = $POSIX::1003::Events::EXPORT_TAGS{constants};
+    my @rows;
+    no strict 'refs';
+    foreach my $name (grep /^POLL/, sort @$poll)
+    {   my $val = &{"POSIX::1003::Events::$name"};
+        defined $val or $val = 'undef';
+        push @rows, [ $name, $val ];
     }
-    elsif($table eq 'termios')
-    {   my $constants = $POSIX::1003::Termios::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (sort @$constants)
-        {   my $val = &{"POSIX::1003::Termios::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
+    format_rows poll => \@rows;
+}
+
+sub table_props()
+{   my $poll = $POSIX::1003::Properties::EXPORT_TAGS{constants};
+    my @rows;
+    no strict 'refs';
+    foreach my $name (sort @$poll)
+    {   my $val = &{"POSIX::1003::Properties::$name"};
+        defined $val or $val = 'undef';
+        push @rows, [ $name, $val ];
     }
-    elsif($table eq 'poll')
-    {   my $poll = $POSIX::1003::Events::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (grep /^POLL/, sort @$poll)
-        {   my $val = &{"POSIX::1003::Events::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
-    }
-    elsif($table eq 'property')
-    {   my $poll = $POSIX::1003::Properties::EXPORT_TAGS{constants};
-        no strict 'refs';
-        foreach my $name (sort @$poll)
-        {   my $val = &{"POSIX::1003::Properties::$name"};
-            defined $val or $val = 'undef';
-            push @rows, [ $name, $val ];
-        }
-    }
-    else
-    {   die "do not know how to make table $table";
-    }
+    format_rows property => \@rows;
+}
+
+sub format_rows($$)
+{   my ($manual, $rows) = @_;
 
     my $longest_name = 0;
     my $longest_val  = 5;  # at least 'undef'
-    for (@rows)
+
+    my $nr_rows      = @$rows;
+    my $nr_undef     = 0;
+
+    for (@$rows)
     {   $longest_name = length $_->[0] if $longest_name < length $_->[0];
         $longest_val  = length $_->[1] if $longest_val  < length $_->[1];
     }
 
     my @lines;
-    foreach (@rows)
+    foreach (@$rows)
     {   my ($name, $value) = @$_;
         $name .= ' ' x ($longest_name - length $name);
         push @lines, "  $name   $value\n";
+        $nr_undef++ if $value eq 'undef';
     }
 
     if($longest_name+$longest_val < 20)
@@ -214,5 +261,19 @@ sub produce_table($)
          push @lines, sprintf "%-31s  %s", shift @left, shift @right
              while @left;
     }
-    @lines;
+
+    warn sprintf "module %-8s has %3d constants, %2d are undefined\n",
+        $manual, $nr_rows, $nr_undef
+            if $pod !~ m/blib/;
+
+    return join "\n", @lines
+        if @lines;
+
+    <<_NONE;
+There were no symbols detected for this category during installation.
+This can mean that the related command is not supported, or that this
+module did not get ported to (your version of) your Operating System.
+In the latter case, please help us making it work.
+_NONE
 }
+

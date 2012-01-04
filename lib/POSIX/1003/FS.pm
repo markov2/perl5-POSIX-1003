@@ -26,7 +26,7 @@ my @functions = qw/
  major minor makedev
  /;
 
-our @IN_CORE     = qw(utime);
+our @IN_CORE     = qw(utime mkdir);
 
 our %EXPORT_TAGS =
  ( constants => \@constants
@@ -107,7 +107,8 @@ collected from M<Fcntl> (import tag C<:mode>).  The DEVICE number is
 a combination from the type (I<major> number), a sequence number and
 usage information (combined in a I<minor> number).
 
- 
+=function mkdir [FILENAME [MASK]]
+Simple C<CORE::mkdir()>
 
 =section Additional
 

@@ -222,7 +222,7 @@ sub posix_1003_names(@)
 
     foreach my $pkg (@modules)
     {   eval "require $pkg";
-        $@ && die $@;
+        $@ && next;  # die?
         $pkg->can('import') or next;
         $pkg->import(':none');   # create %EXPORT_OK
 

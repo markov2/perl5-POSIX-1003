@@ -75,30 +75,33 @@ there is a scalar context (missing from POSIX.pm).
 =function ceil EXPR
 =function cosh EXPR
 =function floor EXPR
-=function fmod EXPR, EXPR
 =function frexp EXPR
 =function ldexp EXPR
 =function log10 EXPR
-=function modf EXPR
 =function sinh EXPR
 =function tan EXPR
 =function tanh EXPR
 =cut
 
 # the argument to be optional is important for expression priority!
-sub acos(;$)  { POSIX::acos (@_ ? shift : $_) }
-sub asin(;$)  { POSIX::asin (@_ ? shift : $_) }
-sub atan(;$)  { POSIX::atan (@_ ? shift : $_) }
-sub ceil(;$)  { POSIX::ceil (@_ ? shift : $_) }
-sub cosh(;$)  { POSIX::cosh (@_ ? shift : $_) }
-sub floor(;$) { POSIX::floor(@_ ? shift : $_) }
-sub frexp(;$) { POSIX::frexp(@_ ? shift : $_) }
-sub ldexp(;$) { POSIX::ldexp(@_ ? shift : $_) }
-sub log10(;$) { POSIX::log10(@_ ? shift : $_) }
-sub modf(;$)  { POSIX::modf (@_ ? shift : $_) }
-sub sinh(;$)  { POSIX::sinh (@_ ? shift : $_) }
-sub tan(;$)   { POSIX::tan  (@_ ? shift : $_) }
-sub tanh(;$)  { POSIX::tanh (@_ ? shift : $_) }
+sub acos(_)  { goto &POSIX::acos  }
+sub asin(_)  { goto &POSIX::asin  }
+sub atan(_)  { goto &POSIX::atan  }
+sub ceil(_)  { goto &POSIX::ceil  }
+sub cosh(_)  { goto &POSIX::cosh  }
+sub floor(_) { goto &POSIX::floor }
+sub frexp(_) { goto &POSIX::frexp }
+sub ldexp(_) { goto &POSIX::ldexp }
+sub log10(_) { goto &POSIX::log10 }
+sub sinh(_)  { goto &POSIX::sinh  }
+sub tan(_)   { goto &POSIX::tan   }
+sub tanh(_)  { goto &POSIX::tanh  }
+
+=function modf EXPR, EXPR
+=function fmod EXPR, EXPR
+=cut
+sub modf($$) { goto &POSIX::modf }
+sub fmod($$) { goto &POSIX::fmod }
 
 # All provided by POSIX.xs
 
