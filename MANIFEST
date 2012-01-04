@@ -31,6 +31,7 @@ lists/pathconf.txt
 lists/poll.txt
 lists/posix.txt
 lists/rlimit.txt
+lists/signals.txt
 lists/sysconf.txt
 lists/ulimit.txt
 manuals.PL

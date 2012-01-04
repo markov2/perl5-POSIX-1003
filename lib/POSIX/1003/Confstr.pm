@@ -72,6 +72,7 @@ sub _create_constant($)
     sub() {_confstr($id)};
 }
 
+#--------------------------
 =section Additional
 
 =function confstr_names
@@ -80,6 +81,7 @@ Returns a list with all known names, unsorted.
 
 sub confstr_names() { keys %$confstr }
 
+#--------------------------
 =chapter CONSTANTS
 
 =over 4

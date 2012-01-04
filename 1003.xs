@@ -79,6 +79,16 @@ fill_pathconf()
     return pc_table;
 }
 
+HV * sig_table = NULL;
+HV *
+fill_signals()
+{   if(sig_table) return sig_table;
+
+    sig_table = newHV();
+#include "signals.c"
+    return sig_table;
+}
+
 HV * pr_table = NULL;
 HV *
 fill_properties()
@@ -126,6 +136,16 @@ sysconf_table()
     PROTOTYPE:
     CODE:
 	RETVAL = fill_sysconf();
+    OUTPUT:
+	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Signals
+
+HV *
+signals_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_signals();
     OUTPUT:
 	RETVAL
 

@@ -235,7 +235,7 @@ sub format_rows($$)
     foreach (@$rows)
     {   my ($name, $value) = @$_;
         $name .= ' ' x ($longest_name - length $name);
-        push @lines, "  $name   $value\n";
+        push @lines, "  $name   $value";
         $nr_undef++ if $value eq 'undef';
     }
 
@@ -255,7 +255,6 @@ sub format_rows($$)
     elsif($longest_name+$longest_val < 30)
     {    push @lines, "\n" if @lines %2;
          my @left  = splice @lines, 0, @lines/2;
-         chomp @left;
          my @right = @lines;
          @lines = ();
          push @lines, sprintf "%-31s  %s", shift @left, shift @right
@@ -266,7 +265,7 @@ sub format_rows($$)
         $manual, $nr_rows, $nr_undef
             if $pod !~ m/blib/;
 
-    return join "\n", @lines
+    return join "\n", @lines, ''
         if @lines;
 
     <<_NONE;

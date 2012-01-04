@@ -4,11 +4,9 @@ use strict;
 package POSIX::1003::Signals;
 use base 'POSIX::1003';
 
-my @signals = qw/
- SIGABRT SIGALRM SIGCHLD SIGCONT SIGFPE SIGHUP SIGILL SIGINT
- SIGKILL SIGPIPE SIGRTMIN SIGRTMAX SIGQUIT SIGSEGV SIGSTOP SIGTERM
- SIGTSTP SIGTTIN SIGTTOU SIGUSR1 SIGUSR2 SIGBUS SIGPOLL SIGPROF SIGSYS
- SIGTRAP SIGURG SIGVTALRM SIGXCPU SIGXFSZ SIG_BLOCK SIG_DFL SIG_ERR
+my @signals;
+my @states  = qw/
+ SIG_BLOCK SIG_DFL SIG_ERR
  SIG_IGN SIG_SETMASK SIG_UNBLOCK
  /;
 
@@ -19,16 +17,32 @@ my @actions = qw/
 
 my @functions = qw/
  raise sigaction signal sigpending sigprocmask sigsuspend signal
+ signal_names
  /;
+
+my @constants = (@signals, @actions);
 
 our %EXPORT_TAGS =
   ( signals   => \@signals
   , actions   => \@actions
-  , constants => [ @signals, @actions ]
+  , states    => \@states
+  , constants => \@constants
   , functions => \@functions
+  , table     => [ '%signals' ]
   );
 
 our @IN_CORE = qw/kill/;
+
+my $signals;
+our %signals;
+
+BEGIN {
+    # initialize the :signals export tag
+    $signals = signals_table;
+    push @constants, keys %$signals;
+    push @signals,   keys %$signals;
+    tie %signals, 'POSIX::1003::ReadOnlyTable', $signals;
+}
 
 =chapter NAME
 
@@ -43,6 +57,10 @@ POSIX::1003::Signals - POSIX using signals
   sigsuspend($signal_mask);
 
   kill SIGPOLL//SIGHUP, $$;
+
+  use POSIX::1003::Signals '%signals';
+  my $number = $signals{SIGHUP};
+  $signals{SIGNEW} = $number;
 
 =chapter DESCRIPTION
 This manual page explains the access to the POSIX C<sigaction>
@@ -140,7 +158,24 @@ sub sigprocmask($$;$) {goto &POSIX::sigprocmask }
 sub sigsuspend($)     {goto &POSIX::sigsuspend }
 sub signal($$)        { $SIG{$_[0]} = $_[1] }
 
+#--------------------------
+=section Additional
+
+=function signal_names
+Returns a list with all known names, unsorted.
+=cut
+
+sub signal_names() { keys %$signals }
+
+#--------------------------
+
 =chapter CONSTANTS
+
+=over 4
+=item B<%signals>
+This exported variable is a (tied) HASH which maps C<SIG*> names
+to their numbers.
+=back
 
 The following constants are exported, shown here with the values
 discovered during installation of this module:
@@ -155,5 +190,11 @@ installation.
 #TABLE_SIGNALS_END
 
 =cut
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    my $val = $signals->{$name};
+    sub() {$val};
+}
 
 1;

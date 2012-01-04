@@ -3,6 +3,10 @@
 
 All changes are made by Mark Overmeer, unless stated otherwise.
 
+0.10: Wed Jan  4 11:26:12 CET 2012
+	- ::Signals split export tag :signals into :signals and :states
+	- let signal names be auto-detected as well.
+
 0.09: Wed Jan  4 10:14:57 CET 2012
 	- ::Overview: Signal::More absorbed by POSIX::RT::Signal
 	  [Leon Timmermans]

@@ -11,15 +11,16 @@ use strict;
 sub dump_table($$$);
 sub from_listing($$);
 
-my (%sc, %cs, %posix, %pc, %ul, %rl, %poll);
+my (%sc, %cs, %posix, %pc, %ul, %rl, %poll, %sig);
 
-from_listing \%sc,    File::Spec->catfile('lists', 'sysconf.txt' );
-from_listing \%cs,    File::Spec->catfile('lists', 'confstr.txt' );
-from_listing \%pc,    File::Spec->catfile('lists', 'pathconf.txt');
-from_listing \%posix, File::Spec->catfile('lists', 'posix.txt'   );
-from_listing \%ul,    File::Spec->catfile('lists', 'ulimit.txt' );
-from_listing \%rl,    File::Spec->catfile('lists', 'rlimit.txt' );
-from_listing \%poll,  File::Spec->catfile('lists', 'poll.txt' );
+from_listing \%sc,    'sysconf.txt';
+from_listing \%cs,    'confstr.txt';
+from_listing \%pc,    'pathconf.txt';
+from_listing \%posix, 'posix.txt';
+from_listing \%ul,    'ulimit.txt';
+from_listing \%rl,    'rlimit.txt';
+from_listing \%poll,  'poll.txt';
+from_listing \%sig,   'signals.txt';
 
 #use Data::Dumper;
 #warn Dumper \%sc, \%cs, \%posix, \%pc;
@@ -30,7 +31,8 @@ dump_table(\%pc,    'pc_table',   'pathconf.c'  );
 dump_table(\%posix, 'pr_table',   'properties.c');
 dump_table(\%ul,    'ul_table',   'ulimit.c'    );
 dump_table(\%rl,    'rl_table',   'rlimit.c'    );
-dump_table(\%poll,  'poll_table', 'poll.c'    );
+dump_table(\%poll,  'poll_table', 'poll.c'      );
+dump_table(\%sig,   'sig_table',  'signals.c'   );
 
 # System specific compilation helpers
 open SYSTEM, '>', 'system.c'
@@ -69,13 +71,15 @@ _CONST
 
 sub from_listing($$)
 {   my ($table, $filename) = @_;
+    my $path =  File::Spec->catfile('lists', $filename);
     local *IN;
-    open IN, '<', $filename
-        or die "cannot read from $filename: $!";
+    open IN, '<', $path
+        or die "cannot read from $path: $!";
     while(<IN>)
     {   next if m/^#|^\s*$/;
         chomp;
         $table->{$_}++;
     }
-    close IN;
+    close IN
+        or die "errors while reading $path: $!";
 }

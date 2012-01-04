@@ -6,3 +6,7 @@ getrusage in ::Proc ?
 
 gethostid
 gettimeofday ?
+
+test _poll
+
+autodetect signals, SIGIO is missing on Linux
