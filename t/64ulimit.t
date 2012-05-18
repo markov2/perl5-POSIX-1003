@@ -9,6 +9,7 @@ use POSIX::1003::Limit qw(ulimit %ulimit UL_GETFSIZE);
 
 my $fsize = ulimit('UL_GETFSIZE');
 ok(defined $fsize, "UL_GETFSIZE via function = $fsize");
+if(!$fsize) {diag("key $_") for keys %ulimit}  # debug NetBSD
 
 my $fsize2 = UL_GETFSIZE;
 ok(defined $fsize2, "UL_GETFSIZE directly = $fsize2");
@@ -29,11 +30,16 @@ ok(!defined $fsize4);
 
 use POSIX::1003::Limit qw(UL_SETFSIZE);
 
-# On Linux, SET only seems to work when it is substantially smaller.
+# Older gcc versions are broken:
+# http://sourceware.org/bugzilla/show_bug.cgi?id=6947
 my $smaller = 12349895;
 my $fsize5 = ulimit('UL_SETFSIZE', $smaller);
-cmp_ok($fsize5, '==', $smaller, 'smaller fsize');
-cmp_ok(UL_GETFSIZE, '==', $smaller);
+
+SKIP: {
+    skip "setfsize does not work, no permission?", 2 if $fsize5==$fsize;
+    cmp_ok($fsize5, '==', $smaller, 'smaller fsize');
+    cmp_ok(UL_GETFSIZE, '==', $smaller);
+}
 
 use POSIX::1003::Limit qw(ulimit_names);
 

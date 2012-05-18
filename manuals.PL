@@ -227,10 +227,10 @@ sub format_rows($$)
         if @lines;
 
     <<_NONE;
-There were no symbols detected for this category during installation.
-This can mean that the related command is not supported, or that this
-module did not get ported to (your version of) your Operating System.
-In the latter case, please help us making it work.
+  There were no symbols detected for this category during installation.
+  This can mean that the related command is not supported, or that this
+  module did not get ported to (your version of) your Operating System.
+  In the latter case, please help us making it work.
 _NONE
 }
 

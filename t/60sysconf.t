@@ -30,6 +30,7 @@ ok(!defined $om4);
 use POSIX::1003::Sysconf qw(sysconf_names);
 my @names = sysconf_names;
 cmp_ok(scalar @names, '>', 10, @names." names");
+if(@names <= 10) {diag($_) for @names};   # to debug NetBSD
 
 my $undefd = 0;
 foreach my $name (sort @names)

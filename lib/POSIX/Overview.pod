@@ -601,7 +601,7 @@ in core, but the POSIX C<flockfile> mechanism is probably unsupported:
   statvfs                         Filesys::statvfs
   tmpfile                         File::Temp IO::File/new_tmpfile
   tmpnam      (insecure!)         File::Temp POSIX.pm
-  truncate    perlfunc/truncate
+  truncate    perlfunc
   unlink      perlfunc       
   utime       perlfunc            ::FS POSIX.pm
 

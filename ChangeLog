@@ -3,7 +3,12 @@
 
 All changes are made by Mark Overmeer, unless stated otherwise.
 
-0.11:
+0.12: Fri May 18 14:05:11 CEST 2012
+	- indent manual text about missing configuration.
+	- setrlimit and ulimit do not always have rights on Linux.
+	  Changed in tests t/64ulimit.t and t/65rlimit.t  [cpantesters]
+
+0.11: Wed Jan  4 13:56:04 CET 2012
 	- POSIX::1003::exampleValue($name) as generic way to demonstrate
 	  values for constants
 	- generate signal names via auto-detection, not a static list
@@ -11,6 +16,7 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 	- manuals.PL uses new exampleValue() interface
 	- ::Limit did not define export tag :constants
 	- export problem with _POSIX2 properties
+	- minor tweeks to output of parameter tables
 
 0.10: Wed Jan  4 11:26:12 CET 2012
 	- ::Signals split export tag :signals into :signals and :states
