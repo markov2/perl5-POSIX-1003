@@ -12,7 +12,7 @@ my @functions = qw/pathconf fpathconf pathconf_names/;
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
-  , table     => [ '%pathconf' ]
+  , tables    => [ '%pathconf' ]
   );
 
 my  $pathconf;

@@ -6,7 +6,6 @@ use strict;
 use Test::More tests => 12;
 
 use POSIX::1003::FdIO;   # load all
-use Fcntl  qw(O_RDONLY SEEK_SET SEEK_CUR);
 
 my $fd = openfd __FILE__, O_RDONLY
     or die "cannot open myself: $!";
@@ -19,15 +18,19 @@ cmp_ok(seekfd($fd, 0,  SEEK_CUR), '==', 10, 'tell');
 # try to read a few bytes
 my $string;
 my $len = readfd $fd, $string, 20;
-ok(defined $string, "read string '$string'");
+ok(defined $string, "read string");
 cmp_ok($len, '==', 20, 'returned length');
 cmp_ok(length $string, '==', 20, 'check length');
 cmp_ok(seekfd($fd, 0,  SEEK_CUR), '==', 30, 'tell');
 cmp_ok(tellfd($fd), '==', 30, 'tellfd');
 
-my $readall = readfd_all $fd;
-ok(defined $readall, "read all success");
-cmp_ok((-s __FILE__) - 30, '==', length $readall, "all bytes");
-
 # try to read the whole file, from here on
 ok((closefd($fd) ? 1 : 0), "closefd $fd");
+
+# only SEEK_ keys in %seek
+my $non_seek = grep !/^SEEK_/, keys %seek;
+cmp_ok($non_seek, '==', 0, join(',',keys %seek));
+
+# only O_ keys in %mode
+my $non_mode = grep !/^O_/, keys %mode;
+cmp_ok($non_mode, '==', 0, join(',',keys %mode));

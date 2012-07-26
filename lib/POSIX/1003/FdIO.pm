@@ -4,30 +4,38 @@ use strict;
 package POSIX::1003::FdIO;
 use base 'POSIX::1003';
 
-use Fcntl qw/O_WRONLY O_CREAT O_TRUNC SEEK_CUR/;
-use POSIX::1003::Pathconf qw/_PC_REC_INCR_XFER_SIZE/;
-
 # Blocks resp from unistd.h, limits.h, and stdio.h
-my @constants = qw/
- STDERR_FILENO STDIN_FILENO STDOUT_FILENO
-
- PIPE_BUF STREAM_MAX MAX_INPUT SSIZE_MAX
-
- BUFSIZ EOF
- /;
-
+my (@constants, @seek, @mode);
 my @functions = qw/closefd creatfd dupfd dup2fd openfd pipefd
- readfd seekfd writefd
-
- tellfd readfd_all writefd_all 
- /;
+  readfd seekfd writefd tellfd/;
 
 our %EXPORT_TAGS =
  ( constants => \@constants
  , functions => \@functions
+ , seek      => \@seek
+ , mode      => \@mode
+ , tables    => [ qw/%seek %mode/ ]
  );
 
-__PACKAGE__->import(qw/SSIZE_MAX BUFSIZ/);
+my $fdio;
+our (%fdio, %seek, %mode);
+
+BEGIN {
+    $fdio = fdio_table;
+    push @constants, keys %$fdio;
+
+    # initialize the :seek export tag
+    push @seek, grep /^SEEK_/, keys %$fdio;
+    my %seek_subset;
+    @seek_subset{@seek} = @{$fdio}{@seek};
+    tie %seek,  'POSIX::1003::ReadOnlyTable', \%seek_subset;
+
+    # initialize the :mode export tag
+    push @mode, grep /^O_/, keys %$fdio;
+    my %mode_subset;
+    @mode_subset{@mode} = @{$fdio}{@mode};
+    tie %mode,  'POSIX::1003::ReadOnlyTable', \%mode_subset;
+}
 
 =chapter NAME
 
@@ -36,9 +44,13 @@ POSIX::1003::FdIO - POSIX handling file descriptors
 =chapter SYNOPSIS
 
   use POSIX::1003::FdIO;
+
   $fd = openfd($fn, O_RDWR);
+  defined $fd or die $!;   # $fd==0 is valid value! (STDIN)
+
   $fd = openfd($fn, O_WRONLY|O_TRUNC);
   $fd = openfd($fn, O_CREAT|O_WRONLY, 0640);
+  # Permission bit constants in POSIX::1003::FS
 
   my $buf;
   $bytes_read    = readfd($fd, $buf, BUFSIZ);
@@ -74,37 +86,44 @@ For all people who do not trust the C<sys*> commands (and there are
 many), we provide the implementation of POSIX-in-Core with a less
 confusing name to avoid accidents.
 
- POSIX   Perl-Core POSIX.pm POSIX::1003::FdIO
- fseek   seek
- lseek   sysseek   lseek    seekfd
- fopen   open
- open    sysopen            openfd  # sysopen clumpsy
- fdopen                             # IO::Handle->new_from_fd
- fclose  close
- close   close     close    closefd
- fread   read
- read    sysread   read     readfd
- fwrite  write
- write   syswrite  write    writefd
- pipe              pipe     pipefd
-         pipe,open                  # buffered unless $|=0
- creat             creat    creatfd
- dup                        dupfd
- stat    stat
- fstat             fstat    statfd
- lstat   lstat
- ftell   tell
-                            tellfd  # tell on fd not in POSIX
+    POSIX   Perl-Core POSIX.pm POSIX::1003::FdIO
+ FH fseek   seek
+ FD lseek   sysseek   lseek    seekfd
+ FH fopen   open
+ FD open    sysopen            openfd   # sysopen is clumpsy
+ FD fdopen                              # IO::Handle->new_from_fd
+ FH fclose  close
+ FD close   close     close    closefd
+ FH fread   read
+ FD read    sysread   read     readfd
+ FH fwrite  write
+ FD write   syswrite  write    writefd
+ FH         pipe,open                   # buffered unless $|=0
+ FD pipe              pipe     pipefd
+ FH stat    stat
+ FD fstat             fstat    statfd
+ FN lstat   lstat
+ FH ftell   tell
+ FD                            tellfd   # tell on fd not in POSIX
+ FH rewind            rewind
+ FD                            rewindfd # idem
+ FD creat             creat    creatfd
+ FD dup                        dupfd
+
+Works on: FH=file handle, FD=file descriptor, FN=file name
 
 =section Standard POSIX
 
 =function seekfd FD, OFFSET, WHENCE
-The WHENCE is a C<SEEK_*> constant from M<Fcntl>
+The WHENCE is a C<SEEK_*> constant.
 
 =function openfd FILENAME, FLAGS, MODE
-Returned is an integer file descriptor (FD). FLAGS are composed
-from the C<O_*> constants defined by M<Fcntl> (import tag C<:mode>)
-The MODE combines C<S_I*> constants from that same module.
+Returned is an integer file descriptor (FD).  Returns C<undef> on
+failure (and '0' is a valid FD!)
+
+FLAGS are composed from the C<O_*> constants defined by this module (import
+tag C<:mode>) The MODE field combines C<S_I*> constants defined by
+M<POSIX::1003::FS> (import tag C<:stat>).
 
 =function closefd FD
 Always check the return code: C<undef> on error, cause in C<$!>.
@@ -116,14 +135,22 @@ you must close with C<CORE::close()>.
 
 =function readfd FD, SCALAR, [LENGTH]
 Read the maximum of LENGTH bytes from FD into the SCALAR. Returned is
-the actual number of bytes read.
+the actual number of bytes read.  The value C<-1> tells you there is
+an error, reported in C<$!>
+
+B<Be warned> that a returned value smaller than LENGTH does not mean
+that the FD has nothing more to offer: the end is reached only when 0
+(zero) is returned.  Therefore, this reading is quite inconvenient.
+You may want to use M<POSIX::Util::readfd_all()>
 
 =function writefd FD, BYTES, [LENGTH]
 Attempt to write the first LENGTH bytes of STRING to FD. Returned is
-the number of bytes actually written. The number of bytes written
-can be less than LENGTH without an error condition: you have to call
-write again with the remaining bytes. You have an error only when C<-1>
+the number of bytes actually written.  You have an error only when C<-1>
 is returned.
+
+The number of bytes written can be less than LENGTH without an error
+condition: you have to call write again with the remaining bytes.  This
+is quite inconvenient. You may want to use M<POSIX::Util::readfd_all()>
 
 =function dupfd FD
 Copy the file-descriptor FD into the lowest-numbered unused descriptor.
@@ -157,7 +184,7 @@ sub pipefd()      { goto &POSIX::pipe  }
 sub dupfd($)      { goto &POSIX::dup   }
 sub dup2fd($$)    { goto &POSIX::dup2  }
 sub statfd($)     { goto &POSIX::fstat }
-sub creatfd($$)   { openfd $_[0], O_WRONLY|O_CREAT|O_TRUNC, $_[1] }
+sub creatfd($$)   { openfd $_[0], O_WRONLY()|O_CREAT()|O_TRUNC(), $_[1] }
 
 =section Additional
 Zillions of Perl programs reimplement these functions. Let's simplify
@@ -167,73 +194,18 @@ code.
 Reports the location in the file. This call does not exist (not in POSIX,
 nor on other UNIXes), however is a logical counterpart of the C<tell()> on
 filenames.
+
+=function rewindfd FD
+Seek to the beginning of the file
 =cut
 
-sub tellfd($) {seekfd $_[0], 0, SEEK_CUR() }
-
-=function writefd_all FD, BYTES, [DO_CLOSE]
-Be sure that BYTES have the utf-8 flag off! We are working with bytes
-here, not strings.  Returns false if something went wrong (error in C<$!>)
-The FD will get closed when DO_CLOSE is provided and true.
-
-=example
-  my $out = creatfd $outfile, 0600;
-  writefd_all $out, $bytes, 1
-      or die "write to $outfile failed: $!\n";
-=cut
-
-sub writefd_all($$;$)
-{   my ($to, $data, $do_close) = @_;
-
-    while(my $l = length $data)
-    {   my $written = writefd $to, $data, $l;
-        return undef if $written==-1;
-        last if $l eq $written;    # normal case
-        substr($data, 0, $written) = '';
-    }
-
-    $do_close or return 1;
-    closefd $to != -1;
-}
-
-=function readfd_all FD, [SIZE, [DO_CLOSE]]
-Read all remaining bytes from the FD.  At most SIZE bytes are read,
-which defaults to SSIZE_MAX.
-
-The maximum SIZE would be SSIZE_MAX, but POSIX.xs pre-allocs a buffer
-with that size, so 2^64 is too large. We will read in convenient
-
-  my $in = openfd $filename, O_RDONLY;
-  my $d  = readfd_all $in, undef, 1;
-  defined $d or die "cannot read from $filename: $!\n";
-
-=cut
-
-sub readfd_all($;$$)
-{   my ($in, $size, $do_close) = @_;
-    defined $size or $size = SSIZE_MAX();
-    my ($data, $buf) = ('', '');
-
-    my $block = _PC_REC_INCR_XFER_SIZE($in) || BUFSIZ() || 4096;
-    while(my $bytes = readfd $in, $buf, ($block < $size ? $block : $size))
-    {   if($bytes==-1)    # read-error, will also show in $! of closefd
-        {   undef $data;
-            last;
-        }
-        last if $bytes==0;
-        $data .= $buf;
-        $size -= $bytes;
-    }
-
-    $do_close or return $data;
-    closefd($in) ? $data : undef;
-}
-
+sub tellfd($)     {seekfd $_[0], 0, SEEK_CUR() }
+sub rewindfd()    {seekfd $_[0], 0, SEEK_SET() }
 
 =chapter CONSTANTS
 
 The following constants are exported, shown here with the values
-discovered during installation of this module:
+discovered during installation of this module.
 
 =for comment
 #TABLE_FDIO_START
@@ -244,6 +216,15 @@ installation.
 =for comment
 #TABLE_FDIO_END
 
+You can limit the import to the C<SEEK_*> constants by explicitly
+using the C<:seek> import tag.  Use the C<:mode> for all C<O_*>
+constants, to be used with M<openfd()>.
 =cut
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    my $val = $fdio->{$name};
+    sub() {$val};
+}
 
 1;

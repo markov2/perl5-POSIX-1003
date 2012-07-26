@@ -12,7 +12,7 @@ our %EXPORT_TAGS =
   , rlimit    => \@rlimit
   , constants => \@constants
   , functions => \@functions
-  , table     => [ qw/%ulimit %rlimit/ ]
+  , tables    => [ qw/%ulimit %rlimit/ ]
   );
 
 my  ($ulimit, $rlimit);

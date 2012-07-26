@@ -12,7 +12,7 @@ my @functions = qw/property property_names/;
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
-  , table     => [ '%property' ]
+  , tables    => [ '%property' ]
   );
 
 my  $property;

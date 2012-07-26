@@ -28,7 +28,7 @@ our %EXPORT_TAGS =
   , status    => \@states
   , constants => \@constants
   , functions => \@functions
-  , table     => [ '%signals' ]
+  , tables    => [ '%signals' ]
   );
 
 our @IN_CORE = qw/kill/;

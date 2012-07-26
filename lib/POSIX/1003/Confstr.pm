@@ -12,7 +12,7 @@ my @functions = qw/confstr confstr_names/;
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
-  , table     => [ '%confstr' ]
+  , tables    => [ '%confstr' ]
   );
 
 my  $confstr;

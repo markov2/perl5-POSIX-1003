@@ -3,7 +3,7 @@ use warnings;
 
 package POSIX::1003;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 use Carp 'croak';
 
 { use XSLoader;
@@ -12,18 +12,23 @@ use Carp 'croak';
 }
 
 my $in_constant_table;
-BEGIN { $in_constant_table = qr/ ^ (?:
-   _SC_      # sysconf
- | _CS_      # confstr
- | _PC_      # pathconf
- | _POSIX    # property
- | UL_       # ulimit
- | RLIM      # rlimit
- | GET_|SET_ # rlimit aix
- | POLL      # poll
- | SIG[^_]   # signals
- ) /x;
- }
+BEGIN { $in_constant_table = qr/
+   ^_CS_    # confstr
+ | ^GET_    # rlimit
+ | ^O_      # fdio
+ | ^_PC_    # pathconf
+ | ^POLL    # poll
+ | ^_POSIX  # property
+ | ^RLIM    # rlimit
+ | ^_SC_    # sysconf
+ | ^S_      # stat
+ | ^SEEK_   # fdio
+ | ^SET_    # rlimit aix
+ | ^SIG[^_] # signals
+ | ^UL_     # ulimit
+ | _OK$     # access
+ /x
+};
 
 sub import(@)
 {   my $class = shift;
@@ -208,12 +213,6 @@ For getting and setting resource limits.
 
 =section Other modules
 =over 4
-=item M<Fcntl>
-Flags for modes, seek and fcntl are left to be defined by
-the M<Fcntl> module.
-=item M<Errno>
-All constants representing error numbers are left to be defined in
-the M<Errno> module.
 =item M<User::pwent>
 Provides an OO interface around C<getpw*()>
 =item M<User::grent>

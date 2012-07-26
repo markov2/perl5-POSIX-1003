@@ -5,33 +5,59 @@ package POSIX::1003::FS;
 use base 'POSIX::1003';
 
 # Blocks resp from unistd.h, stdio.h, limits.h
-my @constants = qw/
- F_OK W_OK X_OK R_OK
+my @constants;
+my @access = qw/access/;
+my @stat_checks = qw/S_ISDIR S_ISCHR S_ISBLK S_ISREG S_ISFIFO
+  S_ISLNK S_ISSOCK S_ISWHT/;
+my @stat  = (qw/stat lstat/, @stat_checks);
 
- FILENAME_MAX
-
- LINK_MAX MAX_CANON NAME_MAX PATH_MAX
- /;
+sub S_ISDIR($)  { ($_[0] & S_IFMT()) == S_IFDIR()}
+sub S_ISCHR($)  { ($_[0] & S_IFMT()) == S_IFCHR()}
+sub S_ISBLK($)  { ($_[0] & S_IFMT()) == S_IFBLK()}
+sub S_ISREG($)  { ($_[0] & S_IFMT()) == S_IFREG()}
+sub S_ISFIFO($) { ($_[0] & S_IFMT()) == S_IFIFO()}
+sub S_ISLNK($)  { ($_[0] & S_IFMT()) == S_IFLNK()}
+sub S_ISSOCK($) { ($_[0] & S_IFMT()) == S_IFSOCK()}
+sub S_ISWHT($)  { ($_[0] & S_IFMT()) == S_IFWHT()}  # FreeBSD
 
 # POSIX.xs defines L_ctermid L_cuserid L_tmpname: useless!
 
 # Blocks resp from sys/stat.h, unistd.h, utime.h, sys/types
 my @functions = qw/
- mkfifo mknod
-
+ mkfifo mknod stat lstat
  access lchown
-
  utime
-
  major minor makedev
  /;
 
-our @IN_CORE     = qw(utime mkdir);
+our @IN_CORE     = qw(utime mkdir stat lstat);
 
 our %EXPORT_TAGS =
  ( constants => \@constants
  , functions => \@functions
+ , access    => \@access
+ , stat      => \@stat
+ , tables    => [ qw/%access %stat/ ]
  );
+
+my ($fsys, %access, %stat);
+
+BEGIN {
+    $fsys = fsys_table;
+    push @constants, keys %$fsys;
+
+    # initialize the :access export tag
+    push @access, grep /_OK$/, keys %$fsys;
+    my %access_subset;
+    @access_subset{@access} = @{$fsys}{@access};
+    tie %access,  'POSIX::1003::ReadOnlyTable', \%access_subset;
+
+    # initialize the :fsys export tag
+    push @stat, grep /^S_/, keys %$fsys;
+    my %stat_subset;
+    @stat_subset{@stat} = @{$fsys}{@stat};
+    tie %stat, 'POSIX::1003::ReadOnlyTable', \%stat_subset;
+}
 
 =chapter NAME
 
@@ -39,11 +65,10 @@ POSIX::1003::FS - POSIX for the file-system
 
 =chapter SYNOPSIS
 
-  use POSIX::1003::FS qw(access R_OK);
-  if(access($fn, R_OK)) # $fn is readible?
+  use POSIX::1003::FS ':access';
+  if(access $fn, R_OK) # $fn is readible?
 
-  use POSIX::1003::FS qw(mkfifo);
-  use Fcntl ':mode';
+  use POSIX::1003::FS qw(mkfifo :stat);
   mkfifo($path, S_IRUSR|S_IWUSR) or die $!;
 
   # Absorbed from Unix::Mknod
@@ -124,6 +149,21 @@ Combine MAJOR and MINOR into a single DEVICE number.
  my $device = makedev $major, $minor;
  mknod $specialfile, $mode, $device;
 
+=function S_ISDIR MODE
+=example
+  use File::stat 'stat';
+  if(S_ISDIR(stat($fn)->mode)) ...
+
+  if(S_ISDIR((lstat $fn)[2])) ...
+
+=function S_ISCHR MODE
+=function S_ISBLK MODE
+=function S_ISREG MODE
+=function S_ISFIFO MODE
+=function S_ISLNK MODE
+=function S_ISSOCK MODE
+=function S_ISWHT MODE
+
 =chapter CONSTANTS
 
 The following constants are exported, shown here with the values
@@ -138,6 +178,15 @@ installation.
 =for comment
 #TABLE_FSYS_END
 
+All functions and constants which start with C<S_*> can be imported
+using the C<:stat> tag, including all related C<S_IF*> functions.
+The C<*_OK> tags can be imported with C<:access> =cut
 =cut
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    my $val = $fsys->{$name};
+    sub() {$val};
+}
 
 1;

@@ -3,7 +3,14 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include <unistd.h>
+
+#ifndef HAS_UNISTD_H
+#define HAS_UNISTD_H
+#endif
+
+#ifndef HAS_FCNTL_H
+#define HAS_FCNTL_H
+#endif
 
 #ifndef HAS_CONFSTR
 #define HAS_CONFSTR
@@ -36,6 +43,14 @@
  */
 
 #include "system.c"
+
+#ifdef HAS_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAS_FCNTL_H
+#include <fcntl.h>
+#endif
 
 #ifdef HAS_ULIMIT
 #include <ulimit.h>
@@ -97,6 +112,26 @@ fill_properties()
     pr_table = newHV();
 #include "properties.c"
     return pr_table;
+}
+
+HV * fdio_table = NULL;
+HV *
+fill_fdio()
+{   if(fdio_table) return fdio_table;
+
+    fdio_table = newHV();
+#include "fdio.c"
+    return fdio_table;
+}
+
+HV * fsys_table = NULL;
+HV *
+fill_fsys()
+{   if(fsys_table) return fsys_table;
+
+    fsys_table = newHV();
+#include "fsys.c"
+    return fsys_table;
 }
 
 HV * ul_table = NULL;
@@ -184,6 +219,26 @@ pathconf_table()
     PROTOTYPE:
     CODE:
 	RETVAL = fill_pathconf();
+    OUTPUT:
+	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::FdIO
+
+HV *
+fdio_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_fdio();
+    OUTPUT:
+	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::FS
+
+HV *
+fsys_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_fsys();
     OUTPUT:
 	RETVAL
 

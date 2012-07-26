@@ -27,6 +27,8 @@ lib/POSIX/SigAction.pm
 lib/POSIX/SigSet.pm
 lists.PL
 lists/confstr.txt
+lists/fdio.txt
+lists/fsys.txt
 lists/pathconf.txt
 lists/poll.txt
 lists/posix.txt
@@ -55,3 +57,4 @@ t/64ulimit.t
 t/65rlimit.t
 t/70lazy.t
 typemap
+xt/99pod.t

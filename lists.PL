@@ -11,7 +11,7 @@ use strict;
 sub dump_table($$$);
 sub from_listing($$);
 
-my (%sc, %cs, %posix, %pc, %ul, %rl, %poll, %sig);
+my (%sc, %cs, %posix, %pc, %ul, %rl, %poll, %sig, %fdio, %fsys);
 
 from_listing \%sc,    'sysconf.txt';
 from_listing \%cs,    'confstr.txt';
@@ -21,6 +21,8 @@ from_listing \%ul,    'ulimit.txt';
 from_listing \%rl,    'rlimit.txt';
 from_listing \%poll,  'poll.txt';
 from_listing \%sig,   'signals.txt';
+from_listing \%fdio,  'fdio.txt';
+from_listing \%fsys,  'fsys.txt';
 
 #use Data::Dumper;
 #warn Dumper \%sc, \%cs, \%posix, \%pc;
@@ -33,6 +35,8 @@ dump_table(\%ul,    'ul_table',   'ulimit.c'    );
 dump_table(\%rl,    'rl_table',   'rlimit.c'    );
 dump_table(\%poll,  'poll_table', 'poll.c'      );
 dump_table(\%sig,   'sig_table',  'signals.c'   );
+dump_table(\%fdio,  'fdio_table', 'fdio.c'      );
+dump_table(\%fsys,  'fsys_table', 'fsys.c'      );
 
 # System specific compilation helpers
 open SYSTEM, '>', 'system.c'

@@ -2,6 +2,20 @@
 ====== version history of POSIX::1003
 
 All changes are made by Mark Overmeer, unless stated otherwise.
+# ::FS manual needs cleanup, f.i. split lists of constants
+# Main component of exporter in POSIX::1003 useful enough to become
+# a separate module.
+
+0.13: Thu Jul 26 13:37:37 CEST 2012
+	- export tag ':table' became ':tables'
+	- dynamically detect constants for FdIO, adding SEEK_HOLE and
+	  SEEK_DATA when availale.
+	- dynamically detect S_* and *_OK constants for ::FS, removes
+	  the need for Fcntl
+	- moved ::FdIO::readfd_all and ::writefd_all into separate module
+	  POSIX::Util.
+	- add pod tester
+	- add ::FdIO::rewindfd
 
 0.12: Fri May 18 14:05:11 CEST 2012
 	- indent manual text about missing configuration.

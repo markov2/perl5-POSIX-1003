@@ -12,7 +12,7 @@ my @functions = qw/sysconf sysconf_names/;
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
-  , table     => [ '%sysconf' ]
+  , tables    => [ '%sysconf' ]
   );
 
 my  $sysconf;
