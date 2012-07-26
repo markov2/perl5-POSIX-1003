@@ -6,6 +6,8 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # Main component of exporter in POSIX::1003 useful enough to become
 # a separate module.
 
+0.14:
+
 0.13: Thu Jul 26 13:37:37 CEST 2012
 	- export tag ':table' became ':tables'
 	- dynamically detect constants for FdIO, adding SEEK_HOLE and
