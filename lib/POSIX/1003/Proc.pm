@@ -2,16 +2,11 @@ use warnings;
 use strict;
 
 package POSIX::1003::Proc;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 # Blocks resp. in stdlib.h, limits.h
-my @constants = qw/
- EXIT_FAILURE EXIT_SUCCESS
-
- CHILD_MAX
- /;
-
-our @IN_CORE   = qw/wait waitpid/;
+my @constants = qw/EXIT_FAILURE EXIT_SUCCESS CHILD_MAX /;
+our @IN_CORE  = qw/wait waitpid/;
 
 # Blocks resp. in stdlib.h, sys/wait.h, unistd.h
 my @functions = qw/

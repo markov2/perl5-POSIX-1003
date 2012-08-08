@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::Termios;
-use base 'POSIX::1003', 'POSIX::Termios';
+use base 'POSIX::1003::Module', 'POSIX::Termios';
 
 my @speed = qw/
  B0 B110 B1200 B134 B150 B1800 B19200 B200 B2400

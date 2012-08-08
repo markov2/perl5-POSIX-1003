@@ -27,7 +27,7 @@ foreach my $package (@show_versions)
     warn "$package $report\n";
 }
 
-require_ok('POSIX::1003');
+require_ok('POSIX::1003::Module');
 require_ok('POSIX::1003::Confstr');
 require_ok('POSIX::1003::FdIO');
 require_ok('POSIX::1003::FS');
@@ -45,5 +45,5 @@ require_ok('POSIX::1003::Time');
 require_ok('POSIX::SigAction');
 require_ok('POSIX::SigSet');
 
-require_ok('POSIX::3::Symbols');
-require_ok('POSIX::3');
+require_ok('POSIX::1003::Symbols');
+require_ok('POSIX::1003');

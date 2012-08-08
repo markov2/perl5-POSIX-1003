@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::Math;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 # Block respectively from float.h, math.h, stdlib.h, limits.h
 my @constants = qw/

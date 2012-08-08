@@ -6,7 +6,13 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # Main component of exporter in POSIX::1003 useful enough to become
 # a separate module.
 
-0.14:
+0.90: Wed Aug  8 10:10:46 CEST 2012
+	After advice from the Dutch Perl Mongers, the following major changes:
+	- renames:
+	  POSIX::1003		-> POSIX::1003::Module
+	  POSIX::3		-> POSIX::1003
+	  POSIX::3::Symbols	-> POSIX::1003::Symbols
+	- remove POSIX::1003::Symbols from MANIFEST
 
 0.13: Thu Jul 26 13:37:37 CEST 2012
 	- export tag ':table' became ':tables'

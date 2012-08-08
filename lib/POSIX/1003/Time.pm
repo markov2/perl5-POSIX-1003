@@ -2,12 +2,11 @@ use warnings;
 use strict;
 
 package POSIX::1003::Time;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 # Blocks resp. defined in time.h, limits.h
 my @constants = qw/
   CLK_TCK CLOCKS_PER_SEC NULL
-
   TZNAME_MAX
  /;
 

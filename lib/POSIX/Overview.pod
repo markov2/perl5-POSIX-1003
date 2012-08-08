@@ -63,7 +63,7 @@ that there is a perl core function which does similar things as the
 POSIX function.  On most platforms you can easily find the perlfunc
 descriptions via L<perldoc>.  For instance:
 
-  perldoc -f write
+  perldoc -f open
 
 Another important source for Operating System facts are global variables.
 Those are described in the L<perlvar> manual.  Those variables have

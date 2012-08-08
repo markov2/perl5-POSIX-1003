@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::FS;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 # Blocks resp from unistd.h, stdio.h, limits.h
 my @constants;

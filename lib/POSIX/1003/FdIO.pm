@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::FdIO;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 # Blocks resp from unistd.h, limits.h, and stdio.h
 my (@constants, @seek, @mode);
@@ -96,7 +96,7 @@ confusing name to avoid accidents.
  FD close   close     close    closefd
  FH fread   read
  FD read    sysread   read     readfd
- FH fwrite  write
+ FH fwrite  print
  FD write   syswrite  write    writefd
  FH         pipe,open                   # buffered unless $|=0
  FD pipe              pipe     pipefd

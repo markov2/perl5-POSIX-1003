@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::Locale;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 # Blocks from resp. limits.h and local.h
 my @constants = qw/

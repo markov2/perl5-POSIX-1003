@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::OS;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 # Blocks resp from limits.h
 my @constants = qw/

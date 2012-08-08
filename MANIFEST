@@ -12,6 +12,7 @@ lib/POSIX/1003/FdIO.pm
 lib/POSIX/1003/Limit.pm
 lib/POSIX/1003/Locale.pm
 lib/POSIX/1003/Math.pm
+lib/POSIX/1003/Module.pm
 lib/POSIX/1003/OS.pm
 lib/POSIX/1003/Pathconf.pm
 lib/POSIX/1003/Proc.pm
@@ -20,8 +21,6 @@ lib/POSIX/1003/Signals.pm
 lib/POSIX/1003/Sysconf.pm
 lib/POSIX/1003/Termios.pm
 lib/POSIX/1003/Time.pm
-lib/POSIX/3.pm
-lib/POSIX/3/Symbols.pm
 lib/POSIX/Overview.pod
 lib/POSIX/SigAction.pm
 lib/POSIX/SigSet.pm

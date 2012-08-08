@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::Events;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 my @constants;
 my @functions = qw/

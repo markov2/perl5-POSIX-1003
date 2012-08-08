@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile
   ( NAME        => 'POSIX::1003'
-  , VERSION_FROM => 'lib/POSIX/1003.pm'
+  , VERSION_FROM => 'lib/POSIX/1003/Module.pm'
   , PREREQ_PM   =>
      { Test::More     => 0.47
      , POSIX          => 0

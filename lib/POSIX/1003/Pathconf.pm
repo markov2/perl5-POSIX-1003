@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 package POSIX::1003::Pathconf;
-use base 'POSIX::1003';
+use base 'POSIX::1003::Module';
 
 use Carp 'croak';
 
