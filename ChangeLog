@@ -6,6 +6,20 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # Main component of exporter in POSIX::1003 useful enough to become
 # a separate module.
 
+0.91: Fri Jan  4 10:26:29 CET 2013
+	Fixes:
+	- t/62pathconf.t reduce number of constants expected from at least
+	  10 to at least 5 (Darwin has 9)
+	  reported by [James Keenan]
+	- Darwin use rlimit64 [James Keenan]
+	- Old Linux does not support ulimit(setfsize) [James Keenan]
+	- t/64pathconf.t now uses _PC_LINK_MAX, because _PC_PATH_MAX is
+	  undef on many platforms [H.Merijn Brand]
+	- t/63properties.t now uses _POSIX_VERSION, because _POSIX_NO_TRUNC
+	  is not defined on HP-UX [H.Merijn Brand]
+	- t/70lazy.t still used POSIX::3
+	- POSIX/3* files got accidentally packaged as well
+
 0.90: Wed Aug  8 10:10:46 CEST 2012
 	After advice from the Dutch Perl Mongers, the following major changes:
 	- renames:

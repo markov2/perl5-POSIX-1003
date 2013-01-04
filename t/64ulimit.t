@@ -36,6 +36,7 @@ my $smaller = 12349895;
 my $fsize5 = ulimit('UL_SETFSIZE', $smaller);
 
 SKIP: {
+    skip "setfsize not implemented",2 if $fsize5==0;
     skip "setfsize does not work, no permission?", 2 if $fsize5==$fsize;
     cmp_ok($fsize5, '==', $smaller, 'smaller fsize');
     cmp_ok(UL_GETFSIZE, '==', $smaller);

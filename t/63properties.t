@@ -5,17 +5,17 @@ use strict;
 
 use Test::More tests => 7;
 
-use POSIX::1003::Properties qw(property %property _POSIX_NO_TRUNC);
+use POSIX::1003::Properties qw(property %property _POSIX_VERSION);
 
-my $nt  = property('_POSIX_NO_TRUNC');
-ok(defined $nt, "_POSIX_NO_TRUNC via function = $nt");
+my $nt  = property('_POSIX_VERSION');
+ok(defined $nt, "_POSIX_VERSION via function = $nt");
 
-my $nt2 = $property{_POSIX_NO_TRUNC};
-ok(defined $nt2, "_POSIX_NO_TRUNC via HASH = $nt2");
+my $nt2 = $property{_POSIX_VERSION};
+ok(defined $nt2, "_POSIX_VERSION via HASH = $nt2");
 cmp_ok($nt, '==', $nt2);
 
-my $nt3 = _POSIX_NO_TRUNC;
-ok(defined $nt3, "_POSIX_NO_TRUNC directly = $nt3");
+my $nt3 = _POSIX_VERSION;
+ok(defined $nt3, "_POSIX_VERSION directly = $nt3");
 cmp_ok($nt, '==', $nt3);
 
 use POSIX::1003::Properties qw(property_names);

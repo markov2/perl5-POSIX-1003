@@ -32,12 +32,6 @@
 #define HAS_POLL
 #endif
 
-#ifdef HAS_RLIMIT
-#ifdef __USE_FILE_OFFSET64
-#define HAS_RLIMIT_64
-#endif
-#endif
-
 /*
  * work-arounds for various operating systems
  */

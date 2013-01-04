@@ -992,7 +992,7 @@ Comparible functionality for functions which never made it into POSIX:
   l64a                            MIME::Base64/decode
   memccpy      $b = $1 if $a =~ m/(.*{,n}?)(?:c|$)/
   signgam      math, probably not supported
-  strptime                        POSIX::strptime
+  strptime                        Time::Piece
   swab         ($b,$a) = ($a,$b)
   timezone                        ::Time/tzname
   toascii      $c & 0x7f
@@ -1140,5 +1140,3 @@ Streams are not supported.  So no:
 POSIX also defines zillions of constants. They are listed in
 (and available via) the C<POSIX::1003> modules. The C<_POSIX_>
 constants can be read via L<POSIX::1003::Properties>.
-
-=back

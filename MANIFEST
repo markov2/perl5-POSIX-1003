@@ -37,6 +37,8 @@ lists/sysconf.txt
 lists/ulimit.txt
 manuals.PL
 symbols.PL
+system/darwin.c
+system/hpux.c
 system/linux.c
 t/01use.t
 t/20math.t
