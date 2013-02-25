@@ -7,6 +7,8 @@
 use warnings;
 use strict;
 
+use lib qw(blib/arch blib/lib lib);
+
 my @pods   = map { ($_, "blib/$_") } @ARGV;
 
 my %tables =
@@ -26,8 +28,6 @@ my %tables =
 
 sub produce_table($$);
 sub format_rows($$);
-
-print "**** adding tables to manuals\n";
 
 our $pod;   # sorry :(
 

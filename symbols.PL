@@ -2,6 +2,8 @@
 #
 # Generate tables in manual pages and for the lazy importer POSIX::1003
 
+use lib qw(blib/arch blib/lib lib);
+
 use POSIX::1003   qw(posix_1003_modules posix_1003_names);
 use POSIX::1003::Symbols;
 

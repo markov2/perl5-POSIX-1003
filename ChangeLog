@@ -6,6 +6,13 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # Main component of exporter in POSIX::1003 useful enough to become
 # a separate module.
 
+0.92: Mon Feb 25 10:50:47 CET 2013
+	Improvements:
+	- support strsignal()
+	  rt.cpan.org#72602 [Roger Leigh]
+	- support for NetWare [NormW]
+	- add libs to PL scripts to simplify debugging [NormW]
+
 0.91: Fri Jan  4 10:26:29 CET 2013
 	Fixes:
 	- t/62pathconf.t reduce number of constants expected from at least

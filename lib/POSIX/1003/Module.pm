@@ -3,10 +3,11 @@ use warnings;
 
 package POSIX::1003::Module;
 
-our $VERSION = '0.91';
+our $VERSION = '0.92';
 use Carp 'croak';
 
 { use XSLoader;
+  no warnings 'redefine';
   XSLoader::load 'POSIX';
   XSLoader::load 'POSIX::1003', $VERSION;
 }
@@ -38,6 +39,8 @@ POSIX::1003::Module - Base of POSIX::1003 components
    # and see POSIX::Overview and POSIX::1003
 
 =chapter DESCRIPTION
+The POSIX functions and constants are provided via extensions of this
+module.  This module itself only facilitates those implementations.
 
 =chapter METHODS
 

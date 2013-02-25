@@ -6,18 +6,18 @@ use base 'POSIX::1003::Module';
 
 my @signals;
 my @states  = qw/
- SIG_BLOCK SIG_DFL SIG_ERR
- SIG_IGN SIG_SETMASK SIG_UNBLOCK
+    SIG_BLOCK SIG_DFL SIG_ERR
+    SIG_IGN SIG_SETMASK SIG_UNBLOCK
  /;
 
 my @actions = qw/
- SA_NOCLDSTOP SA_NOCLDWAIT SA_NODEFER SA_ONSTACK SA_RESETHAND SA_RESTART
- SA_SIGINFO
+    SA_NOCLDSTOP SA_NOCLDWAIT SA_NODEFER SA_ONSTACK SA_RESETHAND SA_RESTART
+    SA_SIGINFO
  /;
 
 my @functions = qw/
- raise sigaction signal sigpending sigprocmask sigsuspend signal
- signal_names
+    raise sigaction signal sigpending sigprocmask sigsuspend signal
+    signal_names strsignal
  /;
 
 my @constants = (@signals, @states, @actions);
@@ -150,6 +150,10 @@ See L<perlvar/%SIG>.
 
    signal(SIGINT, \&handler);
    $SIG{SIGINT} = \&handler;  # same
+
+=function strsignal SIGNAL
+Returns a string reprentation of the SIGNAL.  When the SIGNAL is unknown,
+a standard string is returned (never undef)
 =cut
 
 sub sigaction($$;$)   {goto &POSIX::sigaction }
@@ -157,6 +161,7 @@ sub sigpending($)     {goto &POSIX::sigpending }
 sub sigprocmask($$;$) {goto &POSIX::sigprocmask }
 sub sigsuspend($)     {goto &POSIX::sigsuspend }
 sub signal($$)        { $SIG{$_[0]} = $_[1] }
+sub strsignal($)      { _strsignal($_[0]) || "Unknown signal $_[0]" }
 
 #--------------------------
 =section Additional

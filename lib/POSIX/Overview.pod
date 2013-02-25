@@ -849,7 +849,7 @@ L<POSIX::SigSet>. Take a look at those manuals.
   sigprocmask                     ::Signals
   sigsuspend                      ::Signals
   sigwait      not supported
-  strsignal    not supported
+  strsignal                       ::Signals
 
 B<Warning>, parameter order in POSIX.pm
 

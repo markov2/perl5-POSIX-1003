@@ -1,6 +1,8 @@
 use warnings;
 use strict;
 
+no warnings 'redefine', 'prototype';  # during release of distribution
+
 =package POSIX::SigAction
 
 =chapter NAME

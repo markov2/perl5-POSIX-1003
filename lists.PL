@@ -8,8 +8,13 @@ use File::Spec;
 use warnings;
 use strict;
 
+use lib qw(blib/arch blib/lib lib);
+
 sub dump_table($$$);
 sub from_listing($$);
+
+# Maybe someone uses cross-compilation
+my $system = lc ($ENV{OSNAME} || $^O);
 
 my (%sc, %cs, %posix, %pc, %ul, %rl, %poll, %sig, %fdio, %fsys);
 
@@ -42,7 +47,6 @@ dump_table(\%fsys,  'fsys_table', 'fsys.c'      );
 open SYSTEM, '>', 'system.c'
     or die "cannot write to system.c: $!";
 
-my $system = $^O;
 my $incl   = File::Spec->catfile('system', "$system.c");
 if(-f $incl)
 {   print SYSTEM qq{#include "system/$system.c"\n};

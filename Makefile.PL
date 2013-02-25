@@ -22,10 +22,13 @@ WriteMakefile
 sub MY::postamble { <<'__POSTAMBLE' }
 
 config::
+	@ $(ECHO) "*** autodetect available symbols"
 	$(FULLPERLRUNINST) ./lists.PL
 
 linkext::
+	@ $(ECHO) "*** collect all defined symbols"
 	$(FULLPERLRUNINST) ./symbols.PL
+	@ $(ECHO) "*** adding values examples to manuals"
 	$(FULLPERLRUNINST) ./manuals.PL $(MAN3PODS)
 
 # for DIST

@@ -17,6 +17,7 @@ our %EXPORT_TAGS =
 
 my  $confstr;
 our %confstr;
+sub confstr($);
 
 BEGIN {
     # initialize the :constants export tag
@@ -24,8 +25,6 @@ BEGIN {
     push @constants, keys %$confstr;
     tie %confstr, 'POSIX::1003::ReadOnlyTable', $confstr;
 }
-
-sub confstr($);
 
 =chapter NAME
 

@@ -32,6 +32,10 @@
 #define HAS_POLL
 #endif
 
+#ifndef HAS_STRSIGNAL
+#define HAS_STRSIGNAL
+#endif
+
 /*
  * work-arounds for various operating systems
  */
@@ -178,6 +182,22 @@ signals_table()
     OUTPUT:
 	RETVAL
 
+SV *
+_strsignal(signr)
+	int		signr;
+    PROTOTYPE: $
+    PREINIT:
+	char 		* buf;
+    CODE:
+#ifdef HAS_STRSIGNAL
+	buf = strsignal(signr);
+	RETVAL = buf==NULL ? &PL_sv_undef : newSVpv(buf, 0);
+#else
+	RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
+
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Confstr
 
 HV *
@@ -204,7 +224,6 @@ _confstr(name)
 #endif
     OUTPUT:
 	RETVAL
-
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Pathconf
 
