@@ -151,9 +151,6 @@ See L<perlvar/%SIG>.
    signal(SIGINT, \&handler);
    $SIG{SIGINT} = \&handler;  # same
 
-=function strsignal SIGNAL
-Returns a string reprentation of the SIGNAL.  When the SIGNAL is unknown,
-a standard string is returned (never undef)
 =cut
 
 sub sigaction($$;$)   {goto &POSIX::sigaction }
@@ -161,6 +158,11 @@ sub sigpending($)     {goto &POSIX::sigpending }
 sub sigprocmask($$;$) {goto &POSIX::sigprocmask }
 sub sigsuspend($)     {goto &POSIX::sigsuspend }
 sub signal($$)        { $SIG{$_[0]} = $_[1] }
+
+=function strsignal SIGNAL
+Returns a string reprentation of the SIGNAL.  When the SIGNAL is unknown,
+a standard string is returned (never undef)
+=cut
 sub strsignal($)      { _strsignal($_[0]) || "Unknown signal $_[0]" }
 
 #--------------------------

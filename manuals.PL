@@ -63,8 +63,13 @@ foreach $pod (@pods)
     close NEW or die "write error in $podtmp: $!\n";
     close POD or die "read error in $pod: $!\n";
 
-    if($changes) { rename $podtmp, $pod or die "rename $podtmp $pod: $!" }
-    else         { unlink $podtmp       or die "unlink $podtmp: $!"  }
+    if($changes)
+    {   unlink $pod;  # Windows' rename() does not work when $dest exists
+        rename $podtmp, $pod or die "rename $podtmp $pod: $!";
+    }
+    else
+    {   unlink $podtmp       or die "unlink $podtmp: $!";
+    }
 }
 
 sub sorted(@) { sort {lc($a) cmp lc($b)} @_ }

@@ -6,6 +6,16 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # Main component of exporter in POSIX::1003 useful enough to become
 # a separate module.
 
+0.93: Tue Apr 23 09:00:47 CEST 2013
+	Fixes:
+	- Netware has no strsignal() [NormW]
+	- Windows does not unlink existing $dest at rename(), manual.PL [NormW]
+	- added POSIX::1003::Symbols back to MANIFEST
+
+	Improvements:
+	- Export rename() via ::FS, to document non-compliant behavior on
+	  Windows.
+
 0.92: Mon Feb 25 10:50:47 CET 2013
 	Improvements:
 	- support strsignal()

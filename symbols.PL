@@ -19,7 +19,7 @@ open SYMBOLS, '>', $symbols
 my $now = localtime;
 
 print SYMBOLS <<_HEAD;
-# Warning: automaticall generated
+# Warning: generated during module installation
 #  by $0
 #  at $now
 # do not edit by hand!

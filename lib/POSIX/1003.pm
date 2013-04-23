@@ -328,10 +328,6 @@ For getting and setting resource limits.
 Provides an OO interface around C<getpw*()>
 =item M<User::grent>
 Provides an OO interface around C<getgr*()>
-=item M<Unix::SavedIDs>
-provides access to all C<(get|set)e?[ug]id> functions. Of
-course, you may use the special variables C<< $( $) $< $> >> as well,
-but that gives unpredictable results.
 =back
 
 =section Rationale

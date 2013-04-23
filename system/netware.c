@@ -10,5 +10,9 @@
 #undef HAS_ULIMIT
 #endif
 
+#ifdef HAS_STRSIGNAL
+#undef HAS_STRSIGNAL
+#endif
+
 /* defines makedev(),major(),minor() */
 #include <sys/sysmacros.h>

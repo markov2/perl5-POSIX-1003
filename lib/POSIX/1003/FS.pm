@@ -24,13 +24,13 @@ sub S_ISWHT($)  { ($_[0] & S_IFMT()) == S_IFWHT()}  # FreeBSD
 
 # Blocks resp from sys/stat.h, unistd.h, utime.h, sys/types
 my @functions = qw/
- mkfifo mknod stat lstat
+ mkfifo mknod stat lstat rename
  access lchown
  utime
  major minor makedev
  /;
 
-our @IN_CORE     = qw(utime mkdir stat lstat);
+our @IN_CORE     = qw(utime mkdir stat lstat rename);
 
 our %EXPORT_TAGS =
  ( constants => \@constants
@@ -134,6 +134,11 @@ usage information (combined in a I<minor> number).
 
 =function mkdir [FILENAME [MASK]]
 Simple C<CORE::mkdir()>
+
+=function rename OLDNAME, NEWNAME
+[0.93] This will use C<CORE::rename()>.  Be warned that Window's C<rename>
+implementation will fail when NEWNAME exists, which is not POSIX compliant.
+On many platforms, C<rename> between different partitions is not allowed.
 
 =section Additional
 
