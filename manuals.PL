@@ -13,6 +13,7 @@ my @pods   = map { ($_, "blib/$_") } @ARGV;
 
 my %tables =
   ( confstr  => [ 'POSIX::1003::Confstr',  \&table_confstr  ]
+  , errno    => [ 'POSIX::1003::Errno',    \&table_errno    ]
   , sysconf  => [ 'POSIX::1003::Sysconf',  \&table_sysconf  ]
   , pathconf => [ 'POSIX::1003::Pathconf', \&table_pathconf ]
   , ulimit   => [ 'POSIX::1003::Limit',    \&table_ulimit   ]
@@ -31,7 +32,7 @@ sub format_rows($$);
 
 our $pod;   # sorry :(
 
-foreach $pod (@pods)
+foreach $pod (sort @pods)
 {   $pod =~ m/\.pod$/
         or next;
 
@@ -178,11 +179,24 @@ sub table_props($)
     format_rows property => \@rows;
 }
 
+sub table_errno($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::Errno::EXPORT_TAGS{constants};
+    my @rows;
+    foreach my $err (sorted @$constants)
+    {   my $val = $pkg->exampleValue($err);
+        my $str = strerror($val // 'undef');
+        push @rows, [$err, $val, $str];
+    }
+    format_rows errno => \@rows;
+}
+
 sub format_rows($$)
 {   my ($manual, $rows) = @_;
 
     my $longest_name = 0;
     my $longest_val  = 5;  # at least 'undef'
+    my $longest_more = 0;
 
     my $nr_rows      = @$rows;
     my $nr_undef     = 0;
@@ -190,15 +204,22 @@ sub format_rows($$)
     for (@$rows)
     {   $longest_name = length $_->[0] if $longest_name < length $_->[0];
         $longest_val  = length $_->[1] if $longest_val  < length $_->[1];
+        $longest_more = length $_->[2]
+                            if @$_ > 2 && $longest_more < length $_->[2];
     }
 
     my $longest_row   = 0;
     my @lines;
     foreach (@$rows)
-    {   my ($name, $value) = @$_;
-        $name .= ' ' x ($longest_name - length $name);
-        push @lines, "$name  $value";
-        $longest_row  = length $lines[-1] if $longest_row < length $lines[-1];
+    {   my ($name, $value, $more) = @$_;
+        $name   .= ' ' x ($longest_name - length $name);
+        my $line = "$name  $value";
+        if($longest_more)
+        {   $line .= ' ' x ($longest_val - length $value);
+            $line .= $more;
+        }
+        push @lines, $line;
+        $longest_row  = length $line if $longest_row < length $line;
         $nr_undef++ if $value eq 'undef';
     }
 

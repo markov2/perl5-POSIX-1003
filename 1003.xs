@@ -36,6 +36,36 @@
 #define HAS_STRSIGNAL
 #endif
 
+#ifndef HAS_STRERROR
+#define HAS_STRERROR
+#endif
+
+#ifndef HAS_SETUID
+#define HAS_SETUID
+#endif
+
+#ifndef HAS_SETEUID
+#define HAS_SETEUID
+#endif
+
+#ifndef HAS_SETREUID
+#define HAS_SETREUID
+#endif
+
+#ifndef HAS_SETRESUID
+#define HAS_SETRESUID
+#endif
+
+#ifndef HAS_GETGROUPS
+#define HAS_GETGROUPS
+#endif
+
+#ifndef CACHE_UID
+#if PERL_VERSION < 15 || PERL_VERSION == 15 && PERL_SUBVERSION < 8
+#define CACHE_UID
+#endif
+#endif
+
 /*
  * work-arounds for various operating systems
  */
@@ -162,6 +192,16 @@ fill_poll()
     return poll_table;
 }
 
+HV * errno_table = NULL;
+HV *
+fill_errno()
+{   if(errno_table) return errno_table;
+
+    errno_table = newHV();
+#include "errno.c"
+    return errno_table;
+}
+
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Sysconf
 
 HV *
@@ -190,9 +230,10 @@ _strsignal(signr)
 	char 		* buf;
     CODE:
 #ifdef HAS_STRSIGNAL
-	buf = strsignal(signr);
+	buf    = strsignal(signr);
 	RETVAL = buf==NULL ? &PL_sv_undef : newSVpv(buf, 0);
 #else
+	errno  = ENOSYS;
 	RETVAL = &PL_sv_undef;
 #endif
     OUTPUT:
@@ -217,9 +258,10 @@ _confstr(name)
 	STRLEN		len;
     CODE:
 #ifdef HAS_CONFSTR
-	len = confstr(name, buf, sizeof(buf));
+	len    = confstr(name, buf, sizeof(buf));
 	RETVAL = len==0 ? &PL_sv_undef : newSVpv(buf, len-1);
 #else
+	errno  = ENOSYS;
 	RETVAL = &PL_sv_undef;
 #endif
     OUTPUT:
@@ -295,6 +337,7 @@ _ulimit(cmd, value)
 	result = ulimit(cmd, value);
 	RETVAL = result==-1 ? &PL_sv_undef : newSViv(result);
 #else
+	errno  = ENOSYS;
 	RETVAL = &PL_sv_undef;
 #endif
     OUTPUT:
@@ -421,6 +464,7 @@ mknod(filename, mode, dev)
 #ifdef HAS_MKNOD
 	RETVAL = mknod(filename, mode, dev);
 #else
+	errno  = ENOSYS;
 	RETVAL = &PL_sv_undef;
 #endif
     OUTPUT:
@@ -469,17 +513,336 @@ _poll(handles, timeout)
         }
         else
 	{   ret = newHV();
-            {   if(rc > 0)
-                {   for(j=0 ; j < nfd ; j++)
-                    {   if(fds[j].revents)
-	                {   sprintf((char *)key_str, "%d", fds[j].fd);
-                            (void)hv_store(ret, key_str, strlen(key_str), newSVuv(fds[j].revents), 0);
-                        }
+            if(rc > 0)
+            {   for(j=0; j < nfd; j++)
+                {   if(fds[j].revents)
+	            {   sprintf((char *)key_str, "%d", fds[j].fd);
+                        (void)hv_store(ret, key_str, strlen(key_str), newSVuv(fds[j].revents), 0);
                     }
                 }
 	    }
 	    XPUSHs((SV*)ret);
 	}
 	XSRETURN(1);
+#else
+	errno = ENOSYS;
+        XPUSHs(&PL_sv_undef);
 #endif
 
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::User
+
+void
+setuid(uid)
+        uid_t           uid
+    PROTOTYPE: $
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETUID
+	result  = setuid(uid);
+#ifdef CACHE_UID
+	PL_uid  = getuid();
+	PL_euid = geteuid();
+#endif
+#else
+	errno   = ENOSYS;
+	result  = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+uid_t
+getuid()
+    PROTOTYPE:
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETUID
+	result = getuid();
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+int
+setgid(gid)
+        gid_t           gid
+    PROTOTYPE: $
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETUID
+	result = setgid(gid);
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+gid_t
+getgid()
+    PROTOTYPE:
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETUID
+	result = getgid();
+#ifdef CACHE_UID
+	PL_gid  = getgid();
+	PL_egid = getegid();
+#endif
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+
+int
+seteuid(euid)
+        uid_t           euid
+    PROTOTYPE: $
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETEUID
+	result  = seteuid(euid);
+#ifdef CACHE_UID
+	PL_euid = geteuid();
+#endif
+#else
+	errno   = ENOSYS;
+	result  = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+uid_t
+geteuid()
+    PROTOTYPE:
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETEUID
+	result  = geteuid();
+#ifdef CACHE_UID
+	PL_egid = getegid();
+#endif
+#else
+	errno   = ENOSYS;
+	result  = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+
+int
+setegid(egid)
+        gid_t           egid
+    PROTOTYPE: $
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETEUID
+	result = setegid(egid);
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+gid_t
+getegid()
+    PROTOTYPE:
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETEUID
+	result = getegid();
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+
+int
+setreuid(ruid, euid)
+        uid_t           ruid
+        uid_t           euid
+    PROTOTYPE: $$
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETREUID
+	result  = setreuid(ruid, euid);
+#ifdef CACHE_UID
+	PL_uid  = getuid();
+	PL_euid = geteuid();
+#endif
+#else
+	errno   = ENOSYS;
+	result  = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+int
+setregid(rgid, egid)
+        gid_t           rgid
+        gid_t           egid
+    PROTOTYPE: $$
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETREUID
+	result = setregid(rgid, egid);
+#ifdef CACHE_UID
+	PL_gid  = getgid();
+	PL_egid = getegid();
+#endif
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+
+int
+setresuid(ruid, euid, suid)
+        uid_t           ruid
+        uid_t           euid
+        uid_t           suid
+    PROTOTYPE: $$$
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETRESUID
+	result  = setresuid(ruid, euid, suid);
+#ifdef CACHE_UID
+	PL_uid  = getuid();
+	PL_euid = geteuid();
+#endif
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+void
+getresuid()
+    PROTOTYPE:
+    INIT:
+        uid_t           ruid;
+        uid_t           euid;
+        uid_t           suid;
+	int		result;
+    PPCODE:
+#ifdef HAS_SETRESUID
+	result = getresuid(&ruid, &euid, &suid);
+	if(result==0) {
+	    XPUSHs(sv_2mortal(newSVuv(ruid)));
+	    XPUSHs(sv_2mortal(newSVuv(euid)));
+	    XPUSHs(sv_2mortal(newSVuv(suid)));
+	}
+#else
+	errno  = ENOSYS;
+#endif
+
+
+int
+setresgid(rgid, egid, sgid)
+        gid_t           rgid
+        gid_t           egid
+        gid_t           sgid
+    PROTOTYPE: $$$
+    INIT:
+	int		result;
+    PPCODE:
+#ifdef HAS_SETRESUID
+	result = setresgid(rgid, egid, sgid);
+#ifdef CACHE_UID
+	PL_gid  = getgid();
+	PL_egid = getegid();
+#endif
+#else
+	errno  = ENOSYS;
+	result = -1;
+#endif
+	XPUSHs(result==-1 ? &PL_sv_undef : sv_2mortal(newSViv(result)));
+
+void
+getresgid()
+    PROTOTYPE:
+    INIT:
+        gid_t           rgid;
+        gid_t           egid;
+        gid_t           sgid;
+	int		result;
+   PPCODE:
+#ifdef HAS_SETRESUID
+	result = getresgid(&rgid, &egid, &sgid);
+	if(result==0) {
+	    XPUSHs(sv_2mortal(newSVuv(rgid)));
+	    XPUSHs(sv_2mortal(newSVuv(egid)));
+	    XPUSHs(sv_2mortal(newSVuv(sgid)));
+	}
+#else
+	errno  = ENOSYS;
+#endif
+
+void
+getgroups()
+    PROTOTYPE:
+    INIT:
+	gid_t	grouplist[NGROUPS_MAX+1];
+	int	nr_groups;
+    PPCODE:
+#ifdef HAS_GETGROUPS
+	nr_groups = getgroups(NGROUPS_MAX+1, grouplist);
+	if(nr_groups >= 0) {
+	    int nr;
+	    for(nr = 0; nr < nr_groups; nr++)
+	        XPUSHs(sv_2mortal(newSVuv(grouplist[nr])));
+	}
+#else
+	errno  = ENOSYS;
+#endif
+
+void
+setgroups(...)
+    PROTOTYPE: @
+    INIT:
+	int   index;
+	gid_t groups[NGROUPS_MAX];
+	int   result;
+    CODE:
+        for(index = 0; index < items && index < NGROUPS_MAX; index++)
+	{   groups[index] = (gid_t)SvUV(ST(index));
+	}
+	result = setgroups(index, groups);
+	XPUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
+
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Errno
+
+HV *
+errno_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_errno();
+    OUTPUT:
+	RETVAL
+
+SV *
+_strerror(int errnr)
+    PROTOTYPE: $
+    INIT:
+	char * buf;
+    CODE:
+#ifdef HAS_STRERROR
+        buf    = strerror(errnr);
+        RETVAL = buf==NULL ? &PL_sv_undef : newSVpv(buf, 0);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL

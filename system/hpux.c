@@ -1,1 +1,7 @@
+#define _INCLUDE_XOPEN_SOURCE_EXTENDED
+
+#ifdef _LARGEFILE64_SOURCE
 #define HAS_RLIMIT_64
+#endif
+
+#undef HAS_STRSIGNAL

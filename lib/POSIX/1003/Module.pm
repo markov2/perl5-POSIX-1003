@@ -3,7 +3,7 @@ use warnings;
 
 package POSIX::1003::Module;
 
-our $VERSION = '0.93';
+our $VERSION = '0.94';
 use Carp 'croak';
 
 { use XSLoader;
@@ -15,6 +15,8 @@ use Carp 'croak';
 my $in_constant_table;
 BEGIN { $in_constant_table = qr/
    ^_CS_    # confstr
+ | ^E(?!CHONL|XIT_) # errno   ECHONL in Termios, EXIT_ in Proc
+ | ^WSAE    # errno (windows sockets)
  | ^GET_    # rlimit
  | ^O_      # fdio
  | ^_PC_    # pathconf
@@ -133,12 +135,12 @@ sub import(@)
         elsif($f =~ s/^%//)
         {   $export = \%{"${class}::$f"};
         }
-        elsif($in_core && grep {$f eq $_} @$in_core)
+        elsif($in_core && grep $f eq $_, @$in_core)
         {   # function is in core, simply ignore the export
             next;
         }
         else
-        {   croak "unable to load $f";
+        {   croak "unable to load $f from $class";
         }
 
         no warnings 'once';

@@ -2,9 +2,20 @@
 ====== version history of POSIX::1003
 
 All changes are made by Mark Overmeer, unless stated otherwise.
-# ::FS manual needs cleanup, f.i. split lists of constants
-# Main component of exporter in POSIX::1003 useful enough to become
-# a separate module.
+# . ::FS manual needs cleanup, f.i. split lists of constants
+# . the main component of exporter in POSIX::1003 useful enough to become
+#   a separate module.
+
+0.94_1: Thu May 16 14:14:33 CEST 2013
+	Fixes:
+	- more carefully return ENOSYS when a function is not supported
+	  by a platform.
+	- HP-UX compilation improvements [H.Merijn Brand]
+
+	Improvements:
+	- added accidentally missing t/27signals.t
+	- added POSIX::1003::User and t/28user.t
+	- added POSIX::1003::Errno and t/29errno.t
 
 0.93: Tue Apr 23 09:00:47 CEST 2013
 	Fixes:

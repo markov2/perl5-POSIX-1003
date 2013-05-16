@@ -29,9 +29,15 @@ like($@, qr/^pass the constant name as string/);
 ok(!defined $soft4);
 ok(!defined $hard4);
 
+SKIP: {
+  # HP-UX
+  defined RLIM_SAVED_MAX
+      or skip 'RLIM_* not supported', 3;
+
 ok(defined RLIM_SAVED_MAX, sprintf "RLIM_SAVED_MAX=0x%x",RLIM_SAVED_MAX);
 ok(defined RLIM_SAVED_CUR, sprintf "RLIM_SAVED_CUR=0x%x",RLIM_SAVED_CUR);
 ok(defined RLIM_INFINITY,  sprintf "RLIM_INFINITY =0x%x",RLIM_INFINITY);
+}
 
 use POSIX::1003::Limit qw(setrlimit);
 

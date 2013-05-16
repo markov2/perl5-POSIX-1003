@@ -907,16 +907,16 @@ B<Warning,> POSIX.pm accepts only one filename
 =head2 User and Group Interfaces
 
   cuserid                         ::Proc
-  getegid     perlvar/$EGID $)
-  geteuid     perlvar/$EUID $>
-  getgid      perlvar/$GID  $(  (split ' ', $GID)[0]
-  getgroups   perlvar/$GID  $(  split ' ', $GID
-  getlogin    perlfunc
-  getuid      perlvar/$UID  $<              # warning
-  setegid     perlvar/$EGID $)              # warning
-  seteuid     perlvar/$EUID $>              # warning
-  setgid      perlvar/$GID  $(    POSIX.pm  # warning
-  setuid      perlvar/$UID  $<    POSIX.pm  # warning
+  getegid     perlvar/$EGID $)    ::User
+  geteuid     perlvar/$EUID $>    ::User
+  getgid      perlvar/$GID  $(    ::User
+  getgroups   perlvar/$GID  $(    ::User
+  getlogin    perlfunc            ::User
+  getuid      perlvar/$UID  $<    ::User    # warning
+  setegid     perlvar/$EGID $)    ::User    # warning
+  seteuid     perlvar/$EUID $>    ::User    # warning
+  setgid      perlvar/$GID  $(    ::User    # warning
+  setuid      perlvar/$UID  $<    ::User    # warning
 
 B<Warning:> The special variables for user- and group-ids try to be smart:
 they are implemented using C<getreuid> and/or friends.  POSIX.pm provides
@@ -1123,9 +1123,16 @@ M<Log::Dispatch>, or M<Log::Report>.
   pututxline                      User::Utmp
   setgrent     perlfunc           User::grent
   setpwent     perlfunc           User::pwent
-  setregid     perlvar/$GID and $EGID
-  setreuid     perlvar/$UID and $EUID
+  setregid     perlvar/$GID,$EGID ::User
+  setreuid     perlvar/$UID,$EUID ::User
   setutxent                       User::Utmp
+
+Non-standard, but commonly available.  See also M<POSIX::User>.
+
+  getresgid                       ::User
+  getresuid                       ::User
+  setresgid                       ::User
+  setresuid                       ::User
 
 =head2 XSI STREAMS Interfaces
 

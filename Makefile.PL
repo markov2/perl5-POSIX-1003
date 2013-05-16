@@ -7,7 +7,6 @@ WriteMakefile
      { Test::More     => 0.47
      , POSIX          => 0
      , XSLoader       => 0
-     , Errno          => 0
      , File::Spec     => 0
      }
   , AUTHOR      => 'Mark Overmeer'

@@ -78,6 +78,7 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
 
   :all                  (all symbols, default)
   :cs      :confstr     POSIX::1003::Confstr
+  :errno   :errors      POSIX::1003::Errno
   :ev      :events      POSIX::1003::Events
   :fd      :fdio        POSIX::1003::FdIO
   :fs      :filesystem  POSIX::1003::FS
@@ -96,6 +97,7 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
   :signals :sigset      POSIX::SigSet
   :termio  :termios     POSIX::1003::Termios
   :time                 POSIX::1003::Time
+  :user                 POSIX::1003::User
 
 =chapter FUNCTIONS
 
@@ -104,6 +106,8 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
 my %tags =
   ( confstr =>     'POSIX::1003::Confstr'
   , cs =>          'POSIX::1003::Confstr'
+  , errno =>       'POSIX::1003::Errno'
+  , errors =>      'POSIX::1003::Errno'
   , events =>      'POSIX::1003::Events'
   , ev =>          'POSIX::1003::Events'
   , fdio =>        'POSIX::1003::FdIO'
@@ -132,6 +136,7 @@ my %tags =
   , termio =>      'POSIX::1003::Termios'
   , termios =>     'POSIX::1003::Termios'
   , time =>        'POSIX::1003::Time'
+  , user =>        'POSIX::1003::User'
   );
 
 my %mod_tag;
@@ -293,6 +298,8 @@ sub show_posix_names(@)
 =over 4
 =item M<POSIX::1003::Confstr>
 Provide access to the C<_CS_*> constants.
+=item M<POSIX::1003::Errno>
+Provide access to the C<E*> constants, for error numbers, and strerror().
 =item M<POSIX::1003::FdIO>
 Provides unbuffered IO handling; based on file-descriptors.
 =item M<POSIX::1003::FS>
@@ -318,6 +325,8 @@ Provide access to the C<sysconf> and its zillion C<_SC_*> constants.
 Terminal IO
 =item M<POSIX::1003::Time>
 Time-stamp processing
+=item M<POSIX::1003::User>
+Change active user and group.
 =item M<POSIX::1003::Limit>
 For getting and setting resource limits.
 =back
@@ -387,7 +396,7 @@ your program.  This module uses prototypes on all exported functions,
 like CORE does.
 
 =item *
-hundreds of C<_SC_*>, C<_CS_*>, C<_PC_*>, C<_POSIX_*>, C<UL_*>,
+hundreds of C<E*>, C<_SC_*>, C<_CS_*>, C<_PC_*>, C<_POSIX_*>, C<UL_*>,
 and C<RLIMIT_*> constants were collected from various sources, not just
 a minimal subset. You get access to all defined on your system.
 
