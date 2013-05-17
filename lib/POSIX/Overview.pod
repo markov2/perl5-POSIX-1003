@@ -906,6 +906,9 @@ B<Warning,> POSIX.pm accepts only one filename
 
 =head2 User and Group Interfaces
 
+Expect portability issues on this subject.  Better B<not use any of
+these>, but use the abstract L<POSIX::User> instead!
+
   cuserid                         ::Proc
   getegid     perlvar/$EGID $)    ::User
   geteuid     perlvar/$EUID $>    ::User
@@ -922,8 +925,6 @@ B<Warning:> The special variables for user- and group-ids try to be smart:
 they are implemented using C<getreuid> and/or friends.  POSIX.pm provides
 C<setuid> and C<setgid> which simply call the special variables. So:
 both do not offer access to the system functions with that name.
-Expect portability issues on this subject.  Better B<not use any of
-these>, but L<UNIX::SavedIDs> instead!
 
 =head2 Wide Character Device Input and Output Interfaces
 

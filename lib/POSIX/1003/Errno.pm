@@ -70,7 +70,7 @@ sub exampleValue($)
 
 =section Standard POSIX
 
-=function sterror ERRNO
+=function strerror ERRNO
 Returns the string representations of the ERRNO, as provided by
 the operating system.
 =cut
@@ -115,9 +115,9 @@ This exported variable is a tied HASH which maps C<E*> names
 on numbers, to be used with the system's C<errno()> function.
 =back
 
-The following constants where detected on your system when the
-module got installed.  The second column shows the value which
-where returned at that time.
+The following error names where detected on your system when the
+module got installed.  The second column shows the related value.
+Followed by the text that M<strerror()> produces for that error.
 
 =for comment
 #TABLE_ERRNO_START

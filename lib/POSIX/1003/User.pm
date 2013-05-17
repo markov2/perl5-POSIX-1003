@@ -81,6 +81,7 @@ will return error ENOSYS.
 =function setreuid RUID, EUID
 =function getresuid 
 =function setresuid RUID, EUID, SUID
+=cut
 
 #------------------
 =subsection Get/set groups

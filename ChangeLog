@@ -6,6 +6,13 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . the main component of exporter in POSIX::1003 useful enough to become
 #   a separate module.
 
+0.94_2: Fri May 17 10:25:38 CEST 2013
+	Fixes:
+	- make setgroups() support optional
+
+	Improvements:
+	- believe CORE/config.h for some settings
+
 0.94_1: Thu May 16 14:14:33 CEST 2013
 	Fixes:
 	- more carefully return ENOSYS when a function is not supported

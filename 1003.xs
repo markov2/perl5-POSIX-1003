@@ -1,16 +1,71 @@
 #define PERL_EXT_POSIX_1003
 
 #include "EXTERN.h"
+
+/* We need our hands on the pure config, because CORE/perl.h makes
+   some "smart" changes :(
+
+   For now, we believe CORE/config.h for the following variables:
+    I_UNISTD
+    I_FCNTL
+    I_POLL
+    I_SYS_POLL
+    I_SYS_RESOURCE
+
+    HAS_SETEUID
+    HAS_SETREUID
+    HAS_SETREGID
+    HAS_SETRESGID
+    HAS_SETRESUID
+    HAS_GETGROUPS
+    HAS_SETGROUPS
+    HAS_POLL
+    HAS_STRERROR
+ */
+
+#ifdef PERL_MICRO
+#  include "uconfig.h"
+#elif USE_CROSS_COMPILE
+#  include "xconfig.h"
+#else
+#  include "config.h"
+#endif
+
+/* Get Perl's smartness
+  
+   We like only to provide setre[ug]id when it is pure, not a rewrite
+   to getres[ug]id.  There are too many system dependencies/bug etc
+   in these library functions to cover it up.
+ */
+
+#ifdef HAS_SETREUID
+#define _HAS_SETREUID
+#endif
+
+#ifdef HAS_SETREGID
+#define _HAS_SETREGID
+#endif
+
 #include "perl.h"
+
+#ifdef _HAS_SETREUID
+#undef _HAS_SETREUID
+#undef HAS_SETREUID
+#endif
+
+#ifdef _HAS_SETREGID
+#undef _HAS_SETREGID
+#undef HAS_SETREGID
+#endif
+
+/* Now some Perl-guts
+ */
+
 #include "XSUB.h"
 
-#ifndef HAS_UNISTD_H
-#define HAS_UNISTD_H
-#endif
-
-#ifndef HAS_FCNTL_H
-#define HAS_FCNTL_H
-#endif
+/* My own extensions
+   Overrule via files in the "system" sub-directory of this distribution.
+ */
 
 #ifndef HAS_CONFSTR
 #define HAS_CONFSTR
@@ -28,36 +83,12 @@
 #define HAS_MKNOD
 #endif
 
-#ifndef HAS_POLL
-#define HAS_POLL
-#endif
-
 #ifndef HAS_STRSIGNAL
 #define HAS_STRSIGNAL
 #endif
 
-#ifndef HAS_STRERROR
-#define HAS_STRERROR
-#endif
-
 #ifndef HAS_SETUID
 #define HAS_SETUID
-#endif
-
-#ifndef HAS_SETEUID
-#define HAS_SETEUID
-#endif
-
-#ifndef HAS_SETREUID
-#define HAS_SETREUID
-#endif
-
-#ifndef HAS_SETRESUID
-#define HAS_SETRESUID
-#endif
-
-#ifndef HAS_GETGROUPS
-#define HAS_GETGROUPS
 #endif
 
 #ifndef CACHE_UID
@@ -72,24 +103,35 @@
 
 #include "system.c"
 
-#ifdef HAS_UNISTD_H
+#ifdef HAS_ULIMIT
+#ifndef I_ULIMIT
+#define I_ULIMIT
+#endif
+#endif
+
+
+#ifdef I_UNISTD
 #include <unistd.h>
 #endif
 
-#ifdef HAS_FCNTL_H
+#ifdef I_FCNTL
 #include <fcntl.h>
 #endif
 
-#ifdef HAS_ULIMIT
+#ifdef I_ULIMIT
 #include <ulimit.h>
 #endif
 
-#ifdef HAS_RLIMIT
+#ifdef I_SYS_RESOURCE
 #include <sys/resource.h>
 #endif
 
-#ifdef HAS_POLL
+#ifdef I_POLL
 #include <poll.h>
+#else
+#ifdef I_SYS_POLL
+#include <sys/poll.h>
+#endif
 #endif
 
 HV * sc_table = NULL;
@@ -692,7 +734,7 @@ setregid(rgid, egid)
     INIT:
 	int		result;
     PPCODE:
-#ifdef HAS_SETREUID
+#ifdef HAS_SETREGID
 	result = setregid(rgid, egid);
 #ifdef CACHE_UID
 	PL_gid  = getgid();
@@ -756,7 +798,7 @@ setresgid(rgid, egid, sgid)
     INIT:
 	int		result;
     PPCODE:
-#ifdef HAS_SETRESUID
+#ifdef HAS_SETRESGID
 	result = setresgid(rgid, egid, sgid);
 #ifdef CACHE_UID
 	PL_gid  = getgid();
@@ -814,11 +856,15 @@ setgroups(...)
 	gid_t groups[NGROUPS_MAX];
 	int   result;
     CODE:
+#ifdef HAS_SETGROUPS
         for(index = 0; index < items && index < NGROUPS_MAX; index++)
 	{   groups[index] = (gid_t)SvUV(ST(index));
 	}
 	result = setgroups(index, groups);
 	XPUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
+#else
+	errno  = ENOSYS;
+#endif
 
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Errno
