@@ -80,6 +80,7 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
   :cs      :confstr     POSIX::1003::Confstr
   :errno   :errors      POSIX::1003::Errno
   :ev      :events      POSIX::1003::Events
+           :fcntl       POSIX::1003::Fcntl
   :fd      :fdio        POSIX::1003::FdIO
   :fs      :filesystem  POSIX::1003::FS
   :limit   :limits      POSIX::1003::Limit
@@ -110,6 +111,7 @@ my %tags =
   , errors =>      'POSIX::1003::Errno'
   , events =>      'POSIX::1003::Events'
   , ev =>          'POSIX::1003::Events'
+  , fcntl =>       'POSIX::1003::Fcntl'
   , fdio =>        'POSIX::1003::FdIO'
   , fd =>          'POSIX::1003::FdIO'
   , filesystem =>  'POSIX::1003::FS'

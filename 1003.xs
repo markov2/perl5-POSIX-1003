@@ -12,6 +12,7 @@
     I_SYS_POLL
     I_SYS_RESOURCE
 
+    HAS_FCNTL
     HAS_SETEUID
     HAS_SETREUID
     HAS_SETREGID
@@ -94,6 +95,12 @@
 #ifndef CACHE_UID
 #if PERL_VERSION < 15 || PERL_VERSION == 15 && PERL_SUBVERSION < 8
 #define CACHE_UID
+#endif
+#endif
+
+#ifdef  HAS_FCNTL
+#ifndef HAS_FCNTL_OWN_EX
+#define HAS_FCNTL_OWN_EX
 #endif
 #endif
 
@@ -192,6 +199,16 @@ fill_fdio()
     fdio_table = newHV();
 #include "fdio.c"
     return fdio_table;
+}
+
+HV * fcntl_table = NULL;
+HV *
+fill_fcntl()
+{   if(fcntl_table) return fcntl_table;
+
+    fcntl_table = newHV();
+#include "fcntl.c"
+    return fcntl_table;
 }
 
 HV * fsys_table = NULL;
@@ -892,3 +909,103 @@ _strerror(int errnr)
 #endif
     OUTPUT:
 	RETVAL
+
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Fcntl
+
+HV *
+fcntl_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_fcntl();
+    OUTPUT:
+	RETVAL
+
+SV *
+_fcntl(fd, function, value)
+        int   fd
+        int   function
+        int   value
+    PROTOTYPE: $$$
+    INIT:
+	int   ret;
+    CODE:
+#ifdef HAS_FCNTL
+        ret = fcntl(fd, function, value);
+	RETVAL = ret==-1 ? &PL_sv_undef : newSVuv(ret);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
+
+SV *
+_lock(fd, function, param)
+        int   fd
+        int   function
+        SV *  param
+    PROTOTYPE: $$$
+    INIT:
+        struct flock locker;
+        SV **type, **whence, **start, **len;
+        HV *fl, *fs;
+    CODE:
+#ifdef HAS_FCNTL
+        fs     = (HV *)SvRV(param);
+        type   = hv_fetch(fs, "type",   4, 0);
+        whence = hv_fetch(fs, "whence", 6, 0);
+        start  = hv_fetch(fs, "start",  5, 0);
+        len    = hv_fetch(fs, "len",    3, 0);
+
+        locker.l_type   = SvIV(*type  );
+        locker.l_whence = SvIV(*whence);
+        locker.l_start  = SvIV(*start );
+        locker.l_len    = SvIV(*len   );
+        locker.l_pid    = 0;
+
+        if(fcntl(fd, function, &locker)==-1)
+            return XSRETURN_UNDEF;
+
+	fl = newHV();
+        (void)hv_store(fl, "type",   4, newSViv(locker.l_type  ), 0);
+        (void)hv_store(fl, "whence", 6, newSViv(locker.l_whence), 0);
+        (void)hv_store(fl, "start",  5, newSViv(locker.l_start ), 0);
+        (void)hv_store(fl, "len",    3, newSViv(locker.l_len   ), 0);
+
+	if(function==F_GETLK)
+            (void)hv_store(fl, "pid",3, newSViv(locker.l_pid   ), 0);
+
+        RETVAL = newRV_noinc((SV *)fl);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+        RETVAL
+
+void
+_own_ex(function, fd, pid, type)
+        int   function
+        int   fd
+        pid_t pid
+        int   type
+    PROTOTYPE: $$$$
+    INIT:
+    PPCODE:
+#ifdef HAS_FCNTL_OWN_EX
+        {   struct f_owner_ex ex;
+	    ex.type  = type;
+            ex.pid   = pid;
+
+            if(fcntl(fd, function, &ex)==-1)
+                return;
+
+            XPUSHs(sv_2mortal(newSVuv(ex.type)));
+            XPUSHs(sv_2mortal(newSVuv(ex.pid)));
+        }
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+

@@ -13,6 +13,7 @@ WriteMakefile
   , ABSTRACT    => 'POSIX::1003, alternative for POSIX in core'
   , LICENSE     => 'perl'
   , PL_FILES    => {}
+  , INC         => '-I.'
   , realclean   => {FILES => '*.c'}
   );
 

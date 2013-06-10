@@ -9,22 +9,23 @@ use strict;
 
 use lib qw(blib/arch blib/lib lib);
 
-my @pods   = map { ($_, "blib/$_") } @ARGV;
+my @pods   = map +($_, "blib/$_"), @ARGV;
 
 my %tables =
   ( confstr  => [ 'POSIX::1003::Confstr',  \&table_confstr  ]
   , errno    => [ 'POSIX::1003::Errno',    \&table_errno    ]
-  , sysconf  => [ 'POSIX::1003::Sysconf',  \&table_sysconf  ]
-  , pathconf => [ 'POSIX::1003::Pathconf', \&table_pathconf ]
-  , ulimit   => [ 'POSIX::1003::Limit',    \&table_ulimit   ]
-  , rlimit   => [ 'POSIX::1003::Limit',    \&table_rlimit   ]
-  , math     => [ 'POSIX::1003::Math',     \&table_math     ]
-  , signals  => [ 'POSIX::1003::Signals',  \&table_signals  ]
+  , fcntl    => [ 'POSIX::1003::Fcntl',    \&table_fcntl    ]
   , fdio     => [ 'POSIX::1003::FdIO',     \&table_fdio     ]
   , fsys     => [ 'POSIX::1003::FS',       \&table_fsys     ]
-  , termios  => [ 'POSIX::1003::Termios',  \&table_termios  ]
+  , math     => [ 'POSIX::1003::Math',     \&table_math     ]
+  , pathconf => [ 'POSIX::1003::Pathconf', \&table_pathconf ]
   , poll     => [ 'POSIX::1003::Events',   \&table_poll     ]
   , property => [ 'POSIX::1003::Properties', \&table_props  ]
+  , rlimit   => [ 'POSIX::1003::Limit',    \&table_rlimit   ]
+  , signals  => [ 'POSIX::1003::Signals',  \&table_signals  ]
+  , sysconf  => [ 'POSIX::1003::Sysconf',  \&table_sysconf  ]
+  , termios  => [ 'POSIX::1003::Termios',  \&table_termios  ]
+  , ulimit   => [ 'POSIX::1003::Limit',    \&table_ulimit   ]
   );
 
 sub produce_table($$);
@@ -82,7 +83,7 @@ sub produce_table($$)
 
     my ($pkg, $handler) = @$table;
     eval "require $pkg";
-    return "Compilation errors in module $pkg: $@" if $@;
+    die "Compilation errors in module $pkg: $@" if $@;
 
     $pkg->import(':all');
     $handler->($pkg);
@@ -137,6 +138,14 @@ sub table_signals($)
     my @rows  = map { [$_, $pkg->exampleValue($_)] }
         sorted @$constants;
     format_rows signals => \@rows;
+}
+
+sub table_fcntl($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::Fcntl::EXPORT_TAGS{constants};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
+    format_rows fcntl => \@rows;
 }
 
 sub table_fdio($)
@@ -249,8 +258,11 @@ sub format_rows($$)
         $manual, $nr_rows, $nr_undef
             if $pod !~ m/blib/;
 
-    return "  ".join("\n  ", @lines)."\n"
-        if @lines;
+    if(@lines)
+    {   my $text = "  ".join("\n  ", @lines)."\n";
+        warn $text if $ENV{AUTOMATED_TESTING};
+        return $text;
+    }
 
     <<_NONE;
   There were no symbols detected for this category during installation.

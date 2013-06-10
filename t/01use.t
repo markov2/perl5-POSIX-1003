@@ -4,7 +4,7 @@ use lib 'lib', 'blib/lib', 'blib/arch';
 use warnings;
 use strict;
 
-use Test::More tests => 20;
+use Test::More tests => 22;
 
 # The versions of the following packages are reported to help understanding
 # the environment in which the tests are run.  This is certainly not a
@@ -30,6 +30,7 @@ foreach my $package (@show_versions)
 require_ok('POSIX::1003::Module');
 require_ok('POSIX::1003::Confstr');
 require_ok('POSIX::1003::Errno');
+require_ok('POSIX::1003::Fcntl');
 require_ok('POSIX::1003::FdIO');
 require_ok('POSIX::1003::FS');
 require_ok('POSIX::1003::Limit');
@@ -43,6 +44,7 @@ require_ok('POSIX::1003::Signals');
 require_ok('POSIX::1003::Sysconf');
 require_ok('POSIX::1003::Termios');
 require_ok('POSIX::1003::Time');
+require_ok('POSIX::1003::User');
 require_ok('POSIX::SigAction');
 require_ok('POSIX::SigSet');
 

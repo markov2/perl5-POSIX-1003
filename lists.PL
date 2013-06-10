@@ -16,10 +16,11 @@ sub from_listing($$);
 # Maybe someone uses cross-compilation
 my $system = lc ($ENV{OSNAME} || $^O);
 
-my (%sc, %cs, %posix, %pc, %ul, %rl, %poll, %sig, %fdio, %fsys, %errno);
+my (%sc, %cs, %posix, %pc, %ul, %rl, %poll, %sig, %fdio, %fsys, %errno, %fcntl);
 
 from_listing \%cs,    'confstr.txt';
 from_listing \%errno, 'errno.txt';
+from_listing \%fcntl, 'fcntl.txt';
 from_listing \%fdio,  'fdio.txt';
 from_listing \%fsys,  'fsys.txt';
 from_listing \%pc,    'pathconf.txt';
@@ -35,6 +36,7 @@ from_listing \%ul,    'ulimit.txt';
 
 dump_table(\%cs,    'cs_table',   'confstr.c'   );
 dump_table(\%errno, 'errno_table','errno.c'     );
+dump_table(\%fcntl, 'fcntl_table','fcntl.c'     );
 dump_table(\%fdio,  'fdio_table', 'fdio.c'      );
 dump_table(\%fsys,  'fsys_table', 'fsys.c'      );
 dump_table(\%pc,    'pc_table',   'pathconf.c'  );
@@ -56,7 +58,6 @@ if(-f $incl)
 
 close SYSTEM
     or die "write errors to system.c: $!";
-
 
 exit 0;
 

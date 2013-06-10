@@ -3,7 +3,9 @@ use warnings;
 
 package POSIX::1003::Module;
 
-our $VERSION = '0.94_2';
+# The VERSION of the distribution is sourced from this file, because
+# this module also loads the XS extension.
+our $VERSION = '0.94_3';
 use Carp 'croak';
 
 { use XSLoader;
@@ -15,8 +17,9 @@ use Carp 'croak';
 my $in_constant_table;
 BEGIN { $in_constant_table = qr/
    ^_CS_    # confstr
+ | ^DN_     # fcntl
  | ^E(?!CHONL|XIT_) # errno   ECHONL in Termios, EXIT_ in Proc
- | ^WSAE    # errno (windows sockets)
+ | ^F_      # fcntl
  | ^GET_    # rlimit
  | ^O_      # fdio
  | ^_PC_    # pathconf
@@ -29,6 +32,7 @@ BEGIN { $in_constant_table = qr/
  | ^SET_    # rlimit aix
  | ^SIG[^_] # signals
  | ^UL_     # ulimit
+ | ^WSAE    # errno (windows sockets)
  | _OK$     # access
  /x
 };

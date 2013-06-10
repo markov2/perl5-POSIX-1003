@@ -163,6 +163,9 @@ failure.
 
 =function pipefd
 Returns the reader and writer file descriptors.
+See also M<POSIX::1003::Fcntl::setfd_pipe_size()>
+
+=example
   my ($r, $w) = pipefd;
   writefd($w, "hello", 5 );
   readfd($r, $buf, 5 );
@@ -210,7 +213,7 @@ discovered during installation of this module.
 =for comment
 #TABLE_FDIO_START
 
-The constant names for this math module are inserted here during
+The constant names for this fdio module are inserted here during
 installation.
 
 =for comment

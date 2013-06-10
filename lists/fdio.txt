@@ -21,6 +21,7 @@ SEEK_SET
 # http://nixdoc.net/man-pages/FreeBSD/open.2.html
 # http://nixdoc.net/man-pages/IRIX/man2/open.2.html
 O_APPEND
+O_ACCMODE
 O_ASYNC
 O_CIO
 O_CIOR

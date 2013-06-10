@@ -5,10 +5,24 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . ::FS manual needs cleanup, f.i. split lists of constants
 # . the main component of exporter in POSIX::1003 useful enough to become
 #   a separate module.
+# . add epoll/epoll_ctl ?  Sys::Syscall
+# . add sendfile?  Sys::Sendfile
+# . add ioctl?
+
+0.94_3: Mon Jun 10 10:00:29 CEST 2013
+	Improvements:
+	- add ::Fcntl
+	- system/mswin32.c
+	- add EPOLL constants
+	- add O_ACCMODE
+	- add "-I." to compile to CC search path
+	- cpantesters now will show all constants while creating
+	  manual-pages.
 
 0.94_2: Fri May 17 10:25:38 CEST 2013
 	Fixes:
 	- make setgroups() support optional
+	- un-trick setre[gu]id confusion caused by CORE/perl.h
 
 	Improvements:
 	- believe CORE/config.h for some settings
