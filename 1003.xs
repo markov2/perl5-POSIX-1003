@@ -104,6 +104,14 @@
 #endif
 #endif
 
+#ifndef HAS_FLOCK
+#define HAS_FLOCK
+#endif
+
+#ifndef HAS_LOCKF
+#define HAS_LOCKF
+#endif
+
 /*
  * work-arounds for various operating systems
  */
@@ -924,15 +932,22 @@ fcntl_table()
 SV *
 _fcntl(fd, function, value)
         int   fd
-        int   function
+        SV *  function
         int   value
     PROTOTYPE: $$$
     INIT:
 	int   ret;
     CODE:
 #ifdef HAS_FCNTL
-        ret = fcntl(fd, function, value);
-	RETVAL = ret==-1 ? &PL_sv_undef : newSVuv(ret);
+	if(SvOK(function))
+        {   ret = fcntl(fd, SvIV(function), value);
+	    RETVAL = ret==-1 ? &PL_sv_undef : newSVuv(ret);
+	}
+	else
+	{   /* catch-all for all unsupported functions */
+            errno  = ENOSYS;
+            RETVAL = &PL_sv_undef;
+	}
 #else
         errno  = ENOSYS;
         RETVAL = &PL_sv_undef;
@@ -965,7 +980,7 @@ _lock(fd, function, param)
         locker.l_pid    = 0;
 
         if(fcntl(fd, function, &locker)==-1)
-            return XSRETURN_UNDEF;
+            XSRETURN_UNDEF;
 
 	fl = newHV();
         (void)hv_store(fl, "type",   4, newSViv(locker.l_type  ), 0);
@@ -1009,3 +1024,39 @@ _own_ex(function, fd, pid, type)
         RETVAL = &PL_sv_undef;
 #endif
 
+SV *
+_flock(fd, function)
+        int   fd
+        int   function
+    PROTOTYPE: $$
+    INIT:
+	int   ret;
+    CODE:
+#ifdef HAS_FLOCK
+        ret    = flock(fd, function);
+	RETVAL = ret==-1 ? &PL_sv_undef : newSVuv(ret);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
+
+SV *
+_lockf(fd, function, len)
+        int   fd
+        int   function
+	off_t len
+    PROTOTYPE: $$$
+    INIT:
+	int   ret;
+    CODE:
+#ifdef HAS_LOCKF
+        ret    = lockf(fd, function, len);
+	RETVAL = ret==-1 ? &PL_sv_undef : newSVuv(ret);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL

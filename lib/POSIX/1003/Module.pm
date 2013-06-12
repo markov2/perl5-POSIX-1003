@@ -5,7 +5,7 @@ package POSIX::1003::Module;
 
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.
-our $VERSION = '0.94_3';
+our $VERSION = '0.94_4';
 use Carp 'croak';
 
 { use XSLoader;
@@ -19,7 +19,9 @@ BEGIN { $in_constant_table = qr/
    ^_CS_    # confstr
  | ^DN_     # fcntl
  | ^E(?!CHONL|XIT_) # errno   ECHONL in Termios, EXIT_ in Proc
+ | ^FCNTL   # fcntl
  | ^F_      # fcntl
+ | ^FD_     # fcntl
  | ^GET_    # rlimit
  | ^O_      # fdio
  | ^_PC_    # pathconf

@@ -21,15 +21,15 @@ WriteMakefile
 #### distribution.
 sub MY::postamble { <<'__POSTAMBLE' }
 
-config::
-	@ $(ECHO) "*** autodetect available symbols"
-	$(FULLPERLRUNINST) ./lists.PL
+config:: system.c
+	$(NOECHO) $(ECHO) "*** autodetect available symbols"
+	$(FULLPERL) lists.PL
 
-linkext::
-	@ $(ECHO) "*** collect all defined symbols"
-	$(FULLPERLRUNINST) ./symbols.PL
-	@ $(ECHO) "*** adding values examples to manuals"
-	$(FULLPERLRUNINST) ./manuals.PL $(MAN3PODS)
+linkext:: $(MAN3PODS)
+	$(NOECHO) $(ECHO) "*** collect all defined symbols"
+	$(FULLPERL) symbols.PL
+	$(NOECHO) $(ECHO) "*** adding values examples to manuals"
+	$(FULLPERL) manuals.PL $(MAN3PODS)
 
 # for DIST
 RAWDIR          = ../public_html/posix/raw

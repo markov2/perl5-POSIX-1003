@@ -9,6 +9,16 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . add sendfile?  Sys::Sendfile
 # . add ioctl?
 
+0.94_4: Wed Jun 12 15:16:33 CEST 2013
+	Improvements:
+	- add ::Fcntl::flock() and ::lockf
+	- add system/freebsd.c
+	- the 'return' in "return XSRETURN_UNDEF" is too much [NormW]
+	- t/32fcntl.t dup test sometimes produces a fh which is >4.
+	  test now more relaxed.
+	- use "blib" in *.PL
+	- use FULLPERL, not FULLPERLRUNINST, in Makefile.PL
+
 0.94_3: Mon Jun 10 10:00:29 CEST 2013
 	Improvements:
 	- add ::Fcntl

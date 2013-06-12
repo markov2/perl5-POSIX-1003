@@ -63,3 +63,4 @@
 #endif
 
 #undef CACHE_UID
+#undef HAS_LIMIT

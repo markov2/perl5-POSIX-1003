@@ -568,7 +568,8 @@ POSIX.pm)
 =head2 Thread-Safe Stdio Locking Interfaces
 
 Perl does support the non-portable flock (see L<perlfunc/flock>)
-in core, but the POSIX C<flockfile> mechanism is probably unsupported:
+in core, but the POSIX C<flockfile> mechanism is unsupported by
+the PerlIO layers:
 
   flockfile, ftrylockfile, funlockfile, getc_unlocked,
   getchar_unlocked, putc_unlocked, putchar_unlocked

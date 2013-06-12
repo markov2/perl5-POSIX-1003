@@ -8,7 +8,7 @@ use Test::More;
 use POSIX::1003::FdIO  qw/openfd closefd O_WRONLY O_CREAT O_ACCMODE/;
 use POSIX::1003::Fcntl;
 
-plan tests => 6;
+plan tests => 7;
 
 #
 # F_DUPFD
@@ -21,9 +21,9 @@ ok(defined $fd, "opened $testfile as $fd");
 
 my $fd2 = fcntl_dup $fd;
 ok(defined $fd2, "fd $fd dupped into $fd2");
-cmp_ok($fd2, '==', $fd+1);
+cmp_ok($fd2, '!=', $fd, "new descriptor differs");
 
-closefd $fd2;
+ok(closefd $fd2, "close new descriptor");
 
 #
 # F_GETFL

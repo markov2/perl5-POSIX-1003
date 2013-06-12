@@ -7,7 +7,7 @@
 use warnings;
 use strict;
 
-use lib qw(blib/arch blib/lib lib);
+use blib;
 
 my @pods   = map +($_, "blib/$_"), @ARGV;
 

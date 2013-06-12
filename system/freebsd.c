@@ -1,2 +1,1 @@
-#undef HAS_RLIMIT_64
 #undef HAS_FCNTL_OWN_EX

@@ -69,8 +69,12 @@ POSIX::1003::FdIO - POSIX handling file descriptors
 =chapter DESCRIPTION
 Most people believe that the C<sys*> commands in Perl-Core are not
 capable of doing unbuffered IO. For those people, we have this module.
-Whether C<sysread()> or M<readfd()> is meassurable faster cannot be
-answered.
+The question whether C<sysread()> or M<readfd()> is meassurable faster
+cannot be answered.
+
+The C<fcntl()> command has its separate module M<POSIX::1003::Fcntl>.
+Locking functions are locate there as well, because they are often
+implemented via C<fcntl>.
 
 =chapter FUNCTIONS
 
@@ -109,6 +113,9 @@ confusing name to avoid accidents.
  FD                            rewindfd # idem
  FD creat             creat    creatfd
  FD dup                        dupfd
+ FD fcntl   fcntl              (many)   # see ::Fcntl
+ FD flock   flock              flockfd  # see ::Fcntl
+ FD lockf                      lockf    # see ::Fcntl
 
 Works on: FH=file handle, FD=file descriptor, FN=file name
 

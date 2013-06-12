@@ -25,16 +25,24 @@ getfd_lease
 setfd_notify
 setfd_pipe_size
 getfd_pipe_size
+
+flock
+flockfd
+
+lockf
 /;
 
 our %EXPORT_TAGS =
  ( constants => \@constants
  , functions => \@functions
+ , flock     => [ qw/flock flockfd LOCK_SH LOCK_EX LOCK_UN LOCK_NB/ ] 
+ , lockf     => [ qw/lockf F_LOCK F_TLOCK F_ULOCK F_TEST/ ]
  , tables    => [ qw/%fcntl/ ]
  );
 
 our @IN_CORE  = qw/
-  fcntl/;
+fcntl
+flock/;
 
 my $fcntl;
 our %fcntl;
@@ -99,6 +107,43 @@ tries to provide functions which separates the various uses.
 =function fcntl FD, FUNCTION, SCALAR
 See C<perlfunc fcntl>.  This raw call to C<fcntl()> is only in some
 cases simple, but often isn't.
+
+=function flockfd FD, FLAGS
+Not standard POSIX, but available on many POSIX platforms.  Often
+implemented as M<fcntl()>, which is more complex to use.  On other
+platforms implemented as separate OS feature.
+
+Perl core provides a C<flock> which may hide plaform differences.
+This C<flockfd> is the pure version.  Try to use M<setfd_lock()>, which
+is more portable and flexible.
+
+=examples
+  use POSIX::1003::Fcntl ':flock';
+  if(flockfd $fd, LOCK_EX|LOCK_NB) ...
+  flockfd $fd, LOCK_UN;
+=cut
+
+sub flockfd($$)
+{   my ($file, $flags) = @_;
+    my $fd   = ref $file ? fileno($file) : $file;
+    _flock($fd, $flags);
+}
+
+=function lockf FD, FLAG, LENGTH
+Not standard POSIX, but available on many POSIX platforms.  Often
+implemented via M<fcntl()>, which is more complex to use.
+
+=examples
+  use POSIX::1003::Fcntl ':lockfd';
+  if(lockf $fd, F_LOCK) ...
+  lockf $fd, F_ULOCK;
+=cut
+
+sub lockf($$;$)
+{   my ($file, $flags, $len) = @_;
+    my $fd   = ref $file ? fileno($file) : $file;
+    _lockf($fd, $flags, $len//0);
+}
 
 =section Additional
 

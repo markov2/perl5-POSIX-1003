@@ -2,16 +2,13 @@
  * NetWare OS
  */
 
-#ifdef HAS_POLL
 #undef HAS_POLL
-#endif
-
-#ifdef HAS_ULIMIT
 #undef HAS_ULIMIT
-#endif
-
-#ifdef HAS_STRSIGNAL
 #undef HAS_STRSIGNAL
+#undef HAS_FCNTL_OWN_EX
+
+#ifndef NGROUPS_MAX
+#define NGROUPS_MAX 1
 #endif
 
 /* defines makedev(),major(),minor() */

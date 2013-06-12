@@ -1,17 +1,18 @@
 #!/usr/bin/env perl
 #
-# Generate tables in manual pages and for the lazy importer POSIX::1003
+# produce the table which knows which constant/function is provided
+# by which module.  This produces a new POSIX/1003/Symbols.pm
 
-use lib qw(blib/arch blib/lib lib);
+use blib;
 
 use POSIX::1003   qw(posix_1003_modules posix_1003_names);
 use POSIX::1003::Symbols;
 
 my $symbols = $INC{'POSIX/1003/Symbols.pm'}
-   or die "cannot find filename for POSIX::1003::Symbols";
+    or die "cannot find filename for POSIX::1003::Symbols";
 
 -w $symbols || chmod 0644, $symbols
-   or die "cannot make $symbols readible: $!";
+    or die "cannot make $symbols readible: $!";
 
 open SYMBOLS, '>', $symbols
     or die "cannot write to $symbols: $!";
