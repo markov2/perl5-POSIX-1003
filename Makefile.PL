@@ -1,5 +1,9 @@
 use ExtUtils::MakeMaker;
 
+# The system.c file must sometimes exist to avoid errors in 'make', eventhough
+# the real file will get generated as first thing when make runs.
+open TOUCH, '>', 'system.c' and close TOUCH;
+
 WriteMakefile
   ( NAME        => 'POSIX::1003'
   , VERSION_FROM => 'lib/POSIX/1003/Module.pm'

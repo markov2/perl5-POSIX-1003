@@ -41,7 +41,6 @@ our %EXPORT_TAGS =
   , functions => \@functions
   );
 
-
 =chapter NAME
 
 POSIX::1003::Math - POSIX handling time

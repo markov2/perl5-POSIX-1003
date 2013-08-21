@@ -4,6 +4,9 @@ use strict;
 package POSIX::1003::Time;
 use base 'POSIX::1003::Module';
 
+use POSIX::1003::Locale  qw(setlocale LC_TIME);
+use Encode               qw(find_encoding is_utf8 decode);
+
 # Blocks resp. defined in time.h, limits.h
 my @constants = qw/
   CLK_TCK CLOCKS_PER_SEC NULL
@@ -119,6 +122,31 @@ should use only the conversion specifiers defined by the ANSI C
 standard (C89, to play safe).  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
 But even then, the results of some of the conversion specifiers are
 non-portable.
+
+[0.95_5] This implementation of C<strftime()> is character-set aware,
+even when the LC_TIME table does not match the type of the format string.
+=cut
+
+sub strftime($@)
+{   my $fmt = shift;
+
+    my $lc  = setlocale LC_TIME;
+    if($lc && $lc =~ m/\.([\w-]+)/ && (my $enc = find_encoding $1))
+    {   # enforce the format string (may contain any text) to the same
+        # charset as the locale is using.
+        my $rawfmt = $enc->encode($fmt);
+        return $enc->decode(POSIX::strftime($rawfmt, @_));
+    }
+
+    if(is_utf8($fmt))
+    {   # no charset in locale, hence ascii inserts
+        my $out = POSIX::strftime(encode($fmt, 'utf8'), @_);
+        return decode $out, 'utf8';
+    }
+
+    # don't know about the charset
+    POSIX::strftime($fmt, @_);
+}
 
 =function tzset
 Set-up local timezone from C<$ENV{TZ}> and the OS.

@@ -616,7 +616,7 @@ are provided by L<Fcntl>.
   alphasort   perlfunc/sort
   getdelim    perlvar/$INPUT_RECORD_SEPARATOR
   getline     $a = <FH>           IO::Handle
-  glob        perlfunc/glob
+  glob        perlfunc/glob       File::Glob
   globfree    never needed
   mkdtemp     File::Temp/mkdtemp
   scandir     perlfunc/glob

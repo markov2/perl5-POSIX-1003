@@ -23,6 +23,7 @@ my %tables =
   , property => [ 'POSIX::1003::Properties', \&table_props  ]
   , rlimit   => [ 'POSIX::1003::Limit',    \&table_rlimit   ]
   , signals  => [ 'POSIX::1003::Signals',  \&table_signals  ]
+  , sigactions=>[ 'POSIX::1003::Signals',\&table_sigactions ]
   , sysconf  => [ 'POSIX::1003::Sysconf',  \&table_sysconf  ]
   , termios  => [ 'POSIX::1003::Termios',  \&table_termios  ]
   , ulimit   => [ 'POSIX::1003::Limit',    \&table_ulimit   ]
@@ -134,10 +135,18 @@ sub table_math($)
 
 sub table_signals($)
 {   my $pkg   = shift;
-    my $constants = $POSIX::1003::Signals::EXPORT_TAGS{constants};
+    my $constants = $POSIX::1003::Signals::EXPORT_TAGS{signals};
     my @rows  = map { [$_, $pkg->exampleValue($_)] }
         sorted @$constants;
     format_rows signals => \@rows;
+}
+
+sub table_sigactions($)
+{   my $pkg   = shift;
+    my $constants = $POSIX::1003::Signals::EXPORT_TAGS{actions};
+    my @rows  = map { [$_, $pkg->exampleValue($_)] }
+        sorted @$constants;
+    format_rows actions => \@rows;
 }
 
 sub table_fcntl($)
@@ -271,4 +280,3 @@ sub format_rows($$)
   In the latter case, please help us making it work.
 _NONE
 }
-

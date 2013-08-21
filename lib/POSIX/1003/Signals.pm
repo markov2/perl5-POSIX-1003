@@ -4,15 +4,9 @@ use strict;
 package POSIX::1003::Signals;
 use base 'POSIX::1003::Module';
 
-my @signals;
 my @states  = qw/
     SIG_BLOCK SIG_DFL SIG_ERR
     SIG_IGN SIG_SETMASK SIG_UNBLOCK
- /;
-
-my @actions = qw/
-    SA_NOCLDSTOP SA_NOCLDWAIT SA_NODEFER SA_ONSTACK SA_RESETHAND SA_RESTART
-    SA_SIGINFO
  /;
 
 my @functions = qw/
@@ -20,7 +14,8 @@ my @functions = qw/
     signal_names strsignal
  /;
 
-my @constants = (@signals, @states, @actions);
+my (@signals, @actions);
+my @constants = @states;
 
 our %EXPORT_TAGS =
   ( signals   => \@signals
@@ -39,11 +34,13 @@ our %signals;
 BEGIN {
     # initialize the :signals export tag
     $signals = signals_table;
+
     push @constants, keys %$signals;
-    push @signals,   keys %$signals;
+    push @signals, grep !/^SA_/, keys %$signals;
+    push @actions, grep /^SA_/, keys %$signals;
+
     tie %signals, 'POSIX::1003::ReadOnlyTable', $signals;
 }
-
 =chapter NAME
 
 POSIX::1003::Signals - POSIX using signals
@@ -163,16 +160,23 @@ sub signal($$)        { $SIG{$_[0]} = $_[1] }
 Returns a string reprentation of the SIGNAL.  When the SIGNAL is unknown,
 a standard string is returned (never undef)
 =cut
+
 sub strsignal($)      { _strsignal($_[0]) || "Unknown signal $_[0]" }
 
 #--------------------------
 =section Additional
 
 =function signal_names
-Returns a list with all known names, unsorted.
+Returns a list with all known signal names, unsorted.
 =cut
 
-sub signal_names() { keys %$signals }
+sub signal_names() { @signals }
+
+=function sigaction_names
+Returns a list with all known sigaction names, unsorted.
+=cut
+
+sub sigaction_names() { @actions }
 
 #--------------------------
 
@@ -180,9 +184,11 @@ sub signal_names() { keys %$signals }
 
 =over 4
 =item B<%signals>
-This exported variable is a (tied) HASH which maps C<SIG*> names
-to their numbers.
+This exported variable is a (tied) HASH which maps C<SIG*> and
+C<SA_*> names to their numbers.
 =back
+
+=section Export tag C<:signals>
 
 The following constants are exported, shown here with the values
 discovered during installation of this module:
@@ -190,13 +196,29 @@ discovered during installation of this module:
 =for comment
 #TABLE_SIGNALS_START
 
-The constant names for this math module are inserted here during
-installation.
+The constant names for signals are inserted here during installation.
 
 =for comment
 #TABLE_SIGNALS_END
 
+=section Export tag C<:actions>
+
+=for comment
+#TABLE_SIGACTIONS_START
+
+The constant names for sigactions are inserted here during installation.
+
+=for comment
+#TABLE_SIGACTIONS_END
+
 =cut
+
+sub exampleValue($)
+{   my ($class, $name) = @_;
+    my $val = $signals->{$name};
+    defined $val ? $val : 'undef';
+}
+
 
 sub _create_constant($)
 {   my ($class, $name) = @_;

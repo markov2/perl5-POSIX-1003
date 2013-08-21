@@ -5,7 +5,7 @@ package POSIX::1003::Module;
 
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.
-our $VERSION = '0.94_4';
+our $VERSION = '0.94_5';
 use Carp 'croak';
 
 { use XSLoader;
@@ -28,8 +28,9 @@ BEGIN { $in_constant_table = qr/
  | ^POLL    # poll
  | ^_POSIX  # property
  | ^RLIM    # rlimit
- | ^_SC_    # sysconf
+ | ^SA_     # sigaction
  | ^S_      # stat
+ | ^_SC_    # sysconf
  | ^SEEK_   # fdio
  | ^SET_    # rlimit aix
  | ^SIG[^_] # signals
@@ -166,7 +167,7 @@ sub exampleValue($)
 
     my $tags      = \%{"$pkg\::EXPORT_TAGS"} or die;
     my $constants = $tags->{constants} || [];
-    grep {$_ eq $name} @$constants
+    grep $_ eq $name, @$constants
         or return undef;
 
     my $val = &{"$pkg\::$name"};

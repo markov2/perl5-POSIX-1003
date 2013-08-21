@@ -8,6 +8,21 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . add epoll/epoll_ctl ?  Sys::Syscall
 # . add sendfile?  Sys::Sendfile
 # . add ioctl?
+# . add (bsd_)glob with its many flags
+# . add POSIX::RT::Semaphore logic?
+# . cleanup exampleValue()
+
+0.94_5: Wed Aug 21 13:05:52 CEST 2013
+	Changes:
+	- ::Time::strftime() is now charset aware.
+
+	Fixes:
+	- some makes do not work correctly without existing system.c
+
+	Improvements:
+	- add warning about possible overflow of times()
+	- auto-detect SA_ constants, do not take them from POSIX.pm
+	- added O_TMPFILE (new in Linux kernel 3.11)
 
 0.94_4: Wed Jun 12 15:16:33 CEST 2013
 	Improvements:

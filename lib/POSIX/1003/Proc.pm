@@ -137,8 +137,12 @@ Returns the name of the current working directory.  See also M<Cwd>.
 =function times5
 The CORE C<times()> function returns four values, conveniently converted
 into seconds (float).  The M<POSIX> C<times()> returns five values in
-clocktics. To disambique those two, we offer the POSIX function under
+clock tics. To disambique those two, we offer the POSIX function under
 a slightly different name.
+
+Be warned that the clock ticks will overflow which the count of clock tics
+does not fit in a C<clock_t> type anymore.  That will happen in 49.7 days,
+when a tick is a millisecond and clock_t an uint32.
 
           ($user, $sys, $cuser, $csys) = CORE::times();
  ($elapse, $user, $sys, $cuser, $csys) = POSIX::times();
