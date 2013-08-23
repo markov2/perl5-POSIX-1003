@@ -12,6 +12,14 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . add POSIX::RT::Semaphore logic?
 # . cleanup exampleValue()
 
+0.95: Fri Aug 23 16:49:07 CEST 2013
+	Fixes:
+	- ::Proc  WNOHANG and WUNTRACED are constants, not functions.
+	- ::Proc  W*() functions had wrong prototype
+
+	Improvements:
+	- add ::FdIO::fdopen()
+
 0.94_5: Wed Aug 21 13:05:52 CEST 2013
 	Changes:
 	- ::Time::strftime() is now charset aware.

@@ -5,7 +5,10 @@ package POSIX::1003::Proc;
 use base 'POSIX::1003::Module';
 
 # Blocks resp. in stdlib.h, limits.h
-my @constants = qw/EXIT_FAILURE EXIT_SUCCESS CHILD_MAX /;
+my @constants = qw/
+ EXIT_FAILURE EXIT_SUCCESS CHILD_MAX
+ WNOHANG WUNTRACED
+  /;
 our @IN_CORE  = qw/wait waitpid/;
 
 # Blocks resp. in stdlib.h, sys/wait.h, unistd.h
@@ -13,7 +16,7 @@ my @functions = qw/
  abort
 
  WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
- WNOHANG WSTOPSIG WTERMSIG WUNTRACED
+ WSTOPSIG WTERMSIG 
   
  _exit pause setpgid setsid tcgetpgrp tcsetpgrp
  ctermid cuserid getcwd nice
@@ -88,9 +91,19 @@ if C<WIFSTOPPED($?)> is true.
 =function wait
 Simply L<perlfunc/wait>.
 
-=function waitpid PID
+=function waitpid PID, FLAGS
 Simply L<perlfunc/waitpid>.
 =cut
+
+# When the next where automatically imported from POSIX, they are
+# considered constant and therefore without parameter.  Therefore,
+# these are linked explicitly.
+*WIFEXITED   = \&POSIX::WIFEXITED;
+*WIFSIGNALED = \&POSIX::WIFSIGNALED;
+*WIFSTOPPED  = \&POSIX::WIFSTOPPED;
+*WEXITSTATUS = \&POSIX::WEXITSTATUS;
+*WTERMSIG    = \&POSIX::WTERMSIG;
+*WSTOPSIG    = \&POSIX::WSTOPSIG;
 
 #-------------------------------------
 =section Standard POSIX functions from unistd.h

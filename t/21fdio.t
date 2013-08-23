@@ -3,7 +3,7 @@ use lib 'lib', 'blib/lib', 'blib/arch';
 use warnings;
 use strict;
 
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 use POSIX::1003::FdIO;   # load all
 
@@ -24,7 +24,9 @@ cmp_ok(length $string, '==', 20, 'check length');
 cmp_ok(seekfd($fd, 0,  SEEK_CUR), '==', 30, 'tell');
 cmp_ok(tellfd($fd), '==', 30, 'tellfd');
 
-# try to read the whole file, from here on
+my $fh = fdopen $fd, 'r';
+isa_ok($fh, 'GLOB', 'now also connected as fh');
+
 ok((closefd($fd) ? 1 : 0), "closefd $fd");
 
 # only SEEK_ keys in %seek

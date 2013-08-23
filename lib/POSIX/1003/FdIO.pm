@@ -7,7 +7,7 @@ use base 'POSIX::1003::Module';
 # Blocks resp from unistd.h, limits.h, and stdio.h
 my (@constants, @seek, @mode);
 my @functions = qw/closefd creatfd dupfd dup2fd openfd pipefd
-  readfd seekfd writefd tellfd/;
+  readfd seekfd writefd tellfd fdopen/;
 
 our %EXPORT_TAGS =
  ( constants => \@constants
@@ -50,7 +50,6 @@ POSIX::1003::FdIO - POSIX handling file descriptors
 
   $fd = openfd($fn, O_WRONLY|O_TRUNC);
   $fd = openfd($fn, O_CREAT|O_WRONLY, 0640);
-  # Permission bit constants in POSIX::1003::FS
 
   my $buf;
   $bytes_read    = readfd($fd, $buf, BUFSIZ);
@@ -65,6 +64,8 @@ POSIX::1003::FdIO - POSIX handling file descriptors
   writefd($w, "hello", 5);
   readfd($r, $buf, 5);
   closefd($r) && closefd($w) or die $!;
+
+  my $fh = fdopen $fd or die $!;
 
 =chapter DESCRIPTION
 Most people believe that the C<sys*> commands in Perl-Core are not
@@ -95,7 +96,7 @@ confusing name to avoid accidents.
  FD lseek   sysseek   lseek    seekfd
  FH fopen   open
  FD open    sysopen            openfd   # sysopen is clumpsy
- FD fdopen                              # IO::Handle->new_from_fd
+ FD fdopen  open               fdopen   # IO::Handle->new_from_fd
  FH fclose  close
  FD close   close     close    closefd
  FH fread   read
@@ -110,7 +111,7 @@ confusing name to avoid accidents.
  FH ftell   tell
  FD                            tellfd   # tell on fd not in POSIX
  FH rewind            rewind
- FD                            rewindfd # idem
+ FD                            rewindfd # rewind on fd not in POSIX
  FD creat             creat    creatfd
  FD dup                        dupfd
  FD fcntl   fcntl              (many)   # see ::Fcntl
@@ -196,6 +197,32 @@ sub dup2fd($$)    { goto &POSIX::dup2  }
 sub statfd($)     { goto &POSIX::fstat }
 sub creatfd($$)   { openfd $_[0], O_WRONLY()|O_CREAT()|O_TRUNC(), $_[1] }
 
+=function fdopen FD, MODE
+Converts a FD into an (buffered) FH.  You probably want to set binmode
+after this.  MODE can be Perl-like '<', '>', '>>', or POSIX standard
+'r', 'w', 'a'.  POSIX modes 'r+', 'w+', and 'a+' can probably not be
+supported.
+=cut
+
+# This is implemented via CORE::open, because we need an Perl FH, not a
+# FILE *.
+
+sub fdopen($$)
+{   my ($fd, $mode) = @_;
+   
+    $mode =~ m/^([rwa]\+?|\<|\>|\>>)$/
+        or die "illegal fdopen() mode '$mode'\n";
+
+    my $m = $1 eq 'r' ? '<' : $1 eq 'w' ? '>' : $1 eq 'a' ? '>>' : $1;
+
+    die "fdopen() mode '$mode' (both read and write) is not supported\n"
+        if substr($m,-1) eq '+';
+
+    open my($fh), "$m&=", $fd;
+    $fh;
+}
+
+#------------------
 =section Additional
 Zillions of Perl programs reimplement these functions. Let's simplify
 code.

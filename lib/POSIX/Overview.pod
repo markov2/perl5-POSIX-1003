@@ -431,7 +431,7 @@ See C<perlopentut> section "Open a la C".
 
   clearerr                        IO::Handle
   fclose      perlfunc/close      IO::Handle/close
-  fdopen      perlfunc/open       IO::Handle/new_from_fd
+  fdopen      perlfunc/open       ::FdIO/fdopen
   feof        perlfunc/eof        IO::Handle/eof
   ferror      perlvar/$ERRNO      IO::Handle/error     $!+0
   fflush                          IO::Handle/flush

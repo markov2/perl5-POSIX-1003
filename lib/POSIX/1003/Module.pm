@@ -5,7 +5,7 @@ package POSIX::1003::Module;
 
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.
-our $VERSION = '0.94_5';
+our $VERSION = '0.95';
 use Carp 'croak';
 
 { use XSLoader;
@@ -14,8 +14,7 @@ use Carp 'croak';
   XSLoader::load 'POSIX::1003', $VERSION;
 }
 
-my $in_constant_table;
-BEGIN { $in_constant_table = qr/
+my $in_constant_table = qr/
    ^_CS_    # confstr
  | ^DN_     # fcntl
  | ^E(?!CHONL|XIT_) # errno   ECHONL in Termios, EXIT_ in Proc
@@ -37,8 +36,7 @@ BEGIN { $in_constant_table = qr/
  | ^UL_     # ulimit
  | ^WSAE    # errno (windows sockets)
  | _OK$     # access
- /x
-};
+ /x;
 
 =chapter NAME
 POSIX::1003::Module - Base of POSIX::1003 components
