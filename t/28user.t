@@ -21,4 +21,4 @@ SKIP: {
 }
 
 my $groups = join ', ', getgroups;
-ok($groups, "groups: $groups");
+ok(defined $groups, "groups: $groups");

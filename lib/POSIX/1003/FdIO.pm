@@ -7,7 +7,7 @@ use base 'POSIX::1003::Module';
 # Blocks resp from unistd.h, limits.h, and stdio.h
 my (@constants, @seek, @mode);
 my @functions = qw/closefd creatfd dupfd dup2fd openfd pipefd
-  readfd seekfd writefd tellfd fdopen/;
+  readfd seekfd writefd tellfd truncfd fdopen/;
 
 our %EXPORT_TAGS =
  ( constants => \@constants
@@ -65,11 +65,13 @@ POSIX::1003::FdIO - POSIX handling file descriptors
   readfd($r, $buf, 5);
   closefd($r) && closefd($w) or die $!;
 
-  my $fh = fdopen $fd or die $!;
+  my $fh = fdopen($fd, 'w') or die $!;
 
 =chapter DESCRIPTION
-Most people believe that the C<sys*> commands in Perl-Core are not
+Most people believe that the C<sys*> commands in Perl Core are not
 capable of doing unbuffered IO. For those people, we have this module.
+But there is more in file-descriptor space, missing from Core.
+
 The question whether C<sysread()> or M<readfd()> is meassurable faster
 cannot be answered.
 
@@ -81,42 +83,48 @@ implemented via C<fcntl>.
 
 =section Overview
 
-Perl defaults to use file-handles avoiding file descriptors. For
+Perl defaults to use file-handles, avoiding file descriptors. For
 that reason, the C<fread> of POSIX is the C<read> of Perl; that's
-confusing. The POSIX-in-Core implementation makes you write
-C<CORE::read()> and C<POSIX::read()> explicitly. However,
-C<POSIX::read()> is the same as C<CORE::sysread()>!
+confusing.  But the POSIX standard is confused as well: some function
+names which start with an C<f> are actually for file-descriptors, other
+for file-handles!
 
-For all people who do not trust the C<sys*> commands (and there are
-many), we provide the implementation of POSIX-in-Core with a less
-confusing name to avoid accidents.
+The POSIX module, distributed with Perl, makes you write C<CORE::read()>
+and C<POSIX::read()> explicitly. However, C<POSIX::read()> is the same
+as C<CORE::sysread()>!
 
-    POSIX   Perl-Core POSIX.pm POSIX::1003::FdIO
- FH fseek   seek
- FD lseek   sysseek   lseek    seekfd
- FH fopen   open
- FD open    sysopen            openfd   # sysopen is clumpsy
- FD fdopen  open               fdopen   # IO::Handle->new_from_fd
- FH fclose  close
- FD close   close     close    closefd
- FH fread   read
- FD read    sysread   read     readfd
- FH fwrite  print
- FD write   syswrite  write    writefd
- FH         pipe,open                   # buffered unless $|=0
- FD pipe              pipe     pipefd
- FH stat    stat
- FD fstat             fstat    statfd
- FN lstat   lstat
- FH ftell   tell
- FD                            tellfd   # tell on fd not in POSIX
- FH rewind            rewind
- FD                            rewindfd # rewind on fd not in POSIX
- FD creat             creat    creatfd
- FD dup                        dupfd
- FD fcntl   fcntl              (many)   # see ::Fcntl
- FD flock   flock              flockfd  # see ::Fcntl
- FD lockf                      lockf    # see ::Fcntl
+To avoid conflicts with function names in Perl core, and the confusion
+that the POSIX created, all exported function names provided by this
+module contain 'fd' in their name.
+
+    POSIX    Perl-Core POSIX.pm  POSIX::1003::FdIO
+ FH fseek     seek
+ FD lseek     sysseek   lseek    seekfd
+ FH fopen     open
+ FD open      sysopen            openfd   # sysopen is clumpsy
+ FD fdopen    open               fdopen   # IO::Handle->new_from_fd
+ FH fclose    close
+ FD close     close     close    closefd
+ FH fread     read
+ FD read      sysread   read     readfd
+ FH fwrite    print
+ FD write     syswrite  write    writefd
+ FH           pipe,open                   # buffered unless $|=0
+ FD pipe                pipe     pipefd
+ FH stat      stat
+ FD fstat               fstat    statfd
+ FN lstat     lstat
+ FH ftell     tell
+ FD                              tellfd   # tell on fd not in POSIX
+ FH rewind              rewind
+ FD                              rewindfd # rewind on fd not in POSIX
+ FD creat               creat    creatfd
+ FD dup                          dupfd
+ FD fcntl     fcntl              (many)   # see ::Fcntl
+ FD flock     flock              flockfd  # see ::Fcntl
+ FD lockf                        lockf    # see ::Fcntl
+ FN truncate  truncate
+ FD ftruncate                    truncfd
 
 Works on: FH=file handle, FD=file descriptor, FN=file name
 
@@ -155,10 +163,6 @@ You may want to use M<POSIX::Util::readfd_all()>
 Attempt to write the first LENGTH bytes of STRING to FD. Returned is
 the number of bytes actually written.  You have an error only when C<-1>
 is returned.
-
-The number of bytes written can be less than LENGTH without an error
-condition: you have to call write again with the remaining bytes.  This
-is quite inconvenient. You may want to use M<POSIX::Util::readfd_all()>
 
 =function dupfd FD
 Copy the file-descriptor FD into the lowest-numbered unused descriptor.
@@ -222,6 +226,14 @@ sub fdopen($$)
     $fh;
 }
 
+=function truncfd FD, [LENGTH]
+[0.96] Shorten the file to the LENGTH (defaults to 0).  The file offset
+(your pointer in the file) is not changed, so you may need to M<seekfd()>
+as well.  Behavior is undefined when LENGTH is larger than the file size.
+
+The POSIX name for this function is C<ftruncate>.
+=cut
+
 #------------------
 =section Additional
 Zillions of Perl programs reimplement these functions. Let's simplify
@@ -233,7 +245,7 @@ nor on other UNIXes), however is a logical counterpart of the C<tell()> on
 filenames.
 
 =function rewindfd FD
-Seek to the beginning of the file
+Seek to the beginning of the file.
 =cut
 
 sub tellfd($)     {seekfd $_[0], 0, SEEK_CUR() }

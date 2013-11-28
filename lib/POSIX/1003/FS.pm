@@ -7,9 +7,14 @@ use base 'POSIX::1003::Module';
 # Blocks resp from unistd.h, stdio.h, limits.h
 my @constants;
 my @access = qw/access/;
-my @stat_checks = qw/S_ISDIR S_ISCHR S_ISBLK S_ISREG S_ISFIFO
-  S_ISLNK S_ISSOCK S_ISWHT/;
-my @stat  = (qw/stat lstat/, @stat_checks);
+
+my @stat  = qw/stat lstat
+  S_ISDIR S_ISCHR S_ISBLK S_ISREG S_ISFIFO S_ISLNK S_ISSOCK S_ISWHT S_IFMT
+  S_IFBLK S_IFCHR S_IFDIR S_IFIFO S_IFLNK S_IFMT S_IFREG S_IFSOCK S_ISGID
+  S_ISUID S_ISVTX/;
+
+my @perms = qw/S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU
+  S_IWGRP S_IWOTH S_IWUSR S_IXGRP S_IXOTH S_IXUSR/;
 
 sub S_ISDIR($)  { ($_[0] & S_IFMT()) == S_IFDIR()}
 sub S_ISCHR($)  { ($_[0] & S_IFMT()) == S_IFCHR()}
@@ -38,6 +43,7 @@ our %EXPORT_TAGS =
  , access    => \@access
  , stat      => \@stat
  , tables    => [ qw/%access %stat/ ]
+ , perms     => \@perms
  );
 
 my ($fsys, %access, %stat);
@@ -96,7 +102,9 @@ Use the C<*_OK> constants for FLAGS.
 Like C<chown()>, but does not follow symlinks when encountered. Returns
 the number of files successfully changed.
 
-B<Warning>, M<POSIX> uses different parameter order:
+B<Be Warned> that the M<POSIX> specification uses different parameter
+order. For Perl was decided to accept a list of filenames.  Passing more
+than one filename, however, hinders correct error reporting.
 
   # POSIX specification:
   # int lchown(const char *path, uid_t owner, gid_t group);
@@ -121,7 +129,7 @@ sub lchown($$@)
 =function utime ATIME, MTIME, FILENAMES
 Simply C<CORE::utime()>
 
-B<Warning,> C<POSIX.pm> uses a different parameter order than core.
+B<Be Warned> that C<POSIX.pm> uses a different parameter order than CORE.
 
   POSIX::utime($filename, $atime, $mtime);
   CORE::utime($atime, $mtime, @filenames);
@@ -136,9 +144,13 @@ usage information (combined in a I<minor> number).
 Simple C<CORE::mkdir()>
 
 =function rename OLDNAME, NEWNAME
-[0.93] This will use C<CORE::rename()>.  Be warned that Window's C<rename>
-implementation will fail when NEWNAME exists, which is not POSIX compliant.
-On many platforms, C<rename> between different partitions is not allowed.
+[0.93] Give a file or directory a new name, the basis of the UNIX C<mv>
+('move') command.  This will use C<CORE::rename()>. 
+
+B<Be warned> that Window's C<rename> implementation will fail when
+NEWNAME exists.  That behavior is not POSIX compliant.  On many platforms
+(especially the older), a C<rename> between different partitions is not
+allowed.
 
 =section Additional
 
@@ -168,6 +180,7 @@ Combine MAJOR and MINOR into a single DEVICE number.
 =function S_ISLNK MODE
 =function S_ISSOCK MODE
 =function S_ISWHT MODE
+=function S_ISVTX MODE
 
 =chapter CONSTANTS
 
@@ -184,8 +197,11 @@ installation.
 #TABLE_FSYS_END
 
 All functions and constants which start with C<S_*> can be imported
-using the C<:stat> tag, including all related C<S_IF*> functions.
-The C<*_OK> tags can be imported with C<:access> =cut
+using the C<:stat> tag, including all related C<S_IS*> functions.
+
+The C<*_OK> tags can be imported with C<:access>
+
+Permission flags get loaded with C<:perms>.
 =cut
 
 sub _create_constant($)

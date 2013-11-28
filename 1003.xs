@@ -112,6 +112,10 @@
 #define HAS_LOCKF
 #endif
 
+#ifndef HAS_FTRUNCATE
+#define HAS_FTRUNCATE
+#endif
+
 /*
  * work-arounds for various operating systems
  */
@@ -353,6 +357,24 @@ fdio_table()
 	RETVAL = fill_fdio();
     OUTPUT:
 	RETVAL
+
+SV *
+truncfd(fd, l = 0)
+        int             fd;
+        off_t           l;
+    PROTOTYPE: $;$
+    PREINIT:
+        long            result;
+    CODE:
+#ifdef HAS_FTRUNCATE
+        result = ftruncate(fd, l);
+        RETVAL = result==-1 ? &PL_sv_undef : newSViv(result);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+        RETVAL
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::FS
 

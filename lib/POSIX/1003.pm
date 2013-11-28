@@ -11,18 +11,21 @@ my %own_functions = map +($_ => 1), qw/
   show_posix_names
  /;
 
-our (%EXPORT_TAGS, %IMPORT_FROM);
+our (%EXPORT_TAGS, %IMPORT_FROM, %SUBSET);
 
 =chapter NAME
 
 POSIX::1003 - bulk-load POSIX::1003 symbols
 
 =chapter SYNOPSIS
-  use POSIX::1003  qw(:termios :pc PATH_MAX);
+  use POSIX::1003           qw(:termios :pc PATH_MAX);
   # is short for all of these:
   use POSIX::1003::Termios  qw(:all);
   use POSIX::1003::Pathconf qw(:all);
   use POSIX::1003::FS       qw(PATH_MAX);
+
+  # full modules, subsets, constants, functions
+  use POSIX::1003           qw(:pathconf :stat R_OK, cos);
 
   # overview about all exported symbols (by a module)
   show_posix_names 'POSIX::1003::Pathconf';
@@ -67,6 +70,7 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
 
   use POSIX::1003 ':pathconf';
   use POSIX::1003 ':pc';       # same, abbreviated name
+  use POSIX::1003 ':stat';     # subset from :filesystem
 
   use POSIX::1003 qw(PATH_MAX :math sin);
 
@@ -74,9 +78,10 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
   {   POSIX::1003->import('+1', @_);
   }
 
-=subsection EXPORT_TAGS
+=subsection EXPORT_TAGS including whole modules
 
-  :all                  (all symbols, default)
+  (export tag)          (module)
+  :all                  <all symbols, default>
   :cs      :confstr     POSIX::1003::Confstr
   :errno   :errors      POSIX::1003::Errno
   :ev      :events      POSIX::1003::Events
@@ -99,6 +104,19 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
   :termio  :termios     POSIX::1003::Termios
   :time                 POSIX::1003::Time
   :user                 POSIX::1003::User
+
+=subsection EXPORT_TAGS including subsets
+
+[0.96] Besides loading all the symbols of a module, you can also
+include a subset for some of the modules
+
+   (module)      (export tags of subsets)
+   fcntl         :flock   :lockf
+   fdio          :mode    :seek
+   filesystem    :access  :stat    :perms
+   limits        :rlimit  :ulimit
+   signals       :status  :signals
+   termios       :flush   :flags   :speed
 
 =chapter FUNCTIONS
 
@@ -168,13 +186,13 @@ sub _tags()     { keys %tags}
 
 sub import(@)
 {   my $class = shift;
-    my (%mods, %from);
+    my (%mods, %modset, %from);
 
     my $level = @_ && $_[0] =~ /^\+(\d+)$/ ? shift : 0;
     return if @_==1 && $_[0] eq ':none';
     @_ = ':all' if !@_;
 
-    no strict 'refs';
+    no strict   'refs';
     no warnings 'once';
     my $to    = (caller $level)[0];
 
@@ -184,8 +202,14 @@ sub import(@)
             *{$to.'::'.$_} = \&$_ for keys %own_functions;
         }
         elsif(m/^\:(.*)/)
-        {   exists $tags{$1} or croak "unknown tag '$_'";
-            $mods{$_}++ for map $mod_tag{$_}, _tag2mods $1;  # remove aliases
+        {   if(exists $tags{$1})
+            {   # module by longest alias
+                $mods{$_}++ for map $mod_tag{$_}, _tag2mods $1;
+            }
+            elsif(my $subset = $SUBSET{$1})
+            {   push @{$modset{$subset}}, $1;
+            }
+            else { croak "unknown tag '$_'" };
         }
         elsif($own_functions{$_})
         {   *{$to.'::'.$_} = \&$_;
@@ -204,9 +228,20 @@ sub import(@)
 
     my $up = '+' . ($level+1);
     foreach my $tag (keys %mods)     # whole tags
-    {   foreach my $pkg (_tag2mods($tag))
+    {   delete $modset{$tag};
+        delete $from{$tag};
+        foreach my $pkg (_tag2mods($tag))
         {   eval "require $pkg"; die $@ if $@;
             $pkg->import($up, ':all');
+        }
+    }
+    foreach my $tag (keys %modset)
+    {   foreach my $pkg (_tag2mods($tag))
+        {   eval "require $pkg"; die $@ if $@;
+            my @subsets = @{$modset{$tag}};
+            my $et = \%{"$pkg\::EXPORT_TAGS"};
+            $pkg->import($up, @{$et->{$_}})
+               for @subsets;
         }
     }
     foreach my $tag (keys %from)     # separate symbols
