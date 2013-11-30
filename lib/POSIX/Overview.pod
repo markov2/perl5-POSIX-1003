@@ -908,7 +908,7 @@ B<Warning,> POSIX.pm accepts only one filename
 =head2 User and Group Interfaces
 
 Expect portability issues on this subject.  Better B<not use any of
-these>, but use the abstract L<POSIX::User> instead!
+these>, but use the abstract L<POSIX::1003::User> instead!
 
   cuserid                         ::Proc
   getegid     perlvar/$EGID $)    ::User
@@ -1129,7 +1129,7 @@ M<Log::Dispatch>, or M<Log::Report>.
   setreuid     perlvar/$UID,$EUID ::User
   setutxent                       User::Utmp
 
-Non-standard, but commonly available.  See also M<POSIX::User>.
+Non-standard, but commonly available.  See also M<POSIX::1003::User>.
 
   getresgid                       ::User
   getresuid                       ::User

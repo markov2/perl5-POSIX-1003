@@ -1043,7 +1043,6 @@ _own_ex(function, fd, pid, type)
         }
 #else
         errno  = ENOSYS;
-        RETVAL = &PL_sv_undef;
 #endif
 
 SV *

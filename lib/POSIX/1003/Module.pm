@@ -5,7 +5,7 @@ package POSIX::1003::Module;
 
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.
-our $VERSION = '0.96';
+our $VERSION = '0.97';
 use Carp 'croak';
 
 { use XSLoader;

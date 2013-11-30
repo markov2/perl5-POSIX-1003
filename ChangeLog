@@ -17,6 +17,11 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
+version 0.97: Sat Nov 30 20:45:44 CET 2013
+	Fixes:
+	- build fixes for FreeBSD
+	  rt.cpan.org#91076 [Slaven Rezic]
+
 version 0.96: Thu Nov 28 14:47:55 CET 2013
 	Fixes:
 	- LOCK_* did not get defined.
