@@ -11,6 +11,7 @@
     I_POLL
     I_SYS_POLL
     I_SYS_RESOURCE
+    I_ULIMIT
 
     HAS_FCNTL
     HAS_SETEUID
@@ -99,9 +100,9 @@
 #endif
 
 #ifdef  HAS_FCNTL
-#ifndef HAS_FCNTL_OWN_EX
-#define HAS_FCNTL_OWN_EX
-#endif
+#  ifndef HAS_FCNTL_OWN_EX
+#  define HAS_FCNTL_OWN_EX
+#  endif
 #endif
 
 #ifndef HAS_FLOCK
@@ -122,13 +123,6 @@
 
 #include "system.c"
 
-#ifdef HAS_ULIMIT
-#ifndef I_ULIMIT
-#define I_ULIMIT
-#endif
-#endif
-
-
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
@@ -137,8 +131,11 @@
 #include <fcntl.h>
 #endif
 
-#ifdef I_ULIMIT
-#include <ulimit.h>
+#ifdef HAS_ULIMIT
+#  ifdef  I_ULIMIT
+#  define I_ULIMIT
+#  endif
+#  include <ulimit.h>
 #endif
 
 #ifdef I_SYS_RESOURCE

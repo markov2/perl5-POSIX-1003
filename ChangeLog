@@ -10,12 +10,17 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . add ioctl?
 # . add (bsd_)glob with its many flags
 # . add POSIX::RT::Semaphore logic?
-# . cleanup exampleValue()
+# . cleanup exampleValue(), probably doing too much
 # . charset of $!  strerror()  perl#119499
 
 # . implementation of nl_langinfo
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
+
+version 0.98: Tue Dec  3 08:31:16 CET 2013
+	Fixes:
+	- start config for openbsd and gnukfreebsd [cpantesters]
+	- include of limit.h where the platform does not support it.
 
 version 0.97: Sat Nov 30 20:45:44 CET 2013
 	Fixes:

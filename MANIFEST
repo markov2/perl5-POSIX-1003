@@ -45,10 +45,12 @@ manuals.PL
 symbols.PL
 system/darwin.c
 system/freebsd.c
+system/gnukfreebsd.c
 system/hpux.c
 system/linux.c
 system/mswin32.c
 system/netware.c
+system/openbsd.c
 t/01use.t
 t/20math.t
 t/21fdio.t
