@@ -62,7 +62,7 @@ as specified by POSIX. The actual implementation is part of POSIX.xs
 
 =section Constructors
 
-=c_method new
+=c_method new 
 
 Create a new Termios object. This object will be destroyed automatically
 when it is no longer needed. A Termios object corresponds to the
@@ -72,7 +72,7 @@ termios C struct.
 
 =section Accessors
 
-=method getattr [FD]
+=method getattr [$fd]
 
 Get terminal control attributes (POSIX function C<tcgetattr>). Pass a file
 descriptor, which defaults to C<0> (stdin). Returns C<undef> on failure.
@@ -84,85 +84,85 @@ descriptor, which defaults to C<0> (stdin). Returns C<undef> on failure.
   # Obtain the attributes for stdout
   $termios->getattr(1);
 
-=method setattr FD, FLAGS
+=method setattr $fd, $flags
 Set terminal control attributes (POSIX function C<tcsetattr>).  Returns
 C<undef> on failure.
 
   # Set attributes immediately for stdout.
   $termios->setattr(1, TCSANOW);
 
-=method getcc INDEX
+=method getcc $index
 Retrieve a value from the C<c_cc> field of a termios object. The c_cc field is
 an array so an index must be specified.
   $c_cc[1] = $termios->getcc(1);
 
-=method getcflag
+=method getcflag 
 Retrieve the C<c_cflag> field of a termios object.
   $c_cflag = $termios->getcflag;
 
-=method getiflag
+=method getiflag 
 Retrieve the C<c_iflag> field of a termios object.
   $c_iflag = $termios->getiflag;
 
-=method getispeed
+=method getispeed 
 Retrieve the input baud rate.
   $ispeed = $termios->getispeed;
 
-=method getlflag
+=method getlflag 
 Retrieve the C<c_lflag> field of a termios object.
   $c_lflag = $termios->getlflag;
 
-=method getoflag
+=method getoflag 
 Retrieve the C<c_oflag> field of a termios object.
   $c_oflag = $termios->getoflag;
 
-=method getospeed
+=method getospeed 
 Retrieve the output baud rate.
   $ospeed = $termios->getospeed;
 
-=method setcc VALUE, INDEX
+=method setcc $value, $index
 Set a value in the C<c_cc> field of a termios object.  The c_cc field is an
 array so an index must be specified.
   $termios->setcc(VEOF, 1 );
 
-=method setcflag FLAGS
+=method setcflag $flags
 Set the C<c_cflag> field of a termios object.
   $termios->setcflag( $c_cflag | CLOCAL );
 
-=method setiflag FLAGS
+=method setiflag $flags
 Set the C<c_iflag> field of a termios object.
   $termios->setiflag( $c_iflag | BRKINT );
 
-=method setispeed
+=method setispeed 
 Set the input baud rate.  Returns C<undef> on failure.
   $termios->setispeed( B9600 );
 
-=method setlflag FLAGS
+=method setlflag $flags
 Set the C<c_lflag> field of a termios object.
   $termios->setlflag( $c_lflag | ECHO );
 
-=method setoflag FLAGS
+=method setoflag $flags
 Set the c_oflag field of a termios object.
   $termios->setoflag( $c_oflag | OPOST );
 
-=method setospeed
+=method setospeed 
 Set the output baud rate.
   $termios->setospeed( B9600 );
 
 =chapter FUNCTIONS
 
-=function tcdrain FD
+=function tcdrain $fd
 
-=function tcflow FD, ACTION
-See the possible ACTION values in L</CONSTANTS>, import tag C<:action>
+=function tcflow $fd, $action
+See the possible $action values in L</CONSTANTS>, import tag C<:action>
 
-=function tcflush FD, QUEUE
-See the possible QUEUE values in L</CONSTANTS>, import tag C<:flush>
+=function tcflush $fd, $queue
+See the possible $queue values in L</CONSTANTS>, import tag C<:flush>
 
-=function tcsendbreak FD, DURATION
-DURATION is system dependent.
+=function tcsendbreak $fd, $duration
+$duration is system dependent.
 
-=function ttyname FD
+=function ttyname $fd
 Returns the path to the special device which relates to the file-descriptor.
 See also M<POSIX::1003::Proc::ctermid()>
 

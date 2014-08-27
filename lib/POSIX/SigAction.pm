@@ -32,12 +32,12 @@ but only the POSIX.xs component which has the namespace hard-coded.
 
 =section Constructors
 
-=c_method new HANDLER, [SIGSET, [FLAGS]]
+=c_method new $handler, [$sigset, [$flags]]
 The first parameter is the handler, a code reference. The second parameter
 is a M<POSIX::SigSet> object, it defaults to the empty set.  The third
 parameter contains the C<sa_flags>, it defaults to 0.
 
-This object will be destroyed automatically when it is no longer needed.  
+This object will be destroyed automatically when it is no longer needed.
 =cut
 
 sub POSIX::SigAction::new
@@ -49,12 +49,12 @@ sub POSIX::SigAction::new
 #---------------------------
 =section Accessors
 
-=method handler
-=method mask
-=method flags
+=method handler 
+=method mask 
+=method flags 
 Accessor functions to get/set the values of a SigAction object.
 
-=method safe
+=method safe 
 Accessor function for the "safe signals" flag of a SigAction object; see
 L<perlipc> for general information on safe (a.k.a. "deferred") signals.  If
 you wish to handle a signal safely, use this accessor to set the "safe" flag

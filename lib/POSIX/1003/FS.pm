@@ -92,13 +92,13 @@ You may also need M<POSIX::1003::Pathconf>.
 
 =section Standard POSIX
 
-=function mkfifo FILENAME, MODE
+=function mkfifo $filename, $mode
 
-=function access FILENAME, FLAGS
+=function access $filename, $flags
 Read C<man filetest> before you start using this function!
-Use the C<*_OK> constants for FLAGS.
+Use the C<*_OK> constants for $flags.
 
-=function lchown UID, GID, FILENAMES
+=function lchown $uid, $gid, $filenames
 Like C<chown()>, but does not follow symlinks when encountered. Returns
 the number of files successfully changed.
 
@@ -126,7 +126,7 @@ sub lchown($$@)
     $successes;
 }
 
-=function utime ATIME, MTIME, FILENAMES
+=function utime $atime, $mtime, $filenames
 Simply C<CORE::utime()>
 
 B<Be Warned> that C<POSIX.pm> uses a different parameter order than CORE.
@@ -134,30 +134,30 @@ B<Be Warned> that C<POSIX.pm> uses a different parameter order than CORE.
   POSIX::utime($filename, $atime, $mtime);
   CORE::utime($atime, $mtime, @filenames);
 
-=function mknod PATH, MODE, DEVICE
-Create a special device node on PATH. Useful symbols for MODE can be
-collected from M<Fcntl> (import tag C<:mode>).  The DEVICE number is
+=function mknod $path, $mode, $device
+Create a special device node on $path. Useful symbols for $mode can be
+collected from M<Fcntl> (import tag C<:mode>).  The $device number is
 a combination from the type (I<major> number), a sequence number and
 usage information (combined in a I<minor> number).
 
-=function mkdir [FILENAME [MASK]]
+=function mkdir [$filename [$mask]]
 Simple C<CORE::mkdir()>
 
-=function rename OLDNAME, NEWNAME
+=function rename $oldname, $newname
 [0.93] Give a file or directory a new name, the basis of the UNIX C<mv>
 ('move') command.  This will use C<CORE::rename()>. 
 
 B<Be warned> that Window's C<rename> implementation will fail when
-NEWNAME exists.  That behavior is not POSIX compliant.  On many platforms
+$newname exists.  That behavior is not POSIX compliant.  On many platforms
 (especially the older), a C<rename> between different partitions is not
 allowed.
 
 =section Additional
 
-=function major DEVICE
-=function minor DEVICE
-=function makedev MAJOR, MINOR
-Combine MAJOR and MINOR into a single DEVICE number.
+=function major $device
+=function minor $device
+=function makedev $major, $minor
+Combine $major and $minor into a single DEVICE number.
 
  my $device      = (stat $filename)[6];
  my $device_type = major $device;
@@ -166,21 +166,21 @@ Combine MAJOR and MINOR into a single DEVICE number.
  my $device = makedev $major, $minor;
  mknod $specialfile, $mode, $device;
 
-=function S_ISDIR MODE
+=function S_ISDIR $mode
 =example
   use File::stat 'stat';
   if(S_ISDIR(stat($fn)->mode)) ...
 
   if(S_ISDIR((lstat $fn)[2])) ...
 
-=function S_ISCHR MODE
-=function S_ISBLK MODE
-=function S_ISREG MODE
-=function S_ISFIFO MODE
-=function S_ISLNK MODE
-=function S_ISSOCK MODE
-=function S_ISWHT MODE
-=function S_ISVTX MODE
+=function S_ISCHR $mode
+=function S_ISBLK $mode
+=function S_ISREG $mode
+=function S_ISFIFO $mode
+=function S_ISLNK $mode
+=function S_ISSOCK $mode
+=function S_ISWHT $mode
+=function S_ISVTX $mode
 
 =chapter CONSTANTS
 

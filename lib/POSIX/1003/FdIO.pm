@@ -130,18 +130,18 @@ Works on: FH=file handle, FD=file descriptor, FN=file name
 
 =section Standard POSIX
 
-=function seekfd FD, OFFSET, WHENCE
-The WHENCE is a C<SEEK_*> constant.
+=function seekfd $fd, $offset, $whence
+The $whence is a C<SEEK_*> constant.
 
-=function openfd FILENAME, FLAGS, MODE
+=function openfd $filename, $flags, $mode
 Returned is an integer file descriptor (FD).  Returns C<undef> on
 failure (and '0' is a valid FD!)
 
-FLAGS are composed from the C<O_*> constants defined by this module (import
-tag C<:mode>) The MODE field combines C<S_I*> constants defined by
+$flags are composed from the C<O_*> constants defined by this module (import
+tag C<:mode>) The $mode field combines C<S_I*> constants defined by
 M<POSIX::1003::FS> (import tag C<:stat>).
 
-=function closefd FD
+=function closefd $fd
 Always check the return code: C<undef> on error, cause in C<$!>.
   closefd $fd or die $!;
 
@@ -149,31 +149,31 @@ There is no C<sysclose()> in core, because C<sysopen()> does unbuffered
 IO via its perl-style file-handle: when you open with C<CORE::sysopen()>,
 you must close with C<CORE::close()>.
 
-=function readfd FD, SCALAR, [LENGTH]
-Read the maximum of LENGTH bytes from FD into the SCALAR. Returned is
+=function readfd $fd, SCALAR, [$length]
+Read the maximum of $length bytes from $fd into the SCALAR. Returned is
 the actual number of bytes read.  The value C<-1> tells you there is
 an error, reported in C<$!>
 
-B<Be warned> that a returned value smaller than LENGTH does not mean
-that the FD has nothing more to offer: the end is reached only when 0
+B<Be warned> that a returned value smaller than $length does not mean
+that the $fd has nothing more to offer: the end is reached only when 0
 (zero) is returned.  Therefore, this reading is quite inconvenient.
 You may want to use M<POSIX::Util::readfd_all()>
 
-=function writefd FD, BYTES, [LENGTH]
-Attempt to write the first LENGTH bytes of STRING to FD. Returned is
+=function writefd $fd, $bytes, [$length]
+Attempt to write the first $length bytes of STRING to $fd. Returned is
 the number of bytes actually written.  You have an error only when C<-1>
 is returned.
 
-=function dupfd FD
-Copy the file-descriptor FD into the lowest-numbered unused descriptor.
+=function dupfd $fd
+Copy the file-descriptor $fd into the lowest-numbered unused descriptor.
 The new fd is returned, undef on failure.
 
-=function dup2fd FD, NEWFD
-Copy file-descriptor FD to an explicit NEWFD number. When already
-in use, the file at NEWFD will be closed first.  Returns undef on
+=function dup2fd $fd, $newfd
+Copy file-descriptor $fd to an explicit $newfd number. When already
+in use, the file at $newfd will be closed first.  Returns undef on
 failure.
 
-=function pipefd
+=function pipefd 
 Returns the reader and writer file descriptors.
 See also M<POSIX::1003::Fcntl::setfd_pipe_size()>
 
@@ -182,11 +182,11 @@ See also M<POSIX::1003::Fcntl::setfd_pipe_size()>
   writefd($w, "hello", 5 );
   readfd($r, $buf, 5 );
 
-=function statfd FD
+=function statfd $fd
 Request file administration information about an open file. It returns
 the same list of values as C<stat> on filenames.
 
-=function creatfd FILENAME, MODE
+=function creatfd $filename, $mode
 Implemented via M<openfd()>, which is true by definition of POSIX.
 =cut
 
@@ -201,9 +201,9 @@ sub dup2fd($$)    { goto &POSIX::dup2  }
 sub statfd($)     { goto &POSIX::fstat }
 sub creatfd($$)   { openfd $_[0], O_WRONLY()|O_CREAT()|O_TRUNC(), $_[1] }
 
-=function fdopen FD, MODE
-Converts a FD into an (buffered) FH.  You probably want to set binmode
-after this.  MODE can be Perl-like '<', '>', '>>', or POSIX standard
+=function fdopen $fd, $mode
+Converts a $fd into an (buffered) FH.  You probably want to set binmode
+after this.  $mode can be Perl-like '<', '>', '>>', or POSIX standard
 'r', 'w', 'a'.  POSIX modes 'r+', 'w+', and 'a+' can probably not be
 supported.
 =cut
@@ -226,10 +226,10 @@ sub fdopen($$)
     $fh;
 }
 
-=function truncfd FD, [LENGTH]
-[0.96] Shorten the file to the LENGTH (defaults to 0).  The file offset
+=function truncfd $fd, [$length]
+[0.96] Shorten the file to the $length (defaults to 0).  The file offset
 (your pointer in the file) is not changed, so you may need to M<seekfd()>
-as well.  Behavior is undefined when LENGTH is larger than the file size.
+as well.  Behavior is undefined when $length is larger than the file size.
 
 The POSIX name for this function is C<ftruncate>.
 =cut
@@ -239,12 +239,12 @@ The POSIX name for this function is C<ftruncate>.
 Zillions of Perl programs reimplement these functions. Let's simplify
 code.
 
-=function tellfd FD
+=function tellfd $fd
 Reports the location in the file. This call does not exist (not in POSIX,
 nor on other UNIXes), however is a logical counterpart of the C<tell()> on
 filenames.
 
-=function rewindfd FD
+=function rewindfd $fd
 Seek to the beginning of the file.
 =cut
 

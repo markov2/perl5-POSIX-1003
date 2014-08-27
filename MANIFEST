@@ -20,6 +20,7 @@ lib/POSIX/1003/Pathconf.pm
 lib/POSIX/1003/Proc.pm
 lib/POSIX/1003/Properties.pm
 lib/POSIX/1003/Signals.pm
+lib/POSIX/1003/Socket.pm
 lib/POSIX/1003/Symbols.pm
 lib/POSIX/1003/Sysconf.pm
 lib/POSIX/1003/Termios.pm
@@ -39,6 +40,7 @@ lists/poll.txt
 lists/posix.txt
 lists/rlimit.txt
 lists/signals.txt
+lists/socket.txt
 lists/sysconf.txt
 lists/ulimit.txt
 manuals.PL
@@ -49,6 +51,7 @@ system/gnukfreebsd.c
 system/hpux.c
 system/linux.c
 system/mswin32.c
+system/netbsd.c
 system/netware.c
 system/openbsd.c
 t/01use.t

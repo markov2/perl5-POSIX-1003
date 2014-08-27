@@ -104,11 +104,11 @@ tries to provide functions which separates the various uses.
 
 =section Standard POSIX
 
-=function fcntl FD, FUNCTION, SCALAR
+=function fcntl $fd, $function, SCALAR
 See C<perlfunc fcntl>.  This raw call to C<fcntl()> is only in some
 cases simple, but often isn't.
 
-=function flockfd FD, FLAGS
+=function flockfd $fd, $flags
 Not standard POSIX, but available on many POSIX platforms.  Often
 implemented as M<fcntl()>, which is more complex to use.  On other
 platforms implemented as separate OS feature.
@@ -129,7 +129,7 @@ sub flockfd($$)
     _flock($fd, $flags);
 }
 
-=function lockf FD, FLAG, LENGTH
+=function lockf $fd, $flag, $length
 Not standard POSIX, but available on many POSIX platforms.  Often
 implemented via M<fcntl()>, which is more complex to use.
 
@@ -147,7 +147,7 @@ sub lockf($$;$)
 
 =section Additional
 
-=function fcntl_dup FD|FH, OPTIONS
+=function fcntl_dup $fd|$fh, %options
 
 Functions F_DUPFD and F_DUPFD_CLOEXEC: dupplicate a file-descriptor
 to the lowest free fd number.
@@ -176,7 +176,7 @@ sub fcntl_dup($%)
     setfd_control $fd, O_CLOEXEC;
 }
 
-=function getfd_control FD|FH
+=function getfd_control $fd|$fh
 Control the file descriptor flags, function F_GETFD.
 =cut
 
@@ -186,7 +186,7 @@ sub getfd_control($)
     _fcntl $fd, F_GETFD, UNUSED;
 }
 
-=function setfd_control FD|FH, FLAGS
+=function setfd_control $fd|$fh, $flags
 Change the file descriptor flags, function F_SETFD.
 =cut
 
@@ -196,7 +196,7 @@ sub setfd_control($$)
     _fcntl $fd, F_SETFD, $flags;
 }
 
-=function getfd_flags FD|FH
+=function getfd_flags $fd|$fh
 Get the file status flags and access modes, function F_GETFL.
 
 =example
@@ -210,7 +210,7 @@ sub getfd_flags($)
     _fcntl $fd, F_GETFL, UNUSED;
 }
 
-=function setfd_flags FD|FH, FLAGS
+=function setfd_flags $fd|$fh, $flags
 Change the file status flags and access modes, function F_SETFL.
 =cut
 
@@ -220,7 +220,7 @@ sub setfd_flags($$)
     _fcntl $fd, F_SETFL, $flags;
 }
 
-=function setfd_lock FD|FH, OPTIONS
+=function setfd_lock $fd|$fh, %options
 
 Functions F_SETLK and F_SETLKW: request a lock for (a section of) a file.
 
@@ -239,6 +239,11 @@ Functions F_SETLK and F_SETLKW: request a lock for (a section of) a file.
 =option  wait   BOOLEAN
 =default wait   <false>
 
+=option  private BOOLEAN
+=default private <false>
+Linux kernel >= 3.15 provides "open file description locks", also known
+as "file-private POSIX locks".  Use them when available.
+
 =example
   setfd_lock \*IN, type => F_WRLCK, wait => 1
       or die "cannot lock IN: $!\n";
@@ -247,7 +252,11 @@ Functions F_SETLK and F_SETLKW: request a lock for (a section of) a file.
 sub setfd_lock($%)
 {   my ($file, %args) = @_;
     my $fd   = ref $file ? fileno($file) : $file;
-    my $func = $args{wait} ? F_SETLK : F_SETLKW;
+
+    my $func;
+    $func   = $args{wait} ? F_SETLKP : F_SETLKWP if $args{private};
+    $func ||= $args{wait} ? F_SETLK  : F_SETLKW;
+
     $args{type}   //= F_RDLCK;
     $args{whence} //= SEEK_SET;
     $args{start}  //= 0;
@@ -255,10 +264,10 @@ sub setfd_lock($%)
     _lock $fd, $func, \%args;
 }
 
-=function getfd_islocked FD|FH, OPTIONS
+=function getfd_islocked $fd|$fh, %options
 
 Function F_GETLCK. Returns the first lock which would prevent getting
-the lock.  The OPTIONS are the same as for M<setfd_lock()>.
+the lock.  The %options are the same as for M<setfd_lock()>.
 
 =example
   if(my $lock = getfd_islocked \*IN) ...
@@ -271,14 +280,16 @@ sub getfd_islocked($%)
     $args{whence} //= SEEK_SET;
     $args{start}  //= 0;
     $args{len}    //= 0;
-    my $lock = _lock $fd, F_GETLK, \%args
+
+    my $func = $args{private} ? (F_GETLKW//F_GETLK) : F_GETLK;
+    my $lock = _lock $fd, $func, \%args
        or return undef;
 
     #XXX MO: how to represent "ENOSYS"?
     $lock->{type}==F_UNLCK ? undef : $lock;
 }
 
-=function getfd_owner FD|FH, OPTIONS
+=function getfd_owner $fd|$fh, %options
 Function F_GETOWN or F_GETOWN_EX.
 
 =examples
@@ -308,7 +319,7 @@ sub getfd_owner($%)
     wantarray ? ($type, $pid) : $pid;
 }
 
-=function setfd_owner FD|FH, PID, OPTIONS
+=function setfd_owner $fd|$fh, $pid, %options
 
 Function F_GETOWN or F_GETOWN_EX.  The _EX version is attempted
 if provided.
@@ -341,7 +352,7 @@ sub setfd_owner($$%)
     defined $t;
 }
 
-=function setfd_signal FD|FH, SIGNAL
+=function setfd_signal $fd|$fh, $signal
 Function F_SETSIG.
 
 =examples
@@ -354,7 +365,7 @@ sub setfd_signal($$)
     _fcntl $fd, F_SETSIG, $signal;
 }
 
-=function getfd_signal FD|FH
+=function getfd_signal $fd|$fh
 Function F_GETSIG.
 
 =examples
@@ -367,7 +378,7 @@ sub getfd_signal($)
     _fcntl $fd, F_SETSIG, UNUSED;
 }
 
-=function setfd_lease FD|FH, FLAGS
+=function setfd_lease $fd|$fh, $flags
 Function F_SETLEASE.
 
 =examples
@@ -380,7 +391,7 @@ sub setfd_lease($$)
     _fcntl $fd, F_SETLEASE, $flags;
 }
 
-=function getfd_lease FD|FH
+=function getfd_lease $fd|$fh
 Function F_GETLEASE.
 
 =examples
@@ -395,7 +406,7 @@ sub getfd_lease($)
 }
 
 
-=function setfd_notify FD|FH, FLAGS
+=function setfd_notify $fd|$fh, $flags
 Function F_NOTIFY.
 
 =example
@@ -410,7 +421,7 @@ sub setfd_notify($$)
     _fcntl $fd, F_NOTIFY, $flags;
 }
 
-=function setfd_pipe_size FD|FH, SIZE
+=function setfd_pipe_size $fd|$fh, $size
 Function F_SETPIPE_SZ.
 
 =examples
@@ -423,7 +434,7 @@ sub setfd_pipe_size($$)
     _fcntl $fd, F_SETPIPE_SZ, $size;
 }
 
-=function getfd_pipe_size FD|FH
+=function getfd_pipe_size $fd|$fh
 Function F_GETPIPE_SZ.
 
 =examples

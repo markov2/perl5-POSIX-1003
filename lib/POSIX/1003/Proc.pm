@@ -57,7 +57,7 @@ Functions which are bound to each separate process.
 
 =section Standard POSIX functions from stdlib.h
 
-=function abort
+=function abort 
 Abnormal process exit.
 
 =section Standard POSIX functions from sys/wait.h
@@ -88,10 +88,10 @@ if you specified the C<WUNTRACED> flag to waitpid().
 Returns the signal the child process was stopped for. Only meaningful
 if C<WIFSTOPPED($?)> is true.
 
-=function wait
+=function wait 
 Simply L<perlfunc/wait>.
 
-=function waitpid PID, FLAGS
+=function waitpid $pid, $flags
 Simply L<perlfunc/waitpid>.
 =cut
 
@@ -108,12 +108,12 @@ Simply L<perlfunc/waitpid>.
 #-------------------------------------
 =section Standard POSIX functions from unistd.h
 
-=function cuserid
+=function cuserid 
 Get the login name of the effective user of the current process.
 See also C<perldoc -f getlogin>
   my $name = cuserid();
 
-=function ctermid
+=function ctermid 
 Generates the path name for the controlling terminal of this process.
   my $path = ctermid();
 
@@ -121,11 +121,11 @@ Generates the path name for the controlling terminal of this process.
 Leave the program without calling handlers registered with C<atexit>
 (which is not available in Perl)
 
-=function pause
-=function setpgid PID, PPID
-=function setsid
-=function tcgetpgrp FD
-=function tcsetpgrp FD, PID
+=function pause 
+=function setpgid $pid, $ppid
+=function setsid 
+=function tcgetpgrp $fd
+=function tcsetpgrp $fd, $pid
 =cut
 
 sub cuserid()     {goto &POSIX::cuserid}
@@ -137,17 +137,17 @@ sub setsid()      {goto &POSIX::setsid}
 sub cgetpgrp($)   {goto &POSIX::cgetpgrp}
 sub tcsetpgrp($$) {goto &POSIX::tcsetpgrp}
 
-=function nice INTEGER
+=function nice $integer
   use POSIX::1003::Proc 'nice';
   $new_prio = nice($increment);
 =cut
 
 sub nice($)       {goto &POSIX::nice}
 
-=function getcwd
+=function getcwd 
 Returns the name of the current working directory.  See also M<Cwd>.
 
-=function times5
+=function times5 
 The CORE C<times()> function returns four values, conveniently converted
 into seconds (float).  The M<POSIX> C<times()> returns five values in
 clock tics. To disambique those two, we offer the POSIX function under

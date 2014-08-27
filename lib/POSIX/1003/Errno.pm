@@ -70,8 +70,8 @@ sub exampleValue($)
 
 =section Standard POSIX
 
-=function strerror ERRNO
-Returns the string representations of the ERRNO, as provided by
+=function strerror $errno
+Returns the string representations of the $errno, as provided by
 the operating system.
 =cut
 
@@ -79,9 +79,9 @@ sub strerror($) { _strerror($_[0]) || "Unknown error $_[0]" }
 
 =section Additional
 
-=function errno NAME
-Returns the errno value related to the NAMEd constant.  The NAME
-must be a string. C<undef> will be returned when the NAME is not
+=function errno $name
+Returns the errno value related to the NAMEd constant.  The $name
+must be a string. C<undef> will be returned when the $name is not
 known by the system.
 =example
   my $ticks = errno('EPERM') || 1000;
@@ -101,7 +101,7 @@ sub _create_constant($)
     sub() {$nr};
 }
 
-=function errno_names
+=function errno_names 
 Returns a list with all known names, unsorted.
 =cut
 

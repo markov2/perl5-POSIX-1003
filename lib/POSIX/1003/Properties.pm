@@ -70,8 +70,8 @@ in the C sources only.
 
 =section Additional
 
-=function property NAME
-Returns the property value related to NAME.
+=function property $name
+Returns the property value related to $name.
 =cut
 
 sub property($)
@@ -88,7 +88,7 @@ sub _create_constant($)
     sub() {$value};
 }
 
-=function property_names
+=function property_names 
 Returns a list with all known names, unsorted.
 =cut
 

@@ -15,7 +15,7 @@ our (%EXPORT_TAGS, %IMPORT_FROM, %SUBSET);
 
 =chapter NAME
 
-POSIX::1003 - bulk-load POSIX::1003 symbols
+POSIX::1003 - POSIX 1003:2008 provisioning
 
 =chapter SYNOPSIS
   use POSIX::1003           qw(:termios :pc PATH_MAX);
@@ -34,7 +34,7 @@ POSIX::1003 - bulk-load POSIX::1003 symbols
 
 =chapter DESCRIPTION
 
-The M<POSIX::1003> suite implements access to many POSIX functions. The
+The M<POSIX::1003> suite provides access to b<many> POSIX functions. The
 M<POSIX> module in I<core> (distributed with Perl itself) is ancient, the
 documentation is usually wrong, and it has too much unusable code in it.
 C<POSIX::1003> tries to provide cleaner access to the operating system.
@@ -47,7 +47,7 @@ extension provides access to quite a number of those functions, when they
 are not provided by "core". They also define as many system constants
 as possible. More functions may get added in the future.
 
-B<Start looking in POSIX::Overview>, to discover which module
+B<Start looking> in M<POSIX::Overview>, to discover which module
 provides certain functionality. You may also guess the location from
 the module names listed in L</DETAILS>, below.
 
@@ -101,6 +101,7 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
   :signals              POSIX::1003::Signals
   :signals :sigaction   POSIX::SigAction
   :signals :sigset      POSIX::SigSet
+  :socket               POSIX::1003::Socket
   :termio  :termios     POSIX::1003::Termios
   :time                 POSIX::1003::Time
   :user                 POSIX::1003::User
@@ -110,13 +111,14 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
 [0.96] Besides loading all the symbols of a module, you can also
 include a subset for some of the modules
 
-   (module)      (export tags of subsets)
-   fcntl         :flock   :lockf
-   fdio          :mode    :seek
-   filesystem    :access  :stat    :perms
-   limits        :rlimit  :ulimit
-   signals       :status  :signals
-   termios       :flush   :flags   :speed
+   (module)       (export tags for subsets)
+   :fcntl         :flock   :lockf
+   :fdio          :mode    :seek
+   :filesystem    :access  :stat    :perms
+   :limits        :rlimit  :ulimit
+   :signals       :status  :signals
+   :termios       :flush   :flags   :speed
+   :socket        :sock    :sol     :so     :af    :pf
 
 =chapter FUNCTIONS
 
@@ -152,6 +154,7 @@ my %tags =
   , sigaction =>   'POSIX::SigAction'
   , signals =>     [qw/POSIX::1003::Signals POSIX::SigSet POSIX::SigAction/]
   , sigset =>      'POSIX::SigSet'
+  , socket =>      'POSIX::1003::Socket'
   , sysconf =>     'POSIX::1003::Sysconf'
   , termio =>      'POSIX::1003::Termios'
   , termios =>     'POSIX::1003::Termios'
@@ -252,7 +255,7 @@ sub import(@)
    }
 }
 
-=function posix_1003_modules
+=function posix_1003_modules 
 Returns the names of all modules in the current release of POSIX::1003.
 =cut
 
@@ -264,10 +267,10 @@ sub posix_1003_modules()
     keys %mods;
 }
 
-=function posix_1003_names [MODULES|TAGS]
+=function posix_1003_names [$modules|$tags]
 Returns  all the names, when in LIST content.  In SCALAR context,
 it returns (a reference to) an HASH which contains exported names
-to modules mappings.  If no explicit MODULES are specified, then all
+to modules mappings.  If no explicit $modules are specified, then all
 available modules are taken.
 =cut
 
@@ -299,9 +302,9 @@ sub posix_1003_names(@)
     wantarray ? keys %names : \%names;
 }
 
-=function show_posix_names [MODULES|TAGS]
+=function show_posix_names [$modules|$tags]
 Print all names defined by the POSIX::1003 suite in alphabetical
-(case-insensitive) order. If no explicit MODULES are specified, then all
+(case-insensitive) order. If no explicit $modules are specified, then all
 available modules are taken.
 =cut
 
@@ -356,6 +359,8 @@ Provide access to the C<pathconf()> and its trillion C<_PC_*> constants.
 Provide access to the C<_POSIX_*> constants.
 =item M<POSIX::1003::Signals>
 With helper modules M<POSIX::SigSet> and M<POSIX::SigAction>.
+=item M<POSIX::1003::Socket>
+Provide access to many socket related constants.
 =item M<POSIX::1003::Sysconf>
 Provide access to the C<sysconf> and its zillion C<_SC_*> constants.
 =item M<POSIX::1003::Termios>
@@ -399,12 +404,10 @@ either: not compatible with Perl strings and implemented very different
 interface from POSIX. And there is also no own C<exit()>, because we have
 a C<CORE::exit()> with the same functionality.
 
-=section POSIX::1003 compared to POSIX
+=section POSIX::1003 compared to POSIX.pm
 
-This distribution does not add much functionality itself: it is
-mainly core's POSIX.xs (which is always available and ported to
-all platforms). You can access these routines via M<POSIX> as
-well.
+This distribution uses POSIX.xs (which is always available and ported to
+all platforms) where it can, but adds much, much more.
 
 When you are used to POSIX.pm but want to move to M<POSIX::1003>,
 you must be aware about the following differences:
@@ -416,9 +419,9 @@ based on their purpose, where M<POSIX> uses a header filename as
 tag to group provided functionality.
 
 =item *
-functions provided by CORE are usually not exported again by
-POSIX::1003 (unless to avoid confusion, for instance: is
-C<atan2()> in core or ::Math?)
+functions provided by CORE are usually not exported again by POSIX::1003
+(unless to avoid confusion, for instance: is C<atan2()> in core or
+::Math?)  Importing those is therefore a silent no-op.
 
 =item *
 constants which are already provided via M<Fcntl> or M<Errno> are

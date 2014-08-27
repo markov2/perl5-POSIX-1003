@@ -46,13 +46,13 @@ See L<perllocale> for the details.
 
 =chapter FUNCTIONS
 
-=function localeconv
+=function localeconv 
 Get detailed information about the current locale
 
   my $info     = localeconv();            # is HASH
   print Dumper $info;  # use Data::Dumper to inspect
 
-=function setlocale
+=function setlocale 
 Locales describe national and language specific facts.  With
 M<setlocale()> you change the locale.
 

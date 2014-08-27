@@ -5,7 +5,7 @@ package POSIX::1003::Module;
 
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.
-our $VERSION = '0.98';
+our $VERSION = '0.99';
 use Carp 'croak';
 
 { use XSLoader;
@@ -16,7 +16,8 @@ use Carp 'croak';
 
 # also used in release-test
 our $in_constant_table = qr/
-   ^_CS_    # confstr
+   ^AF_     # socket
+ | ^_CS_    # confstr
  | ^DN_     # fcntl
  | ^E(?!CHONL|XIT_) # errno   ECHONL in Termios, EXIT_ in Proc
  | ^FCNTL   # fcntl
@@ -26,6 +27,7 @@ our $in_constant_table = qr/
  | ^LOCK_   # fcntl
  | ^O_      # fdio
  | ^_PC_    # pathconf
+ | ^PF_     # socket
  | ^POLL    # poll
  | ^_POSIX  # property
  | ^RLIM    # rlimit
@@ -35,6 +37,7 @@ our $in_constant_table = qr/
  | ^SEEK_   # fdio
  | ^SET_    # rlimit aix
  | ^SIG[^_] # signals
+ | ^SO      # socket
  | ^UL_     # ulimit
  | ^WSAE    # errno (windows sockets)
  | _OK$     # access
@@ -53,7 +56,7 @@ module.  This module itself only facilitates those implementations.
 
 =chapter METHODS
 
-=method import
+=method import 
 
 All modules provide a C<:constants> and a C<:functions> tag, sometimes
 more.  The default is C<:all>, which means: everthing. You may also
@@ -155,7 +158,7 @@ sub import(@)
     }
 }
 
-=c_method exampleValue NAME
+=c_method exampleValue $name
 Returns an example value for the NAMEd variable. Often, this is a
 compile-time or runtime constant. For some extensions, like C<::Pathconf>,
 that may not be the case.

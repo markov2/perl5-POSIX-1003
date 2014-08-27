@@ -41,7 +41,7 @@ You may also need M<POSIX::1003::Pathconf>.
 
 =chapter FUNCTIONS
 
-=function uname
+=function uname 
 
 Get the name of current operating system.
 

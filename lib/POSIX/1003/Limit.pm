@@ -117,9 +117,9 @@ sub exampleValue($)
 
 =section Standard POSIX
 
-=function ulimit NAME
-Returns the ulimit value related to the NAMEd constant.  The NAME
-must be a string. C<undef> will be returned when the NAME is not
+=function ulimit $name
+Returns the ulimit value related to the named constant.  The $name
+must be a string. C<undef> will be returned when the $name is not
 known by the system.
 
   my $filesize = ulimit('UL_GETFSIZE') || SSIZE_MAX;
@@ -154,7 +154,7 @@ sub _create_constant($)
     }
 }
 
-=function getrlimit RESOURCE
+=function getrlimit $resource
 
   my ($cur, $max, $success) = getrlimit('RLIMIT_CORE');
   my ($cur, $max) = getrlimit('RLIMIT_CORE');
@@ -169,7 +169,7 @@ sub getrlimit($)
     defined $id ? _getrlimit($id) : ();
 }
 
-=function setrlimit RESOURCE, CUR, [MAX]
+=function setrlimit $resource, $cur, [$max]
   my $success = setrlimit('RLIMIT_CORE', 1e6, 1e8);
   setrlimit('RLIMIT_CORE', 1e6) or die;
 
@@ -188,18 +188,18 @@ sub setrlimit($$;$)
     defined $id ? _setrlimit($id, $cur, $max) : ();
 }
 
-=function setrlimit RESOURCE, CUR, [MAX]
+=function setrlimit $resource, $cur, [$max]
   my $success = setrlimit('RLIMIT_CORE', 1e6, 1e8);
 
 =section Additional
 
-=function ulimit_names
+=function ulimit_names 
 Returns a list with all known names, unsorted.
 =cut
 
 sub ulimit_names() { keys %$ulimit }
 
-=function rlimit_names
+=function rlimit_names 
 Returns a list with all known resource names, unsorted.
 =cut
 

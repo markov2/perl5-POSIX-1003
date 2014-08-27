@@ -64,9 +64,9 @@ sub exampleValue($)
 
 =section Standard POSIX
 
-=function confstr NAME
-Returns the confstr value related to the NAMEd constant.  The NAME
-must be a string. C<undef> will be returned when the NAME is not
+=function confstr $name
+Returns the confstr value related to the NAMEd constant.  The $name
+must be a string. C<undef> will be returned when the $name is not
 known by the system.
 =example
   my $path = confstr('_CS_PATH') || '/bin:/usr/bin';
@@ -90,7 +90,7 @@ sub _create_constant($)
 #--------------------------
 =section Additional
 
-=function confstr_names
+=function confstr_names 
 Returns a list with all known names, unsorted.
 =cut
 

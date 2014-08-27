@@ -38,9 +38,9 @@ POSIX::1003::Events - POSIX for the file-system
 
 =section Standard POSIX
 
-=function select RBITS, WBITS, EBITS, [TIMEOUT]
+=function select $rbits, $wbits, $ebits, [$timeout]
 Perl core contains two functions named C<select>.  The second is the
-one we need here.  Without TIMEOUT, the select will wait until an event
+one we need here.  Without $timeout, the select will wait until an event
 emerges (or an interrupt).
 
 In the example below, C<$rin> is a bit-set indicating on which
@@ -62,20 +62,20 @@ sub select($$$;$)
     goto &select;
 }
 
-=function FD_CLR FD, SET
-Remove the file descriptor FD from the SET. If FD is not a member of
+=function FD_CLR $fd, $set
+Remove the file descriptor $fd from the $set. If $fd is not a member of
 this set, there shall be no effect on the set, nor will an error be
 returned.
 
-=function FD_ISSET FD, SET
-Returns true if the file descriptor FD is a member of the SET
+=function FD_ISSET $fd, $set
+Returns true if the file descriptor $fd is a member of the $set
 
-=function FD_SET FD, SET
-Add the file descriptor FD to the SET
-If the file descriptor FD is already in this set, there
+=function FD_SET $fd, $set
+Add the file descriptor $fd to the $set
+If the file descriptor $fd is already in this set, there
 is no effect on the set, nor will an error be returned.
 
-=function FD_ZERO SET
+=function FD_ZERO $set
 Clear the set
 =cut
 
@@ -84,8 +84,8 @@ sub FD_ISSET($$) {vec($_[1],$_[0],1) ==1}
 sub FD_SET($$)   {vec($_[1],$_[0],1) = 1}
 sub FD_ZERO($)   {$_[0] = 0}
 
-=function poll HASH, [TIMEOUT]
-If TIMEOUT is not defined, the poll will wait until something
+=function poll HASH, [$timeout]
+If $timeout is not defined, the poll will wait until something
 happend.  When C<undef> is returned, then there is an error.
 With an empy HASH returned, then the poll timed out.  Otherwise,
 the returned HASH contains the FDs where something happened.
@@ -100,7 +100,7 @@ sub poll($;$)
 #----------------------
 =section Additional
 
-=function poll_names
+=function poll_names 
 Returns a list with all known names, unsorted.
 =cut
 

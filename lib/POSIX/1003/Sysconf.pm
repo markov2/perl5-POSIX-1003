@@ -67,9 +67,9 @@ sub exampleValue($)
 
 =section Standard POSIX
 
-=function sysconf NAME
-Returns the sysconf value related to the NAMEd constant.  The NAME
-must be a string. C<undef> will be returned when the NAME is not
+=function sysconf $name
+Returns the sysconf value related to the NAMEd constant.  The $name
+must be a string. C<undef> will be returned when the $name is not
 known by the system.
 =example
   my $ticks = sysconf('_SC_CLK_TCK') || 1000;
@@ -93,7 +93,7 @@ sub _create_constant($)
 
 =section Additional
 
-=function sysconf_names
+=function sysconf_names 
 Returns a list with all known names, unsorted.
 =cut
 

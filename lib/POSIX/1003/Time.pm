@@ -74,32 +74,33 @@ zero.  I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0,
 not 1.  The year (C<year>) is given in years since 1900.  I.e., the year
 1995 is 95; the year 2001 is 101.
 
-=function asctime SEC, MIN, HOUR, MDAY, MON, YEAR, ...
+=function asctime $sec, $min, $hour, $mday, $mon, $year, ...
 The C<asctime> function uses C<strftime> with a fixed format, to produce
 timestamps with a trailing new-line.  Example:
 
   "Sun Sep 16 01:03:52 1973\n"
 
-The parameter order is the same as for M<strftime()> without the C<$fmt>:
+The parameter order is the same as for M<strftime()> without its C<$format>
+parameter:
 
   my $str = asctime($sec, $min, $hour, $mday, $mon, $year,
                  $wday, $yday, $isdst);
 
-=function clock
+=function clock 
 The amount of spent processor time in microseconds.
 
-=function ctime TIMESTAMP
+=function ctime $timestamp
 
   # equivalent
   my $str = ctime $timestamp;
   my $str = asctime localtime $timestamp;
 
-=function difftime TIMESTAMP, TIMESTAMP
+=function difftime $timestamp, $timestamp
 Difference between two TIMESTAMPs, which are floats.
 
   $timespan = difftime($end, $begin);
 
-=function mktime SEC, MIN, HOUR, MDAY, MON, YEAR, ...
+=function mktime $sec, $min, $hour, $mday, $mon, $year, ...
 Convert date/time info to a calendar time.
 Returns "undef" on failure.
 
@@ -110,14 +111,14 @@ Returns "undef" on failure.
   $timestamp = mktime(0, 30, 10, 12, 11, 95);
   print "Date = ", ctime($time_t);
 
-=function strftime FMT, SEC, MIN, HOUR, MDAY, MON, YEAR, ...
+=function strftime $format, $sec, $min, $hour, $mday, $mon, $year, ...
 The formatting of C<strftime> is extremely flexible but the parameters
 are quite tricky.  Read carefully!
 
   my $str = strftime($fmt, $sec, $min, $hour,
       $mday, $mon, $year, $wday, $yday, $isdst);
 
-If you want your code to be portable, your format (FMT) argument
+If you want your code to be portable, your $format argument
 should use only the conversion specifiers defined by the ANSI C
 standard (C89, to play safe).  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
 But even then, the results of some of the conversion specifiers are
@@ -151,10 +152,10 @@ sub strftime($@)
     POSIX::strftime($fmt, @_);
 }
 
-=function tzset
+=function tzset 
 Set-up local timezone from C<$ENV{TZ}> and the OS.
 
-=function tzname
+=function tzname 
 Returns the strings to be used to represent Standard time (STD)
 respectively Daylight Savings Time (DST).
 
@@ -164,10 +165,10 @@ respectively Daylight Savings Time (DST).
 
 # Everything in POSIX.xs
 
-=function gmtime [TIME]
+=function gmtime [$time]
 Simply L<perlfunc/gmtime>
 
-=function localtime [TIME]
+=function localtime [$time]
 Simply L<perlfunc/localtime>
 =cut
 

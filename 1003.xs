@@ -12,6 +12,7 @@
     I_SYS_POLL
     I_SYS_RESOURCE
     I_ULIMIT
+    I_SOCKET
 
     HAS_FCNTL
     HAS_SETEUID
@@ -128,6 +129,10 @@
 #endif
 
 #ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+
+#ifdef I_SOCKET
 #include <fcntl.h>
 #endif
 
@@ -268,6 +273,16 @@ fill_errno()
     errno_table = newHV();
 #include "errno.c"
     return errno_table;
+}
+
+HV * socket_table = NULL;
+HV *
+fill_socket()
+{   if(socket_table) return socket_table;
+
+    socket_table = newHV();
+#include "socket.c"
+    return socket_table;
 }
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Sysconf
@@ -934,6 +949,17 @@ _strerror(int errnr)
         errno  = ENOSYS;
         RETVAL = &PL_sv_undef;
 #endif
+    OUTPUT:
+	RETVAL
+
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Socket
+
+HV *
+socket_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_socket();
     OUTPUT:
 	RETVAL
 

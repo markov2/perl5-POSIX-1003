@@ -74,13 +74,13 @@ will return error ENOSYS.
  setresuid($ruid, $euid, $suid)
     or die $!;
 
-=function getuid
-=function setuid UID
-=function geteuid
-=function seteuid EUID
-=function setreuid RUID, EUID
+=function getuid 
+=function setuid $uid
+=function geteuid 
+=function seteuid $euid
+=function setreuid $ruid, $euid
 =function getresuid 
-=function setresuid RUID, EUID, SUID
+=function setresuid $ruid, $euid, $suid
 =cut
 
 #------------------
@@ -95,15 +95,15 @@ The same use and limitations as the uid functions.
 
   setgroups(1,2,3) or die $!;
 
-=function getgid
-=function setgid GID
-=function getegid
-=function setegid EGID
-=function setregid RGID, EGID
+=function getgid 
+=function setgid $gid
+=function getegid 
+=function setegid $egid
+=function setregid $rgid, $egid
 =function getresgid 
-=function setresgid RGID, EGID, SGID
+=function setresgid $rgid, $egid, $sgid
 
-=function getgroups
+=function getgroups 
 Returns a list of group-ids, which may (or may not) contain the effective
 group-id.
 =cut
@@ -111,7 +111,7 @@ group-id.
 #------------------
 =subsection Information about users
 
-=function getpwuid USERID
+=function getpwuid $userid
 Simply L<perlfunc/getpwuid>
 =example
   my ($name, $passwd, $uid, $gid, $quota, $comment,
@@ -119,26 +119,26 @@ Simply L<perlfunc/getpwuid>
   my $uid  = getpwnam($username);
   my $name = getpwuid($userid);
 
-=function getpwnam USERNAME
+=function getpwnam $username
 Simply L<perlfunc/getpwnam>
 
-=function getpwent
+=function getpwent 
 Simply L<perlfunc/getpwent>
 
-=function getlogin
+=function getlogin 
 The username associated with the controling terminal.
 Simply L<perlfunc/getlogin>
 =cut
 
 =subsection Information about groups
 
-=function getgrgid GROUPID
+=function getgrgid $groupid
 Simply L<perlfunc/getgrgid>
 
-=function getgrnam GROUPNAME
+=function getgrnam $groupname
 Simply L<perlfunc/getgrnam>
 
-=function getgrent
+=function getgrent 
 Simply L<perlfunc/getgrent>
 
 =cut

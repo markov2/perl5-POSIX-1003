@@ -69,7 +69,7 @@ These functions are implemened in POSIX.xs
 
 =section Standard POSIX
 
-=function sigaction SIGNAL, ACTION, [OLDACTION]
+=function sigaction $signal, $action, [$oldaction]
 
 Detailed signal management.  The C<signal> must be a number (like SIGHUP),
 not a string (like "SIGHUP").  The  C<action> and C<oldaction> arguments
@@ -103,12 +103,12 @@ Note that not all siginfo values make sense simultaneously (some are
 valid only for certain signals, for example), and not all values make
 sense from Perl perspective.
 
-=function sigpending SIGSET
+=function sigpending $sigset
 
 Examine signals that are blocked and pending.  This uses C<POSIX::SigSet>
 objects for the C<sigset> argument.  Returns C<undef> on failure.
 
-=function sigprocmask HOW, SIGSET, [OLDSIGSET]
+=function sigprocmask $how, $sigset, [$oldsigset]
 
 Change and/or examine calling process's signal mask.  This uses
 C<POSIX::SigSet> objects for the C<sigset> and C<oldsigset> arguments.
@@ -118,20 +118,20 @@ Note that you can't reliably block or unblock a signal from its own signal
 handler if you're using safe signals. Other signals can be blocked or
 unblocked reliably.
 
-=function sigsuspend SIGSET
+=function sigsuspend $sigset
 
 Install a signal mask and suspend process until signal arrives.
 This uses C<POSIX::SigSet> objects for the C<signal_mask> argument.
 Returns C<undef> on failure.
 
-=function raise SIGNAL
+=function raise $signal
 Send a signal to the executing process.
 =cut
 
 # Perl does not support pthreads, so:
 sub raise($) { CORE::kill $_[0], $$ }
 
-=function kill SIGNAL, PROCESS
+=function kill $signal, $process
 Simply L<perlfunc/kill>.
 
 B<Be warned> the order of parameters is reversed in the C<kill>
@@ -141,8 +141,8 @@ exported by M<POSIX>!
   ::Signals::kill($signal, $pid);
   POSIX::kill($pid, $signal);
 
-=function signal SIGNAL, (CODE|'IGNORE'|'DEFAULT')
-Set the CODE (subroutine reference) to be called when the SIGNAL appears.
+=function signal $signal, <CODE|'IGNORE'|'DEFAULT'>
+Set the CODE (subroutine reference) to be called when the $signal appears.
 See L<perlvar/%SIG>.
 
    signal(SIGINT, \&handler);
@@ -156,8 +156,8 @@ sub sigprocmask($$;$) {goto &POSIX::sigprocmask }
 sub sigsuspend($)     {goto &POSIX::sigsuspend }
 sub signal($$)        { $SIG{$_[0]} = $_[1] }
 
-=function strsignal SIGNAL
-Returns a string reprentation of the SIGNAL.  When the SIGNAL is unknown,
+=function strsignal $signal
+Returns a string reprentation of the $signal.  When the $signal is unknown,
 a standard string is returned (never undef)
 =cut
 
@@ -166,13 +166,13 @@ sub strsignal($)      { _strsignal($_[0]) || "Unknown signal $_[0]" }
 #--------------------------
 =section Additional
 
-=function signal_names
+=function signal_names 
 Returns a list with all known signal names, unsorted.
 =cut
 
 sub signal_names() { @signals }
 
-=function sigaction_names
+=function sigaction_names 
 Returns a list with all known sigaction names, unsorted.
 =cut
 

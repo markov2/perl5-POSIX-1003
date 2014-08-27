@@ -27,10 +27,20 @@ my %tables =
   , sysconf  => [ 'POSIX::1003::Sysconf',  \&table_sysconf  ]
   , termios  => [ 'POSIX::1003::Termios',  \&table_termios  ]
   , ulimit   => [ 'POSIX::1003::Limit',    \&table_ulimit   ]
+
+  , socket     => [ 'POSIX::1003::Socket', \&table_socket
+      , qr/^(?!SOL_|SO_|AF_|PF_)/]
+  , socket_sol => [ 'POSIX::1003::Socket', \&table_socket, qr/^SOL_/ ]
+  , socket_so  => [ 'POSIX::1003::Socket', \&table_socket, qr/^SO_/  ]
+  , socket_af  => [ 'POSIX::1003::Socket', \&table_socket, qr/^AF_/  ]
+  , socket_pf  => [ 'POSIX::1003::Socket', \&table_socket, qr/^PF_/  ]
   );
 
 sub produce_table($$);
 sub format_rows($$);
+
+my ($sum_tables, $sum_rows, $sum_undef) = (0, 0, 0);
+sub summerize();
 
 our $pod;   # sorry :(
 
@@ -74,6 +84,7 @@ foreach $pod (sort @pods)
     {   unlink $podtmp       or die "unlink $podtmp: $!";
     }
 }
+summerize;
 
 sub sorted(@) { sort {lc($a) cmp lc($b)} @_ }
 
@@ -82,12 +93,12 @@ sub produce_table($$)
     my $table = $tables{$name}
         or die "unknown table $name";
 
-    my ($pkg, $handler) = @$table;
+    my ($pkg, $handler, @param) = @$table;
     eval "require $pkg";
     die "Compilation errors in module $pkg: $@" if $@;
 
     $pkg->import(':all');
-    $handler->($pkg);
+    $handler->($pkg, @param);
 }
 
 sub table_confstr($)
@@ -123,6 +134,14 @@ sub table_ulimit($)
     my @rows  = map { [$_, $pkg->exampleValue($_)] }
         sorted ulimit_names();
     format_rows ulimit => \@rows;
+}
+
+sub table_socket($$)
+{   my ($pkg, $filter) = @_;
+    my @rows  = map [$_, $pkg->exampleValue($_)]
+      , grep $_ =~ $filter
+         , sorted socket_names();
+    format_rows socket => \@rows;
 }
 
 sub table_math($)
@@ -263,9 +282,13 @@ sub format_rows($$)
              while @left;
     }
 
-    warn sprintf "module %-8s has %3d constants, %2d are undefined\n",
-        $manual, $nr_rows, $nr_undef
-            if $pod !~ m/blib/;
+    if($pod !~ m/blib/)
+    {   warn sprintf "module %-8s has %4d constants, %3d are undefined\n",
+            $manual, $nr_rows, $nr_undef;
+        $sum_tables++;
+        $sum_rows  += $nr_rows;
+        $sum_undef += $nr_undef;
+    }
 
     if(@lines)
     {   my $text = "  ".join("\n  ", @lines)."\n";
@@ -279,4 +302,9 @@ sub format_rows($$)
   module did not get ported to (your version of) your Operating System.
   In the latter case, please help us making it work.
 _NONE
+}
+
+sub summerize()
+{   warn sprintf "   Σ %2d tables have %4d constants, %3d are undefined\n"
+      , $sum_tables, $sum_rows, $sum_undef;
 }

@@ -68,18 +68,18 @@ means that they have the lowest (is list) priority.
 Like the built-in sin, cos, and sqrt, the EXPR defaults to C<$_> and
 there is a scalar context (missing from POSIX.pm).
 
-=function acos EXPR
-=function asin EXPR
-=function atan EXPR
-=function ceil EXPR
-=function cosh EXPR
-=function floor EXPR
-=function frexp EXPR
-=function ldexp EXPR
-=function log10 EXPR
-=function sinh EXPR
-=function tan EXPR
-=function tanh EXPR
+=function acos $expr
+=function asin $expr
+=function atan $expr
+=function ceil $expr
+=function cosh $expr
+=function floor $expr
+=function frexp $expr
+=function ldexp $expr
+=function log10 $expr
+=function sinh $expr
+=function tan $expr
+=function tanh $expr
 =cut
 
 # the argument to be optional is important for expression priority!
@@ -96,16 +96,16 @@ sub sinh(_)  { goto &POSIX::sinh  }
 sub tan(_)   { goto &POSIX::tan   }
 sub tanh(_)  { goto &POSIX::tanh  }
 
-=function modf EXPR, EXPR
-=function fmod EXPR, EXPR
+=function modf $expr, $expr
+=function fmod $expr, $expr
 =cut
 sub modf($$) { goto &POSIX::modf }
 sub fmod($$) { goto &POSIX::fmod }
 
 # All provided by POSIX.xs
 
-=function div NUMER, DENOM
-Devide NUMER by DENOminator. The result is a list of two: quotient and
+=function div $numer, $denominator
+Devide $numer by $denominator. The result is a list of two: quotient and
 remainder.  Implemented in Perl for completeness, currently not with the
 speed of XS.
 
@@ -114,14 +114,14 @@ speed of XS.
 
 sub div($$) { ( int($_[0]/$_[1]), ($_[0] % $_[1]) ) }
 
-=function rint NUMBER
+=function rint $number
 Round to the closest integer.  Implemented in Perl for completeness.
 =cut
 
 sub rint(;$) { my $v = @_ ? shift : $_; int($v + 0.5) }
 
-=function pow EXPR1, EXPR2
-Returns C<EXPR1 ** EXPR2>
+=function pow $expr1, $expr2
+Returns C<$expr1 ** $expr2>
 =cut
 
 sub pow($$) { $_[0] ** $_[1] }
@@ -131,15 +131,15 @@ A small set of mathematical functions are available in Perl CORE,
 without the need to load this module.  But if you do import them,
 it simply gets ignored.
 
-=function abs [EXPR]
-=function exp [EXPR]
-=function log [EXPR]
-=function sqrt [EXPR]
-=function sin [EXPR]
-=function cos [EXPR]
-=function atan2 EXPR, EXPR
-=function srand [EXPR]
-=function rand [EXPR]
+=function abs [$expr]
+=function exp [$expr]
+=function log [$expr]
+=function sqrt [$expr]
+=function sin [$expr]
+=function cos [$expr]
+=function atan2 $expr, $expr
+=function srand [$expr]
+=function rand [$expr]
 =cut
 
 #------------------------------
@@ -175,7 +175,7 @@ String to double translation.  Returns the parsed number and the number
 of characters in the unparsed portion of the string.  When called in a
 scalar context C<strtod> returns the parsed number.
 
-=function strtol STRING, BASE
+=function strtol STRING, $base
 String to integer translation.  Returns the parsed number and
 the number of characters in the unparsed portion of the string.
 When called in a scalar context C<strtol> returns the parsed number.
@@ -187,7 +187,7 @@ octal; any other leading characters mean decimal.  Thus, "1234" is
 parsed as a decimal number, "01234" as an octal number, and "0x1234"
 as a hexadecimal number.
 
-=function strtoul STRING, BASE
+=function strtoul STRING, $base
 String to unsigned integer translation, which behaves like C<strtol>.
 =cut
 

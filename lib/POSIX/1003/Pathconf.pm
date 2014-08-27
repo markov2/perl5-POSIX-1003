@@ -72,11 +72,11 @@ sub exampleValue($)
 =chapter FUNCTIONS
 
 =section Standard POSIX
-=function fpathconf FD, NAME
-Returns the numeric value related to the NAME or C<undef>.
+=function fpathconf $fd, $name
+Returns the numeric value related to the $name or C<undef>.
 
-=function pathconf FILENAME, NAME
-Returns the numeric value related to the NAME or C<undef>.
+=function pathconf $filename, $name
+Returns the numeric value related to the $name or C<undef>.
 =cut
 
 sub fpathconf($$)
@@ -109,7 +109,7 @@ sub _create_constant($)
 
 =section Additional
 
-=function pathconf_names
+=function pathconf_names 
 Returns a list with all known names, unsorted.
 =cut
 

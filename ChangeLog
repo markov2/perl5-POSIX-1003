@@ -17,6 +17,19 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
+version 0.99:
+	Fixes:
+	- openbsd build: skip ulimit
+	- add system/netbsd.c
+
+	Improvements:
+	- added ::Socket
+	- change documentation style
+	- POLLRDHUP (linux 2.6.17)
+	- support linux >=3.15 file-private locks
+
+- ::Socket::{get|set}sockopt
+
 version 0.98: Tue Dec  3 08:31:16 CET 2013
 	Fixes:
 	- start config for openbsd and gnukfreebsd [cpantesters]
