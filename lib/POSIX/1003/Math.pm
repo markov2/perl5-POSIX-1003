@@ -4,24 +4,7 @@ use strict;
 package POSIX::1003::Math;
 use base 'POSIX::1003::Module';
 
-# Block respectively from float.h, math.h, stdlib.h, limits.h
-my @constants = qw/
- DBL_DIG DBL_EPSILON DBL_MANT_DIG DBL_MAX DBL_MAX_10_EXP
- DBL_MAX_EXP DBL_MIN DBL_MIN_10_EXP DBL_MIN_EXP FLT_DIG FLT_EPSILON
- FLT_MANT_DIG FLT_MAX FLT_MAX_10_EXP FLT_MAX_EXP FLT_MIN FLT_MIN_10_EXP
- FLT_MIN_EXP FLT_RADIX FLT_ROUNDS LDBL_DIG LDBL_EPSILON LDBL_MANT_DIG
- LDBL_MAX LDBL_MAX_10_EXP LDBL_MAX_EXP LDBL_MIN LDBL_MIN_10_EXP
- LDBL_MIN_EXP
-
- HUGE_VAL
-
- RAND_MAX
-
- CHAR_BIT CHAR_MAX CHAR_MIN UCHAR_MAX SCHAR_MAX SCHAR_MIN
- SHRT_MAX SHRT_MIN USHRT_MAX
- INT_MAX INT_MIN UINT_MAX
- LONG_MAX LONG_MIN ULONG_MAX
- /;
+my @constants;
 
 # Only from math.h.  The first block are defined in POSIX.xs, the
 # second block present in Core. The last is from string.h
@@ -34,12 +17,23 @@ my @functions = qw/
  div rint pow
  strtod strtol strtoul
 /;
+
 push @functions, @IN_CORE;
 
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
+  , tables    => [ '%math' ]
   );
+
+my  $math;
+our %math;
+
+BEGIN {
+    $math = math_table;
+    push @constants, keys %$math;
+    tie %math, 'POSIX::1003::ReadOnlyTable', $math;
+}
 
 =chapter NAME
 
@@ -206,5 +200,11 @@ installation.
 #TABLE_MATH_END
 
 =cut
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    my $val = $math->{$name};
+    sub () {$val};
+}
 
 1;

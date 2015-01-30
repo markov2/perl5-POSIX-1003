@@ -12,23 +12,44 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . add POSIX::RT::Semaphore logic?
 # . cleanup exampleValue(), probably doing too much
 # . charset of $!  strerror()  perl#119499
+# . linux: CAP_* capset etc
+# . linux: _LINUX_ properties
+# . *bsd: _BSD_ properties
+# . hpux: PRIV_*, pstat, priv_add_effective, priv_remove, privgrp
+# . aix: PV_*
+# . linux memfd* and F_*SEAL*
 
 # . implementation of nl_langinfo
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
-version 0.99:
+#version 0.99_02:
+#- ::Socket::{get|set}sockopt
+
+version 0.99_01: Sat Jan 31 00:39:54 CET 2015
+
 	Fixes:
 	- openbsd build: skip ulimit
 	- add system/netbsd.c
+	- use in combinations with modules which use (old) POSIX
 
 	Improvements:
 	- added ::Socket
 	- change documentation style
 	- POLLRDHUP (linux 2.6.17)
 	- support linux >=3.15 file-private locks
+	- do not hack constants in Fcntl
+	- add GLOB_ and FMN_ constants
+	- math constants not from POSIX, to have them behave as
+	  all other constants.
+	- keep table of all missing labels, so we can warn for accidental
+	  typo's in constants.  ::Module::is_missing()
+	- include lists/locale.txt, lists/procs.txt, lists/os.txt,
+	  lists/math.txt, lists/time.txt, lists/user.txt
+	  do not use constants from POSIX:: anymore because they 'die'
+	  when missing.
+	- prefer core methods over POSIX versions.
 
-- ::Socket::{get|set}sockopt
 
 version 0.98: Tue Dec  3 08:31:16 CET 2013
 	Fixes:

@@ -118,6 +118,10 @@
 #define HAS_FTRUNCATE
 #endif
 
+#ifndef HAS_GLOB
+#define HAS_GLOB
+#endif
+
 /*
  * work-arounds for various operating systems
  */
@@ -154,6 +158,54 @@
 #include <sys/poll.h>
 #endif
 #endif
+
+#define I_SYS_WAIT
+#ifdef I_SYS_WAIT
+#include <sys/wait.h>
+#endif
+
+#ifdef I_TIME
+#include <time.h>
+#endif
+
+#ifdef HAS_GLOB
+#include <glob.h>
+#endif
+
+#define I_SIGNAL
+#ifdef I_SIGNAL
+#include <signal.h>
+#include <bits/signum.h>
+#endif
+
+/*
+ * For missing
+ */
+
+#ifndef __COMPAR_FN_T
+# define __COMPAR_FN_T
+typedef int (*__compar_fn_t) (__const void *, __const void *);
+#endif
+
+char * missing[10000];
+unsigned int  nr_missing = 0;
+bool missing_is_sorted = 0;
+
+static int
+strptr_cmp(const void *p1, const void *p2)
+{   /* passed in are char **'s    */
+    return strcmp(* (char * const *) p1, * (char * const *) p2);
+}
+
+static int
+strptr2_cmp(const void *p1, const void *p2)
+{   /* only second passed in are char **'s    */
+    return strcmp(p1, * (char * const *) p2);
+}
+
+/*
+ * Fill tables
+ */
 
 HV * sc_table = NULL;
 HV *
@@ -285,6 +337,69 @@ fill_socket()
     return socket_table;
 }
 
+
+#include "float.h"
+#include "math.h"
+HV * math_table = NULL;
+HV *
+fill_math()
+{   if(math_table) return math_table;
+
+    math_table = newHV();
+#include "math.c"
+    return math_table;
+}
+
+HV * locale_table = NULL;
+HV *
+fill_locale()
+{   if(locale_table) return locale_table;
+
+    locale_table = newHV();
+#include "locale.c"
+    return locale_table;
+}
+
+HV * os_table = NULL;
+HV *
+fill_os()
+{   if(os_table) return os_table;
+
+    os_table = newHV();
+#include "osconsts.c"
+    return os_table;
+}
+
+HV * proc_table = NULL;
+HV *
+fill_proc()
+{   if(proc_table) return proc_table;
+
+    proc_table = newHV();
+#include "proc.c"
+    return proc_table;
+}
+
+HV * time_table = NULL;
+HV *
+fill_time()
+{   if(time_table) return time_table;
+
+    time_table = newHV();
+#include "time.c"
+    return time_table;
+}
+
+HV * user_table = NULL;
+HV *
+fill_user()
+{   if(user_table) return user_table;
+
+    user_table = newHV();
+#include "user.c"
+    return user_table;
+}
+
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Sysconf
 
 HV *
@@ -321,6 +436,26 @@ _strsignal(signr)
 #endif
     OUTPUT:
 	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Module
+
+SV *
+is_missing(name)
+    char *              name;
+    PROTOTYPE: $
+    PREINIT:
+        char *          found;
+    CODE:
+        if(!missing_is_sorted)
+        {   qsort(missing, nr_missing, sizeof(char *), strptr_cmp);
+            missing_is_sorted = 1;
+        }
+
+        found  = bsearch(name, missing, nr_missing, sizeof(char *),strptr2_cmp);
+        RETVAL = (found == NULL ? &PL_sv_no : &PL_sv_yes);
+    OUTPUT:
+        RETVAL
+
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Confstr
 
@@ -631,6 +766,14 @@ _poll(handles, timeout)
 #endif
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::User
+
+HV *
+user_table()
+    PROTOTYPE:
+    CODE:
+        RETVAL = fill_user();
+    OUTPUT:
+        RETVAL
 
 void
 setuid(uid)
@@ -952,6 +1095,55 @@ _strerror(int errnr)
     OUTPUT:
 	RETVAL
 
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Math
+
+HV *
+math_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_math();
+    OUTPUT:
+	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Locale
+
+HV *
+locale_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_locale();
+    OUTPUT:
+	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::OS
+
+HV *
+osconsts_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_os();
+    OUTPUT:
+	RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Proc
+
+HV *
+proc_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_proc();
+    OUTPUT:
+        RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Time
+
+HV *
+time_table()
+    PROTOTYPE:
+    CODE:
+	RETVAL = fill_time();
+    OUTPUT:
+        RETVAL
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Socket
 
@@ -1104,3 +1296,5 @@ _lockf(fd, function, len)
 #endif
     OUTPUT:
 	RETVAL
+
+

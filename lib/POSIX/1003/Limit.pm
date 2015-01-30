@@ -226,7 +226,8 @@ For ulimit, with a value when it is a getter:
 =for comment
 #TABLE_ULIMIT_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_ULIMIT_END
@@ -237,12 +238,11 @@ M<getrlimit()> returned during installation of the module.
 =for comment
 #TABLE_RLIMIT_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_RLIMIT_END
-
-
 
 =cut
 

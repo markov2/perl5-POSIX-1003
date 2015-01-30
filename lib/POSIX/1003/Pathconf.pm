@@ -19,7 +19,6 @@ my  $pathconf;
 our %pathconf;
 
 BEGIN {
-    # initialize the :constants export tag
     $pathconf = pathconf_table;
     push @constants, keys %$pathconf;
     tie %pathconf, 'POSIX::1003::ReadOnlyTable', $pathconf;
@@ -131,7 +130,8 @@ where returned for a random file at the time.
 =for comment
 #TABLE_PATHCONF_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_PATHCONF_END

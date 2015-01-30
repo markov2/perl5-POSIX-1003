@@ -4,29 +4,34 @@ use strict;
 package POSIX::1003::Proc;
 use base 'POSIX::1003::Module';
 
-# Blocks resp. in stdlib.h, limits.h
-my @constants = qw/
- EXIT_FAILURE EXIT_SUCCESS CHILD_MAX
- WNOHANG WUNTRACED
-  /;
-our @IN_CORE  = qw/wait waitpid/;
-
-# Blocks resp. in stdlib.h, sys/wait.h, unistd.h
+my @constants;
 my @functions = qw/
  abort
 
  WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
  WSTOPSIG WTERMSIG 
-  
+
  _exit pause setpgid setsid tcgetpgrp tcsetpgrp
  ctermid cuserid getcwd nice
  /;
+
+our @IN_CORE  = qw/wait waitpid/;
 push @functions, @IN_CORE;
 
 our %EXPORT_TAGS =
- ( constants => \@constants
- , functions => \@functions
- );
+  ( constants => \@constants
+  , functions => \@functions
+  , tables    => [ '%proc' ]
+  );
+
+my  $proc;
+our %proc;
+
+BEGIN {
+    $proc = proc_table;
+    push @constants, keys %$proc;
+    tie %proc, 'POSIX::1003::ReadOnlyTable', $proc;
+}
 
 =chapter NAME
 
@@ -40,18 +45,7 @@ POSIX::1003::Proc - POSIX handling processes
   setpgid($pid, $pgid);
 
 =chapter DESCRIPTION
-Functions which are bound to each separate process.
-
-=chapter CONSTANTS
-
-=section Constants from stdlib.h
-
- EXIT_FAILURE
- EXIT_SUCCESS
-
-=section Constants from limits.h
-
- CHILD_MAX
+Functions which are bound to processes.
 
 =chapter FUNCTIONS
 
@@ -161,9 +155,27 @@ when a tick is a millisecond and clock_t an uint32.
  ($elapse, $user, $sys, $cuser, $csys) = POSIX::times();
  ($elapse, $user, $sys, $cuser, $csys) = times5();
 
-
 =cut
 
 sub times5()      {goto &POSIX::times}
+
+=chapter CONSTANTS
+
+=for comment
+#TABLE_PROC_START
+
+The constant names for this math module are inserted here during
+installation.
+
+=for comment
+#TABLE_PROC_END
+
+=cut
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    my $val = $proc->{$name};
+    sub() {$val};
+}
 
 1;

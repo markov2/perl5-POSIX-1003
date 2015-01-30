@@ -16,21 +16,28 @@ sub from_listing($$);
 # Maybe someone uses cross-compilation
 my $system = lc ($ENV{OSNAME} || $^O);
 
-my ( %sc, %cs, %posix, %pc, %ul, %rl, %poll, %sig
-   , %fdio, %fsys, %errno, %fcntl, %socket);
+my ( %sc, %cs, %posix, %math, %pc, %ul, %rl, %poll, %sig
+   , %fdio, %fsys, %errno, %fcntl, %socket, %locale, %osconsts
+   , %proc, %time, %user);
 
 from_listing \%cs,    'confstr.txt';
 from_listing \%errno, 'errno.txt';
 from_listing \%fcntl, 'fcntl.txt';
 from_listing \%fdio,  'fdio.txt';
 from_listing \%fsys,  'fsys.txt';
+from_listing \%locale,'locale.txt';
+from_listing \%math,  'math.txt';
+from_listing \%osconsts,'osconsts.txt';
 from_listing \%pc,    'pathconf.txt';
 from_listing \%poll,  'poll.txt';
 from_listing \%posix, 'posix.txt';
+from_listing \%proc,  'proc.txt';
 from_listing \%rl,    'rlimit.txt';
 from_listing \%sc,    'sysconf.txt';
 from_listing \%sig,   'signals.txt';
+from_listing \%time,  'time.txt';
 from_listing \%ul,    'ulimit.txt';
+from_listing \%user,  'user.txt';
 from_listing \%socket,'socket.txt';
 
 #use Data::Dumper;
@@ -41,13 +48,19 @@ dump_table(\%errno, 'errno_table', 'errno.c'     );
 dump_table(\%fcntl, 'fcntl_table', 'fcntl.c'     );
 dump_table(\%fdio,  'fdio_table',  'fdio.c'      );
 dump_table(\%fsys,  'fsys_table',  'fsys.c'      );
+dump_table(\%locale,'locale_table','locale.c'    );
+dump_table(\%math,  'math_table',  'math.c'      );
+dump_table(\%osconsts,'os_table',  'osconsts.c'  );
 dump_table(\%pc,    'pc_table',    'pathconf.c'  );
 dump_table(\%poll,  'poll_table',  'poll.c'      );
 dump_table(\%posix, 'pr_table',    'properties.c');
+dump_table(\%proc,  'proc_table',  'proc.c'      );
 dump_table(\%rl,    'rl_table',    'rlimit.c'    );
 dump_table(\%sc,    'sc_table',    'sysconf.c'   );
 dump_table(\%sig,   'sig_table',   'signals.c'   );
+dump_table(\%time,  'time_table',  'time.c'      );
 dump_table(\%ul,    'ul_table',    'ulimit.c'    );
+dump_table(\%user,  'user_table',  'user.c'      );
 dump_table(\%socket,'socket_table','socket.c'    );
 
 # System specific compilation helpers
@@ -70,12 +83,17 @@ sub dump_table($$$)
     open TABLE, '>', $filename
         or die "cannot write to $filename: $!\n";
 
-    print TABLE "/* Generated */\n\n";
+    print TABLE "/* Generated */\n\n"
+      , "missing_is_sorted = 0;\n\n";
+
     foreach my $const (sort keys %$consts)
     {   my $klen = length $const;
+        my $cast = $const =~ m/^SIG_/ ? '(long)' : '';
         print TABLE <<_CONST
 #ifdef $const
-(void)hv_store($table, "$const", $klen, newSViv($const), 0);
+(void)hv_store($table, "$const", $klen, newSViv($cast$const), 0);
+#else
+missing[nr_missing++] = "$const";
 #endif
 _CONST
     }

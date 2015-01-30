@@ -4,12 +4,9 @@ use strict;
 package POSIX::1003::Socket;
 use base 'POSIX::1003::Module';
 
-use Carp    'croak';
-use IO::Socket::IP;
-
 my (@sock, @sol, @so, @af, @pf, @constants);
 my @functions    = qw/socket_names/;
-our @IN_CORE     = qw//;   # too be added
+our @IN_CORE     = qw//;   # to be added
 
 our %EXPORT_TAGS =
   ( sock      => \@sock
@@ -62,10 +59,9 @@ This module provides access to the "socket" interface, especially a
 long list of constants starting with C<SO_>, C<SOL_>, C<SOCK_>, C<AF_>,
 and many more.
 
-The best way to work with sockets is via M<Socket>, M<IO::Socket> or
-M<IO::Socket::INET>.  This module provides many more constants than
-those modules do, but currently does not export the functions as the
-other modules of this suite do.
+The best way to work with sockets is via M<IO::Socket::IP>.  This module
+provides many more constants than those modules do, but currently does
+not export the functions as the other modules of this suite do.
 
 The advantage of using the constants of this module, is that the list
 will be extended when new names are discovered, and then immediately
@@ -85,6 +81,7 @@ sub _create_constant($)
     sub() {$nr};
 }
 
+#-------------
 =chapter FUNCTIONS
 
 =section Standard POSIX
@@ -109,6 +106,7 @@ C<SO_RCVTIMEO> and C<SO_SNDTIME> get a timestamp in float.
 
 # get/setsockopt in XS
 
+#------------
 =section Additional
 
 =function socket_names 
@@ -117,6 +115,7 @@ Returns a list with all known names, unsorted.
 
 sub socket_names() { keys %$socket }
 
+#------------
 =chapter CONSTANTS
 
 =over 4
@@ -135,7 +134,8 @@ at that time.
 =for comment
 #TABLE_SOCKET_SO_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SOCKET_SO_END
@@ -145,7 +145,8 @@ at that time.
 =for comment
 #TABLE_SOCKET_SOL_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SOCKET_SOL_END
@@ -155,7 +156,8 @@ at that time.
 =for comment
 #TABLE_SOCKET_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SOCKET_END
@@ -165,7 +167,8 @@ at that time.
 =for comment
 #TABLE_SOCKET_AF_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SOCKET_AF_END
@@ -175,7 +178,8 @@ at that time.
 =for comment
 #TABLE_SOCKET_PF_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SOCKET_PF_END

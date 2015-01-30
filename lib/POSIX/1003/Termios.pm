@@ -216,12 +216,19 @@ of this module:
 =for comment
 #TABLE_TERMIOS_START
 
-The constant names for this math module are inserted here during
-installation.
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_TERMIOS_END
 
 =cut
+
+# Only needed by manual.PL
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    no strict 'refs';
+    sub { &{"POSIX::$name"} };
+}
 
 1;

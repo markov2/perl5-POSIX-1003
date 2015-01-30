@@ -19,7 +19,6 @@ my  $sysconf;
 our %sysconf;
 
 BEGIN {
-    # initialize the :constants export tag
     $sysconf = sysconf_table;
     push @constants, keys %$sysconf;
     tie %sysconf, 'POSIX::1003::ReadOnlyTable', $sysconf;
@@ -114,7 +113,8 @@ where returned at that time.
 =for comment
 #TABLE_SYSCONF_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SYSCONF_END

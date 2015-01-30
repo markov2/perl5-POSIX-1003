@@ -19,7 +19,6 @@ my  $errno;
 our %errno;
 
 BEGIN {
-    # initialize the :constants export tag
     $errno = errno_table;
     push @constants, keys %$errno;
     tie %errno, 'POSIX::1003::ReadOnlyTable', $errno;
@@ -122,7 +121,8 @@ Followed by the text that M<strerror()> produces for that error.
 =for comment
 #TABLE_ERRNO_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_ERRNO_END

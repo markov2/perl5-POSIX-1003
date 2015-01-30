@@ -4,23 +4,18 @@ use strict;
 package POSIX::1003::Signals;
 use base 'POSIX::1003::Module';
 
-my @states  = qw/
-    SIG_BLOCK SIG_DFL SIG_ERR
-    SIG_IGN SIG_SETMASK SIG_UNBLOCK
- /;
-
 my @functions = qw/
     raise sigaction signal sigpending sigprocmask sigsuspend signal
     signal_names strsignal
  /;
 
-my (@signals, @actions);
-my @constants = @states;
+my (@handlers, @signals, @actions);
+my @constants;
 
 our %EXPORT_TAGS =
   ( signals   => \@signals
   , actions   => \@actions
-  , status    => \@states
+  , handlers  => \@handlers
   , constants => \@constants
   , functions => \@functions
   , tables    => [ '%signals' ]
@@ -32,15 +27,16 @@ my $signals;
 our %signals;
 
 BEGIN {
-    # initialize the :signals export tag
     $signals = signals_table;
 
     push @constants, keys %$signals;
-    push @signals, grep !/^SA_/, keys %$signals;
-    push @actions, grep /^SA_/, keys %$signals;
+    push @handlers, grep /^SIG_/, keys %$signals;
+    push @signals,  grep !/^SA_|^SIG_/, keys %$signals;
+    push @actions,  grep /^SA_/, keys %$signals;
 
     tie %signals, 'POSIX::1003::ReadOnlyTable', $signals;
 }
+
 =chapter NAME
 
 POSIX::1003::Signals - POSIX using signals
@@ -196,7 +192,8 @@ discovered during installation of this module:
 =for comment
 #TABLE_SIGNALS_START
 
-The constant names for signals are inserted here during installation.
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SIGNALS_END
@@ -206,10 +203,21 @@ The constant names for signals are inserted here during installation.
 =for comment
 #TABLE_SIGACTIONS_START
 
-The constant names for sigactions are inserted here during installation.
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_SIGACTIONS_END
+
+=section Export tag C<:handlers>
+
+=for comment
+#TABLE_SIGHANDLERS_START
+
+  During installation, a symbol table will get inserted here.
+
+=for comment
+#TABLE_SIGHANDLERS_END
 
 =cut
 

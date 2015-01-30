@@ -7,14 +7,9 @@ use base 'POSIX::1003::Module';
 use POSIX::1003::Locale  qw(setlocale LC_TIME);
 use Encode               qw(find_encoding is_utf8 decode);
 
-# Blocks resp. defined in time.h, limits.h
-my @constants = qw/
-  CLK_TCK CLOCKS_PER_SEC NULL
-  TZNAME_MAX
- /;
-
 our @IN_CORE  = qw/gmtime localtime/;
 
+my @constants;
 my @functions = qw/
   asctime ctime strftime
   clock difftime mktime
@@ -24,7 +19,17 @@ push @functions, @IN_CORE;
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
+  , tables    => [ '%time' ]
   );
+
+my  $time;
+our %time;
+
+BEGIN {
+    $time = time_table;
+    push @constants, keys %$time;
+    tie %time, 'POSIX::1003::ReadOnlyTable', $time;
+}
 
 =chapter NAME
 
@@ -52,16 +57,6 @@ POSIX::1003::Time - POSIX handling time
   $timespan  = difftime($end, $begin);
 
 =chapter DESCRIPTION
-
-=chapter CONSTANTS
-
-=section Constants from time.h
-
-  CLK_TCK CLOCKS_PER_SEC NULL
-
-=section Constants from limits.h
-
-  TXNAME_MAX
 
 =chapter FUNCTIONS
 
@@ -170,6 +165,24 @@ Simply L<perlfunc/gmtime>
 
 =function localtime [$time]
 Simply L<perlfunc/localtime>
+
+=chapter CONSTANTS
+
+=for comment
+#TABLE_TIME_START
+
+The constant names for this module are inserted here during
+installation.
+
+=for comment
+#TABLE_TIME_END
+
 =cut
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    my $val = $time->{$name};
+    sub () {$val};
+}
 
 1;

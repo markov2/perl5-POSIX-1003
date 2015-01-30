@@ -5,19 +5,25 @@ package POSIX::1003::Locale;
 use base 'POSIX::1003::Module';
 
 # Blocks from resp. limits.h and local.h
-my @constants = qw/
-  MB_LEN_MAX
-
-  LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY LC_NUMERIC
-  LC_TIME
- /;
-
+my @constants;
 my @functions = qw/localeconv setlocale/;
 
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
+  , tables    => [ '%locale' ]
   );
+
+my  $locale;
+our %locale;
+
+BEGIN {
+    $locale = locale_table;
+    push @constants, keys %$locale;
+    tie %locale, 'POSIX::1003::ReadOnlyTable', $locale;
+}
+
+
 
 =chapter NAME
 
@@ -34,16 +40,6 @@ POSIX::1003::Locale - POSIX handling locale settings
 =chapter DESCRIPTION
 See L<perllocale> for the details.
 
-=chapter CONSTANTS
-
-=section Constants from limits.h
-  MB_LEN_MAX   Max multi-byte length of a char across all locales
-
-=section Constants from locale.h
-
-  LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY LC_NUMERIC
-  LC_TIME
-
 =chapter FUNCTIONS
 
 =function localeconv 
@@ -52,12 +48,29 @@ Get detailed information about the current locale
   my $info     = localeconv();            # is HASH
   print Dumper $info;  # use Data::Dumper to inspect
 
-=function setlocale 
+=function setlocale $lc, $lang
 Locales describe national and language specific facts.  With
 M<setlocale()> you change the locale.
 
   my $location = setlocale(LC_ALL, 'de'); # German
 
+=chapter CONSTANTS
+
+=for comment
+#TABLE_LOCALE_START
+
+  During installation, a symbol table will get inserted here.
+
+=for comment
+#TABLE_LOCALE_END
+
 =cut
+
+sub _create_constant($)
+{   my ($class, $name) = @_;
+    my $val = $locale->{$name};
+    sub () {$val};
+}
+
 
 1;

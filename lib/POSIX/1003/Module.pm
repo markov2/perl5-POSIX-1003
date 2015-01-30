@@ -5,43 +5,15 @@ package POSIX::1003::Module;
 
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.
-our $VERSION = '0.99';
+our $VERSION = '0.99_01';
 use Carp 'croak';
 
-{ use XSLoader;
-  no warnings 'redefine';
-  XSLoader::load 'POSIX';
-  XSLoader::load 'POSIX::1003', $VERSION;
-}
+# some other modules used by the program which uses POSIX::1003 may
+# need POSIX.xs via POSIX.
+use POSIX ();
 
-# also used in release-test
-our $in_constant_table = qr/
-   ^AF_     # socket
- | ^_CS_    # confstr
- | ^DN_     # fcntl
- | ^E(?!CHONL|XIT_) # errno   ECHONL in Termios, EXIT_ in Proc
- | ^FCNTL   # fcntl
- | ^F_      # fcntl
- | ^FD_     # fcntl
- | ^GET_    # rlimit
- | ^LOCK_   # fcntl
- | ^O_      # fdio
- | ^_PC_    # pathconf
- | ^PF_     # socket
- | ^POLL    # poll
- | ^_POSIX  # property
- | ^RLIM    # rlimit
- | ^SA_     # sigaction
- | ^S_      # stat
- | ^_SC_    # sysconf
- | ^SEEK_   # fdio
- | ^SET_    # rlimit aix
- | ^SIG[^_] # signals
- | ^SO      # socket
- | ^UL_     # ulimit
- | ^WSAE    # errno (windows sockets)
- | _OK$     # access
- /x;
+use XSLoader;
+XSLoader::load 'POSIX::1003', $VERSION;
 
 =chapter NAME
 POSIX::1003::Module - Base of POSIX::1003 components
@@ -106,7 +78,7 @@ sub import(@)
             @take{@$tag} = ();
         }
         else
-        {   $_ =~ $in_constant_table or exists $ok->{$_}
+        {   is_missing($_) or exists $ok->{$_}
                or croak "$class does not export $_";
             undef $take{$_};
         }
@@ -121,7 +93,8 @@ sub import(@)
         {   # reuse the already created function; might also be a function
             # which is actually implemented in the $class namespace.
         }
-        elsif($f =~ $in_constant_table)
+        elsif(   is_missing($f)
+              || (exists $ok->{$f} && $f =~ /^[A-Z_][A-Z0-9_]*$/))
         {   *{$class.'::'.$f} = $export = $class->_create_constant($f);
         }
         elsif( $f !~ m/[^A-Z0-9_]/ )  # faster than: $f =~ m!^[A-Z0-9_]+$!
@@ -138,16 +111,16 @@ sub import(@)
                 *{$class.'::'.$f} = $export = sub() {undef};
             }
         }
-        elsif(exists $POSIX::{$f} && defined *{"POSIX::$f"}{CODE})
-        {   # normal functions implemented in POSIX.xs
-            *{"${class}::$f"} = $export = *{"POSIX::$f"}{CODE};
-        }
         elsif($f =~ s/^%//)
         {   $export = \%{"${class}::$f"};
         }
         elsif($in_core && grep $f eq $_, @$in_core)
         {   # function is in core, simply ignore the export
             next;
+        }
+        elsif(exists $POSIX::{$f} && defined *{"POSIX::$f"}{CODE})
+        {   # normal functions implemented in POSIX.xs
+            *{"${class}::$f"} = $export = *{"POSIX::$f"}{CODE};
         }
         else
         {   croak "unable to load $f from $class";
@@ -173,7 +146,7 @@ sub exampleValue($)
     grep $_ eq $name, @$constants
         or return undef;
 
-    my $val = &{"$pkg\::$name"};
+    my $val = $pkg->_create_constant($name)->();
     defined $val ? $val : 'undef';
 }
 

@@ -4,12 +4,13 @@ use strict;
 package POSIX::1003;
 
 use Carp qw/croak/;
+use POSIX::1003::Module ();   # preload
 
 my %own_functions = map +($_ => 1), qw/
-  posix_1003_modules
-  posix_1003_names
-  show_posix_names
- /;
+    posix_1003_modules
+    posix_1003_names
+    show_posix_names
+   /;
 
 our (%EXPORT_TAGS, %IMPORT_FROM, %SUBSET);
 
@@ -114,7 +115,7 @@ include a subset for some of the modules
    (module)       (export tags for subsets)
    :fcntl         :flock   :lockf
    :fdio          :mode    :seek
-   :filesystem    :access  :stat    :perms
+   :filesystem    :access  :stat    :perms  :glob
    :limits        :rlimit  :ulimit
    :signals       :status  :signals
    :termios       :flush   :flags   :speed
@@ -331,6 +332,7 @@ sub show_posix_names(@)
     print "*** ".(keys %$pkg_of)." symbols in total\n";
 }
 
+#------------
 =chapter DETAILS
 
 =section Modules in this distribution

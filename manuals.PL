@@ -8,32 +8,89 @@ use warnings;
 use strict;
 
 use blib;
+use POSIX  qw/strerror/;
 
 my @pods   = map +($_, "blib/$_"), @ARGV;
 
 my %tables =
-  ( confstr  => [ 'POSIX::1003::Confstr',  \&table_confstr  ]
-  , errno    => [ 'POSIX::1003::Errno',    \&table_errno    ]
-  , fcntl    => [ 'POSIX::1003::Fcntl',    \&table_fcntl    ]
-  , fdio     => [ 'POSIX::1003::FdIO',     \&table_fdio     ]
-  , fsys     => [ 'POSIX::1003::FS',       \&table_fsys     ]
-  , math     => [ 'POSIX::1003::Math',     \&table_math     ]
-  , pathconf => [ 'POSIX::1003::Pathconf', \&table_pathconf ]
-  , poll     => [ 'POSIX::1003::Events',   \&table_poll     ]
-  , property => [ 'POSIX::1003::Properties', \&table_props  ]
-  , rlimit   => [ 'POSIX::1003::Limit',    \&table_rlimit   ]
-  , signals  => [ 'POSIX::1003::Signals',  \&table_signals  ]
-  , sigactions=>[ 'POSIX::1003::Signals',\&table_sigactions ]
-  , sysconf  => [ 'POSIX::1003::Sysconf',  \&table_sysconf  ]
-  , termios  => [ 'POSIX::1003::Termios',  \&table_termios  ]
-  , ulimit   => [ 'POSIX::1003::Limit',    \&table_ulimit   ]
+  ( confstr   => 'POSIX::1003::Confstr'
+  , errno     =>
+      { pkg      => 'POSIX::1003::Errno'
+      , more     => sub { strerror($_[0] // 'undef') }
+      }
+  , fcntl     => 'POSIX::1003::Fcntl'
+  , fdio      => 'POSIX::1003::FdIO'
+  , fsys_stat =>
+      { pkg      => 'POSIX::1003::FS'
+      , select   => sub { $_[0] =~ m/^S_/ && $_[0] !~ m/^S_IS/ }
+      }
+  , fsys_acc  =>
+      { pkg      => 'POSIX::1003::FS'
+      , select   => sub { $_[0] =~ m/_OK$|MAX/ }
+      }
+  , fsys_perm =>
+      { pkg      => 'POSIX::1003::FS'
+      , select   => sub { $_[0] =~ m/^S_I[^S]/ }
+      }
+  , fsys_glob =>
+      { pkg      => 'POSIX::1003::FS'
+      , select   => sub { $_[0] =~ m/^GLOB_|^FNM_/ }
+      }
+  , locale   => 'POSIX::1003::Locale'
+  , math     => 'POSIX::1003::Math'
+  , os       => 'POSIX::1003::OS'
+  , poll     =>
+      { pkg      => 'POSIX::1003::Events'
+      , select   => sub { $_[0] =~ m/^E?POLL/ }
+      }
+  , pathconf => 'POSIX::1003::Pathconf'
+  , property => 'POSIX::1003::Properties'
+  , proc     => 'POSIX::1003::Proc'
+  , rlimit   =>
+     { pkg       => 'POSIX::1003::Limit'
+     , select    => sub { $_[0] =~ m/^RLIM/ }
+     }
 
-  , socket     => [ 'POSIX::1003::Socket', \&table_socket
-      , qr/^(?!SOL_|SO_|AF_|PF_)/]
-  , socket_sol => [ 'POSIX::1003::Socket', \&table_socket, qr/^SOL_/ ]
-  , socket_so  => [ 'POSIX::1003::Socket', \&table_socket, qr/^SO_/  ]
-  , socket_af  => [ 'POSIX::1003::Socket', \&table_socket, qr/^AF_/  ]
-  , socket_pf  => [ 'POSIX::1003::Socket', \&table_socket, qr/^PF_/  ]
+  , signals    =>
+     { pkg       => 'POSIX::1003::Signals'
+     , select    => sub { $_[0] !~ m/^SA_|^SIG_/ }
+     }
+  , sigactions =>
+     { pkg       => 'POSIX::1003::Signals'
+     , select    => sub { $_[0] =~ m/^SA_/ }
+     }
+  , sighandlers =>
+     { pkg       => 'POSIX::1003::Signals'
+     , select    => sub { $_[0] =~ m/^SIG_/ }
+     }
+  , socket     =>
+     { pkg       => 'POSIX::1003::Socket'
+     , select    => sub { $_[0] !~ m/^(?:SOL|SO|AF|PF)_/ }
+     }
+  , socket_sol =>
+     { pkg       => 'POSIX::1003::Socket'
+     , select    => sub { $_[0] =~ m/^SOL_/ }
+     }
+  , socket_so  =>
+     { pkg       => 'POSIX::1003::Socket'
+     , select    => sub { $_[0] =~ m/^SO_/ }
+     }
+  , socket_af  =>
+     { pkg       => 'POSIX::1003::Socket'
+     , select    => sub { $_[0] =~ m/^AF_/ }
+     }
+  , socket_pf  =>
+     { pkg       => 'POSIX::1003::Socket'
+     , select    => sub { $_[0] =~ m/^PF_/ }
+     }
+
+  , sysconf  => 'POSIX::1003::Sysconf'
+  , termios  => 'POSIX::1003::Termios'
+  , time     => 'POSIX::1003::Time'
+  , ulimit   =>
+     { pkg       => 'POSIX::1003::Limit'
+     , select    => sub { $_[0] !~ m/^RLIM/ }
+     }
   );
 
 sub produce_table($$);
@@ -45,7 +102,8 @@ sub summerize();
 our $pod;   # sorry :(
 
 foreach $pod (sort @pods)
-{   $pod =~ m/\.pod$/
+{
+    $pod =~ m/\.pod$/
         or next;
 
     open POD, '<', $pod
@@ -66,11 +124,15 @@ foreach $pod (sort @pods)
         do { $old = <POD> }
         until $old =~ m/^\#TABLE_${table}_END/;
 
+        my $line;
+        do { $line = <POD> }
+        while $line =~ m/^\s*$/;
+
         print NEW "\n";
         print NEW produce_table($pod, lc $table);
         $changes++;
 
-        print NEW "\n\n=for comment\n$old\n\n";
+        print NEW "\n\n=for comment\n$old\n$line";
     }
 
     close NEW or die "write error in $podtmp: $!\n";
@@ -86,146 +148,41 @@ foreach $pod (sort @pods)
 }
 summerize;
 
+exit 0;
+
+### HELPERS
+
 sub sorted(@) { sort {lc($a) cmp lc($b)} @_ }
 
 sub produce_table($$)
 {   my ($fn, $name) = @_;
-    my $table = $tables{$name}
-        or die "unknown table $name";
+    my $config = $tables{$name};
+    unless($config)
+    {   warn "unknown table $name";
+        return;
+    }
 
-    my ($pkg, $handler, @param) = @$table;
+    ref $config
+        or $config = { pkg => $config };
+
+    my $pkg = $config->{pkg};
     eval "require $pkg";
     die "Compilation errors in module $pkg: $@" if $@;
 
-    $pkg->import(':all');
-    $handler->($pkg, @param);
-}
+    my $subset = $config->{select} || sub { $_[0] =~ m/^[A-Z0-9_]+$/ }; 
+    my $more   = $config->{more}   || sub { undef };
 
-sub table_confstr($)
-{   my $pkg = shift;
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted confstr_names();
-    format_rows confstr => \@rows;
-}
+    no strict 'refs';
+    my $consts = ${"${pkg}::EXPORT_TAGS"}{constants} || [];
 
-sub table_sysconf($)
-{   my $pkg = shift;
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted sysconf_names();
-    format_rows sysconf => \@rows;
-}
-
-sub table_pathconf($)
-{   my $pkg = shift;
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted pathconf_names();
-    format_rows pathconf => \@rows;
-}
-
-sub table_rlimit($)
-{   my $pkg = shift;
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted rlimit_names();
-    format_rows rlimit => \@rows;
-}
-
-sub table_ulimit($)
-{   my $pkg = shift;
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted ulimit_names();
-    format_rows ulimit => \@rows;
-}
-
-sub table_socket($$)
-{   my ($pkg, $filter) = @_;
-    my @rows  = map [$_, $pkg->exampleValue($_)]
-      , grep $_ =~ $filter
-         , sorted socket_names();
-    format_rows socket => \@rows;
-}
-
-sub table_math($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::Math::EXPORT_TAGS{constants};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows math => \@rows;
-}
-
-sub table_signals($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::Signals::EXPORT_TAGS{signals};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows signals => \@rows;
-}
-
-sub table_sigactions($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::Signals::EXPORT_TAGS{actions};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows actions => \@rows;
-}
-
-sub table_fcntl($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::Fcntl::EXPORT_TAGS{constants};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows fcntl => \@rows;
-}
-
-sub table_fdio($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::FdIO::EXPORT_TAGS{constants};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows fdio => \@rows;
-}
-
-sub table_fsys($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::FS::EXPORT_TAGS{constants};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows fsys => \@rows;
-}
-
-sub table_termios($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::Termios::EXPORT_TAGS{constants};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows termios => \@rows;
-}
-
-sub table_poll($)
-{   my $pkg   = shift;
-    my $poll = $POSIX::1003::Events::EXPORT_TAGS{constants};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted grep /^POLL/, sort @$poll;
-    format_rows poll => \@rows;
-}
-
-sub table_props($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::Properties::EXPORT_TAGS{constants};
-    my @rows  = map { [$_, $pkg->exampleValue($_)] }
-        sorted @$constants;
-    format_rows property => \@rows;
-}
-
-sub table_errno($)
-{   my $pkg   = shift;
-    my $constants = $POSIX::1003::Errno::EXPORT_TAGS{constants};
+    my @consts = sorted grep $subset->($_), @$consts;
     my @rows;
-    foreach my $err (sorted @$constants)
-    {   my $val = $pkg->exampleValue($err);
-        my $str = strerror($val // 'undef');
-        push @rows, [$err, $val, $str];
+    foreach my $const (@consts)
+    {   my $val = $pkg->exampleValue($const);
+        push @rows, +[$const, $val, $more->($val)]
     }
-    format_rows errno => \@rows;
+
+    format_rows $name => \@rows;
 }
 
 sub format_rows($$)
@@ -242,7 +199,7 @@ sub format_rows($$)
     {   $longest_name = length $_->[0] if $longest_name < length $_->[0];
         $longest_val  = length $_->[1] if $longest_val  < length $_->[1];
         $longest_more = length $_->[2]
-                            if @$_ > 2 && $longest_more < length $_->[2];
+            if defined $_->[2] && $longest_more < length $_->[2];
     }
 
     my $longest_row   = 0;
@@ -283,7 +240,7 @@ sub format_rows($$)
     }
 
     if($pod !~ m/blib/)
-    {   warn sprintf "module %-8s has %4d constants, %3d are undefined\n",
+    {   warn sprintf "module %-13s has %4d constants, %3d are undefined\n",
             $manual, $nr_rows, $nr_undef;
         $sum_tables++;
         $sum_rows  += $nr_rows;
@@ -292,7 +249,13 @@ sub format_rows($$)
 
     if(@lines)
     {   my $text = "  ".join("\n  ", @lines)."\n";
-        warn $text if $ENV{AUTOMATED_TESTING};
+
+        if($ENV{AUTOMATED_TESTING})
+        {   # output when running under cpantesting
+            warn ':', join(',', map {defined $_ ? $_ : '-'} @$_), "\n"
+                for @$rows;
+        }
+
         return $text;
     }
 
@@ -305,6 +268,6 @@ _NONE
 }
 
 sub summerize()
-{   warn sprintf "   Σ %2d tables have %4d constants, %3d are undefined\n"
+{   warn sprintf "        Σ %2d tables have %4d constants, %3d are undefined\n"
       , $sum_tables, $sum_rows, $sum_undef;
 }

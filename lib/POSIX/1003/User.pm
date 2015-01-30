@@ -4,9 +4,6 @@ use strict;
 package POSIX::1003::User;
 use base 'POSIX::1003::Module';
 
-my @constants = qw/
- /;
-
 our @IN_CORE  = qw/
   getpwnam  getpwuid  getpwent
   getgrnam  getgrgid  getgrent
@@ -28,10 +25,22 @@ my @functions = qw/
 
 push @functions, @IN_CORE;
 
+my @constants;
+
 our %EXPORT_TAGS =
   ( constants => \@constants
   , functions => \@functions
+  , tables    => [ '%user' ]
   );
+
+my  $user;
+our %user;
+
+BEGIN {
+    $user = user_table;
+    push @constants, keys %$user;
+    tie %user, 'POSIX::1003::ReadOnlyTable', $user;
+}
 
 =chapter NAME
 

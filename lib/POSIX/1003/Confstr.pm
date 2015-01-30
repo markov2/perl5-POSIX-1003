@@ -20,7 +20,6 @@ our %confstr;
 sub confstr($);
 
 BEGIN {
-    # initialize the :constants export tag
     $confstr = confstr_table;
     push @constants, keys %$confstr;
     tie %confstr, 'POSIX::1003::ReadOnlyTable', $confstr;
@@ -113,7 +112,8 @@ where returned at that time.
 =for comment
 #TABLE_CONFSTR_START
 
-   If you install the module, the table will be filled-in here
+  During installation, a symbol table will get inserted here.
+
 
 =for comment
 #TABLE_CONFSTR_END
