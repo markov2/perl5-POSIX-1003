@@ -141,7 +141,7 @@
 #endif
 
 #ifdef HAS_ULIMIT
-#  ifdef  I_ULIMIT
+#  ifndef I_ULIMIT
 #  define I_ULIMIT
 #  endif
 #  include <ulimit.h>
@@ -175,7 +175,6 @@
 #define I_SIGNAL
 #ifdef I_SIGNAL
 #include <signal.h>
-#include <bits/signum.h>
 #endif
 
 /*

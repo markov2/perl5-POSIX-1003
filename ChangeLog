@@ -23,8 +23,16 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
-#version 0.99_02:
-#- ::Socket::{get|set}sockopt
+
+version 0.99_02: Tue Feb  3 11:44:33 CET 2015
+
+	Fixes:
+	- fix compilation for many platforms rt.cpan.org#101866 [Slaven Rezic]
+
+	Improvements:
+	- add system/cygwin.c
+	- other way to show defined constants in cpan-testers environment.
+	  Added t/99constindex.t
 
 version 0.99_01: Sat Jan 31 00:39:54 CET 2015
 

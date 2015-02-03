@@ -81,5 +81,6 @@ t/63properties.t
 t/64ulimit.t
 t/65rlimit.t
 t/70lazy.t
+t/99constindex.t
 typemap
 xt/99pod.t

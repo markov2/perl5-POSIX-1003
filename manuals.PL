@@ -11,6 +11,7 @@ use blib;
 use POSIX  qw/strerror/;
 
 my @pods   = map +($_, "blib/$_"), @ARGV;
+my $constindex_fn = 'constindex.txt';
 
 my %tables =
   ( confstr   => 'POSIX::1003::Confstr'
@@ -99,12 +100,15 @@ sub format_rows($$);
 my ($sum_tables, $sum_rows, $sum_undef) = (0, 0, 0);
 sub summerize();
 
-our $pod;   # sorry :(
+our $pod;        # sorry :(
+
+open my $constindex, ">:encoding(utf8)", $constindex_fn
+    or die "cannot write $constindex_fn: $!";
 
 foreach $pod (sort @pods)
 {
-    $pod =~ m/\.pod$/
-        or next;
+    $pod =~ m/\.pod$/ or next;
+    $pod =~ m/blib/ or next;
 
     open POD, '<', $pod
         or die "cannot read $pod: $!\n";
@@ -146,7 +150,11 @@ foreach $pod (sort @pods)
     {   unlink $podtmp       or die "unlink $podtmp: $!";
     }
 }
+
 summerize;
+
+$constindex->close
+    or die "errors at close $constindex_fn: $!";
 
 exit 0;
 
@@ -239,9 +247,11 @@ sub format_rows($$)
              while @left;
     }
 
-    if($pod !~ m/blib/)
-    {   warn sprintf "module %-13s has %4d constants, %3d are undefined\n",
-            $manual, $nr_rows, $nr_undef;
+#   if($pod !~ m/blib/)
+    {   my $header = sprintf "table %-13s has %4d constants, %3d are undef\n"
+          , $manual, $nr_rows, $nr_undef;
+        warn $header;
+        print $constindex $header;
         $sum_tables++;
         $sum_rows  += $nr_rows;
         $sum_undef += $nr_undef;
@@ -250,11 +260,8 @@ sub format_rows($$)
     if(@lines)
     {   my $text = "  ".join("\n  ", @lines)."\n";
 
-        if($ENV{AUTOMATED_TESTING})
-        {   # output when running under cpantesting
-            warn ':', join(',', map {defined $_ ? $_ : '-'} @$_), "\n"
-                for @$rows;
-        }
+        print $constindex ':', join(',', map $_ // '', @$_), "\n"
+            for @$rows;
 
         return $text;
     }
