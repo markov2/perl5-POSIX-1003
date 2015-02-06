@@ -105,6 +105,10 @@ our $pod;        # sorry :(
 open my $constindex, ">:encoding(utf8)", $constindex_fn
     or die "cannot write $constindex_fn: $!";
 
+if(open my $sys, '<:encoding(utf8)', 'system.c')
+{   $constindex->print(<$sys>);
+}
+
 foreach $pod (sort @pods)
 {
     $pod =~ m/\.pod$/ or next;
@@ -153,7 +157,7 @@ foreach $pod (sort @pods)
 
 summerize;
 
-$constindex->close
+close $constindex
     or die "errors at close $constindex_fn: $!";
 
 exit 0;

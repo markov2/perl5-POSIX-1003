@@ -24,6 +24,13 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . charset of locale only via nl_langinfo(CODESET)
 
 
+version 0.99_03: Fri Feb  6 22:28:40 CET 2015
+
+	Improvements:
+	- system/cygwin.c was missing from MANIFEST
+	- use diag to dump tables when AUTOMATED_TESTING
+	- do not use IO::File->close (breaks Perl 5.12)
+
 version 0.99_02: Tue Feb  3 11:44:33 CET 2015
 
 	Fixes:

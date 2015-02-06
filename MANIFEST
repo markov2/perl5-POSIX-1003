@@ -51,6 +51,7 @@ lists/ulimit.txt
 lists/user.txt
 manuals.PL
 symbols.PL
+system/cygwin.c
 system/darwin.c
 system/freebsd.c
 system/gnukfreebsd.c

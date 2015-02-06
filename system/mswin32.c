@@ -64,3 +64,4 @@
 
 #undef CACHE_UID
 #undef HAS_ULIMIT
+#undef HAS_GLOB
