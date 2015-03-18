@@ -1,5 +1,7 @@
 use ExtUtils::MakeMaker;
 
+use 5.10.0;
+
 WriteMakefile
   ( NAME        => 'POSIX::1003'
   , VERSION_FROM => 'lib/POSIX/1003/Module.pm'

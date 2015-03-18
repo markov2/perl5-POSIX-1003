@@ -65,3 +65,14 @@
 #undef CACHE_UID
 #undef HAS_ULIMIT
 #undef HAS_GLOB
+#undef HAS_SETGROUPS
+#undef HAS_GETGROUPS
+#undef HAS_FCNTL
+#undef HAS_STRSIGNAL
+
+/* mingw has empty stub 
+ * Interesting: https://nanohub.org/infrastructure/rappture/svn/tags/1.0/gui/src/RpWinResource.c
+ */
+#undef HAS_RLIMIT
+
+#undef I_SYS_WAIT

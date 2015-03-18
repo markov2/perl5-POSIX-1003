@@ -7,8 +7,7 @@ use base 'POSIX::1003::Module';
 # Blocks resp from unistd.h, stdio.h, limits.h
 my @constants;
 my @access = qw/access/;
-my @stat   = qw/stat lstat/;
-my @perms  = qw/mkfifo mknod mkdir lchown
+my @stat   = qw/stat lstat mkfifo mknod mkdir lchown
   S_ISDIR S_ISCHR S_ISBLK S_ISREG S_ISFIFO S_ISLNK S_ISSOCK S_ISWHT
 /;
 my @glob;  # qw/glob fnmatch/;
@@ -24,7 +23,6 @@ sub S_ISWHT($)  { ($_[0] & S_IFMT()) == S_IFWHT()}  # FreeBSD
 
 # POSIX.xs defines L_ctermid L_cuserid L_tmpname: useless!
 
-# Blocks resp from sys/stat.h, unistd.h, utime.h, sys/types
 my @functions = qw/
  mkfifo mknod stat lstat rename
  access lchown
@@ -41,14 +39,13 @@ our %EXPORT_TAGS =
  , stat      => \@stat
  , glob      => \@glob
  , tables    => [ qw/%access %stat/ ]
- , perms     => \@perms
  );
 
-my ($fsys, %access, %stat, %glob, %perms);
+my ($fsys, %access, %stat, %glob);
 
 BEGIN {
     $fsys = fsys_table;
-    push @constants, grep !/^S_IS/, keys %$fsys;
+    push @constants, keys %$fsys;
 
     # initialize the :access export tag
     push @access, grep /_OK$|MAX/, keys %$fsys;
@@ -57,19 +54,13 @@ BEGIN {
     tie %access,  'POSIX::1003::ReadOnlyTable', \%access_subset;
 
     # initialize the :stat export tag
-    push @stat, grep /^S_/, keys %$fsys;
+    push @stat, grep /^S_I/, keys %$fsys;
     my %stat_subset;
     @stat_subset{@stat} = @{$fsys}{@stat};
     tie %stat, 'POSIX::1003::ReadOnlyTable', \%stat_subset;
 
-    # initialize the :perms export tag
-    push @perms, grep /^S_I[^S]/, keys %$fsys;
-    my %perms_subset;
-    @perms_subset{@perms} = @{$fsys}{@perms};
-    tie %perms, 'POSIX::1003::ReadOnlyTable', \%perms_subset;
- 
     # initialize the :fsys export tag
-    push @glob, grep /^(?:GLOB|FNM)_/, keys %$fsys;
+    push @glob, grep /^(?:GLOB|FNM|WRDE)_/, keys %$fsys;
     my %glob_subset;
     @glob_subset{@glob} = @{$fsys}{@glob};
     tie %glob, 'POSIX::1003::ReadOnlyTable', \%glob_subset;
@@ -200,6 +191,9 @@ C<:constants>, you get all, but they are also grouped by tag.
 
 =section export tag :stat
 Export M<stat()> and M<lstat()> including their related constants.
+Besides, the node related functions M<mkfifo()>, M<mknod()>, M<mkdir()>,
+and M<lchown()>.  Also, the common C<S_IS*> C-level macro are provided
+as function.
 
 =for comment
 #TABLE_FSYS_STAT_START
@@ -229,27 +223,6 @@ Exports function M<access()> plus its related constants.
 
 =for comment
 #TABLE_FSYS_ACC_END
-
-=section export tag :perms
-
-Load only the permission flags, and related functions M<mkfifo()>, M<mknod()>,
-M<mkdir()>, and M<lchown()>.  Also, the common C<S_IS*> C-level macro are
-provided as function.
-
-=for comment
-#TABLE_FSYS_PERM_START
-
-  S_IFBLK   24576       S_IFSOCK  49152       S_IWGRP   16
-  S_IFCHR   8192        S_IRGRP   32          S_IWOTH   2
-  S_IFDIR   16384       S_IROTH   4           S_IWUSR   128
-  S_IFIFO   4096        S_IRUSR   256         S_IXGRP   8
-  S_IFLNK   40960       S_IRWXG   56          S_IXOTH   1
-  S_IFMT    61440       S_IRWXO   7           S_IXUSR   64
-  S_IFREG   32768       S_IRWXU   448         
-
-
-=for comment
-#TABLE_FSYS_PERM_END
 
 =section export tag :glob
 The M<glob()> and M<fnmatch()> related constants.

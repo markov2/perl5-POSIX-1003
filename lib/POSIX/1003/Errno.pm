@@ -117,6 +117,7 @@ on numbers, to be used with the system's C<errno()> function.
 The following error names where detected on your system when the
 module got installed.  The second column shows the related value.
 Followed by the text that M<strerror()> produces for that error.
+Or course, your error messages may be translated.
 
 =for comment
 #TABLE_ERRNO_START

@@ -115,7 +115,7 @@ include a subset for some of the modules
    (module)       (export tags for subsets)
    :fcntl         :flock   :lockf
    :fdio          :mode    :seek
-   :filesystem    :access  :stat    :perms  :glob
+   :filesystem    :access  :stat    :glob
    :limits        :rlimit  :ulimit
    :signals       :status  :signals
    :termios       :flush   :flags   :speed

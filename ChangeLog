@@ -8,7 +8,7 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . add epoll/epoll_ctl ?  Sys::Syscall
 # . add sendfile?  Sys::Sendfile
 # . add ioctl?
-# . add (bsd_)glob with its many flags
+# . add glob, fnmatch, wordexp  WDRE_ constants are enums
 # . add POSIX::RT::Semaphore logic?
 # . cleanup exampleValue(), probably doing too much
 # . charset of $!  strerror()  perl#119499
@@ -23,6 +23,32 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
+version 0.99_05: Wed Mar 18 11:44:50 CET 2015
+
+	Fixes:
+	- windows has other function with name strsignal
+
+	Improvements:
+	- extra LC_ constants
+	- locale POSIX or C fallback in manual.pl
+
+version 0.99_04: Wed Mar 11 23:10:22 CET 2015
+
+	Changes:
+	- removed ::FS export tag :perm (merged with :stat) because its
+	  role was too confusing.
+
+	Fixes:
+	- keep openbsd from testing ulimit
+	- keep systems from do not support ulimit from the attempt to
+	  test it.
+	- disable a few more things for Windows
+	- enforce locale en_US to produce (errno) tables
+
+	Improvements:
+	- separate table columns with '#'
+	- add SO_INCOMING_CPU, Linux 3.19
+	- add WRDE_* for wordexp to lists/glob.txt
 
 version 0.99_03: Fri Feb  6 22:28:40 CET 2015
 

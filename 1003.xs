@@ -118,8 +118,24 @@
 #define HAS_FTRUNCATE
 #endif
 
-#ifndef HAS_GLOB
-#define HAS_GLOB
+#ifdef _XOPEN_SOURCE
+
+#  ifndef HAS_GLOB
+#  define HAS_GLOB
+#  endif
+
+#  ifndef HAS_WORDEXP
+#  define HAS_WORDEXP
+#  endif
+
+#  ifndef HAS_FNMATCH
+#  define HAS_FNMATCH
+#  endif
+
+#endif
+
+#ifndef I_SYS_WAIT
+#define I_SYS_WAIT
 #endif
 
 /*
@@ -159,7 +175,6 @@
 #endif
 #endif
 
-#define I_SYS_WAIT
 #ifdef I_SYS_WAIT
 #include <sys/wait.h>
 #endif
@@ -175,6 +190,14 @@
 #define I_SIGNAL
 #ifdef I_SIGNAL
 #include <signal.h>
+#endif
+
+#ifdef HAS_WORDEXP
+#include <wordexp.h>
+#endif
+
+#ifdef HAS_FNMATCH
+#include <fnmatch.h>
 #endif
 
 /*
@@ -201,6 +224,13 @@ strptr2_cmp(const void *p1, const void *p2)
 {   /* only second passed in are char **'s    */
     return strcmp(p1, * (char * const *) p2);
 }
+
+/* MO: openbsd has no limits, but I am lazy */
+#ifdef NGROUPS_MAX
+#  define _NGROUPS NGROUPS_MAX
+#else
+#  define _NGROUPS 2048
+#endif
 
 /*
  * Fill tables
@@ -1035,11 +1065,11 @@ void
 getgroups()
     PROTOTYPE:
     INIT:
-	gid_t	grouplist[NGROUPS_MAX+1];
+	gid_t	grouplist[_NGROUPS];
 	int	nr_groups;
     PPCODE:
 #ifdef HAS_GETGROUPS
-	nr_groups = getgroups(NGROUPS_MAX+1, grouplist);
+	nr_groups = getgroups(_NGROUPS, grouplist);
 	if(nr_groups >= 0) {
 	    int nr;
 	    for(nr = 0; nr < nr_groups; nr++)
@@ -1054,11 +1084,11 @@ setgroups(...)
     PROTOTYPE: @
     INIT:
 	int   index;
-	gid_t groups[NGROUPS_MAX];
+	gid_t groups[_NGROUPS];
 	int   result;
     CODE:
 #ifdef HAS_SETGROUPS
-        for(index = 0; index < items && index < NGROUPS_MAX; index++)
+        for(index = 0; index < items && index < _NGROUPS; index++)
 	{   groups[index] = (gid_t)SvUV(ST(index));
 	}
 	result = setgroups(index, groups);
@@ -1198,9 +1228,11 @@ _lock(fd, function, param)
         SV *  param
     PROTOTYPE: $$$
     INIT:
+#ifdef HAS_FCNTL
         struct flock locker;
         SV **type, **whence, **start, **len;
         HV *fl, *fs;
+#endif
     CODE:
 #ifdef HAS_FCNTL
         fs     = (HV *)SvRV(param);

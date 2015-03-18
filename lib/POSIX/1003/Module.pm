@@ -4,8 +4,9 @@ use warnings;
 package POSIX::1003::Module;
 
 # The VERSION of the distribution is sourced from this file, because
-# this module also loads the XS extension.
-our $VERSION = '0.99_03';
+# this module also loads the XS extension.  Therefore, Makefile.PL
+# extracts the version from the line below.
+our $VERSION = '0.99_04';
 use Carp 'croak';
 
 # some other modules used by the program which uses POSIX::1003 may

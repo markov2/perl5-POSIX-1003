@@ -8,9 +8,16 @@ use warnings;
 use strict;
 
 use blib;
-use POSIX  qw/strerror/;
+use POSIX  qw/strerror setlocale LC_ALL/;
 
-my @pods   = map +($_, "blib/$_"), @ARGV;
+use IO::Handle ();  # required by some older Perl versions
+
+# please errno in english
+warn "LOCALE="
+  , setlocale(LC_ALL, 'en_US.utf8')
+ || setlocale(LC_ALL, 'POSIX')
+ || setlocale(LC_ALL, 'C');
+my @pods          = map +($_, "blib/$_"), @ARGV;
 my $constindex_fn = 'constindex.txt';
 
 my %tables =
@@ -23,19 +30,15 @@ my %tables =
   , fdio      => 'POSIX::1003::FdIO'
   , fsys_stat =>
       { pkg      => 'POSIX::1003::FS'
-      , select   => sub { $_[0] =~ m/^S_/ && $_[0] !~ m/^S_IS/ }
+      , select   => sub { $_[0] =~ m/^S_I/ }
       }
   , fsys_acc  =>
       { pkg      => 'POSIX::1003::FS'
       , select   => sub { $_[0] =~ m/_OK$|MAX/ }
       }
-  , fsys_perm =>
-      { pkg      => 'POSIX::1003::FS'
-      , select   => sub { $_[0] =~ m/^S_I[^S]/ }
-      }
   , fsys_glob =>
       { pkg      => 'POSIX::1003::FS'
-      , select   => sub { $_[0] =~ m/^GLOB_|^FNM_/ }
+      , select   => sub { $_[0] =~ m/^(?:GLOB|FNM|WRDE)_/ }
       }
   , locale   => 'POSIX::1003::Locale'
   , math     => 'POSIX::1003::Math'
@@ -105,9 +108,11 @@ our $pod;        # sorry :(
 open my $constindex, ">:encoding(utf8)", $constindex_fn
     or die "cannot write $constindex_fn: $!";
 
-if(open my $sys, '<:encoding(utf8)', 'system.c')
+my $sys;
+if(open $sys, '<:encoding(utf8)', 'system.c')
 {   $constindex->print(<$sys>);
 }
+close $sys;
 
 foreach $pod (sort @pods)
 {
@@ -264,7 +269,7 @@ sub format_rows($$)
     if(@lines)
     {   my $text = "  ".join("\n  ", @lines)."\n";
 
-        print $constindex ':', join(',', map $_ // '', @$_), "\n"
+        print $constindex ':', join('#', map $_ // '', @$_), "\n"
             for @$rows;
 
         return $text;
