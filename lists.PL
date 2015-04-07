@@ -16,6 +16,9 @@ sub from_listing($$);
 # Maybe someone uses cross-compilation
 my $system = lc ($ENV{OSNAME} || $^O);
 
+my %float_as_string = map +($_ => 1),
+    qw/DBL_MAX FLT_MAX HUGEVAL LDBL_MAX/;
+
 my ( %sc, %cs, %posix, %math, %pc, %ul, %rl, %poll, %sig
    , %fdio, %fsys, %errno, %fcntl, %socket, %locale, %osconsts
    , %proc, %time, %user);
@@ -89,9 +92,11 @@ sub dump_table($$$)
     foreach my $const (sort keys %$consts)
     {   my $klen = length $const;
         my $cast = $const =~ m/^SIG_/ ? '(long)' : '';
+        my $data = "newSViv($cast$const)";
+
         print TABLE <<_CONST
 #ifdef $const
-(void)hv_store($table, "$const", $klen, newSViv($cast$const), 0);
+(void)hv_store($table, "$const", $klen, $data, 0);
 #else
 missing[nr_missing++] = "$const";
 #endif

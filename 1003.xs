@@ -118,20 +118,16 @@
 #define HAS_FTRUNCATE
 #endif
 
-#ifdef _XOPEN_SOURCE
+#ifndef HAS_GLOB
+#define HAS_GLOB
+#endif
 
-#  ifndef HAS_GLOB
-#  define HAS_GLOB
-#  endif
+#ifndef HAS_WORDEXP
+#define HAS_WORDEXP
+#endif
 
-#  ifndef HAS_WORDEXP
-#  define HAS_WORDEXP
-#  endif
-
-#  ifndef HAS_FNMATCH
-#  define HAS_FNMATCH
-#  endif
-
+#ifndef HAS_FNMATCH
+#define HAS_FNMATCH
 #endif
 
 #ifndef I_SYS_WAIT
@@ -185,6 +181,39 @@
 
 #ifdef HAS_GLOB
 #include <glob.h>
+
+/*!!! NOT thread safe... no closures in C :-( */
+static SV  * _glob_call;
+
+static int _glob_on_error(epath, eerrno)
+    const char * epath;
+    int          eerrno;
+{   // See man perlcall
+    dSP;
+    int stop = 0;
+    int count;
+
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP);
+    XPUSHs(sv_2mortal(newSVpv(epath, 0)));
+    XPUSHs(sv_2mortal(newSViv(eerrno)));
+    PUTBACK;
+
+    count = call_sv(_glob_call, G_SCALAR);
+
+    SPAGAIN;
+
+    if(count) stop = POPi;
+
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
+
+    return stop;
+}
+
 #endif
 
 #define I_SIGNAL
@@ -562,6 +591,46 @@ fsys_table()
     OUTPUT:
 	RETVAL
 
+int
+_glob(filenames, pattern, flags, errfun)
+        AV   * filenames;
+	char * pattern;
+	int    flags;
+        SV   * errfun;
+    PROTOTYPE:  \@$$$
+    PREINIT:
+        glob_t   globbuf;
+        char  ** pathv;
+        int      rc;
+    CODE:
+        /* clear flags which are handled in Perl */
+        flags     &= ~(GLOB_DOOFFS|GLOB_APPEND);
+        globbuf.gl_offs = 0;
+
+	/* sorting raw characters is useless */
+        flags     |= GLOB_NOSORT;
+
+        if(SvOK(errfun))
+        {   _glob_call = errfun;
+            rc = glob(pattern, flags, _glob_on_error, &globbuf);
+        }
+        else
+        {   rc = glob(pattern, flags, NULL, &globbuf);
+        }
+
+        if(rc==0)
+        {   for(pathv = &globbuf.gl_pathv[0]; *pathv; pathv++)
+            {   av_push(filenames, newSVpv(*pathv, 0));
+            }
+            globfree(&globbuf);
+        }
+
+        RETVAL = rc;
+
+    OUTPUT:
+	RETVAL
+
+
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Properties
 
 HV *
@@ -708,17 +777,44 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::FS
 #include <sys/mkdev.h>
 #endif
 
-dev_t
+SV *
 makedev(dev_t major, dev_t minor)
     PROTOTYPE: $$
+    CODE:
+#ifdef HAS_SYSMKDEV
+	RETVAL = newSViv(makedev(major, minor));
+#else
+	errno  = ENOSYS;
+	RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
 
-dev_t
+SV *
 major(dev_t dev)
     PROTOTYPE: $
+    CODE:
+#ifdef HAS_SYSMKDEV
+	RETVAL = newSVuv(major(dev));
+#else
+	errno  = ENOSYS;
+	RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
 
-dev_t
+SV *
 minor(dev_t dev)
     PROTOTYPE: $
+    CODE:
+#ifdef HAS_SYSMKDEV
+	RETVAL = newSVuv(minor(dev));
+#else
+	errno  = ENOSYS;
+	RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
 
 int
 mknod(filename, mode, dev)

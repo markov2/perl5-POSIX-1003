@@ -10,7 +10,7 @@ my @access = qw/access/;
 my @stat   = qw/stat lstat mkfifo mknod mkdir lchown
   S_ISDIR S_ISCHR S_ISBLK S_ISREG S_ISFIFO S_ISLNK S_ISSOCK S_ISWHT
 /;
-my @glob;  # qw/glob fnmatch/;
+my @glob = qw/posix_glob/;  # fnmatch
 
 sub S_ISDIR($)  { ($_[0] & S_IFMT()) == S_IFDIR()}
 sub S_ISCHR($)  { ($_[0] & S_IFMT()) == S_IFCHR()}
@@ -135,6 +135,12 @@ B<Be Warned> that C<POSIX.pm> uses a different parameter order than CORE.
   POSIX::utime($filename, $atime, $mtime);
   CORE::utime($atime, $mtime, @filenames);
 
+=function stat [$fh|$fn|$dirfh]
+Simply C<CORE::stat()>.  See also M<lstat()>
+
+=function lstat [$fh|$fn|$dirfh]
+Simply C<CORE::lstat()>.  See also M<stat()>
+
 =function mknod $path, $mode, $device
 Create a special device node on $path. Useful symbols for $mode can be
 collected from M<Fcntl> (import tag C<:mode>).  The $device number is
@@ -153,6 +159,66 @@ $newname exists.  That behavior is not POSIX compliant.  On many platforms
 (especially the older), a C<rename> between different partitions is not
 allowed.
 
+=function glob $pattern|\@patterns, %options
+Returns a list of file and directory names which match the $pattern
+(or any of the @patterns), using the libc implementation of glob().
+Various system shells (sh, bash, tsh, etc) use this same function with
+different flags.  This function provides any possible combination.
+
+B<BE WARNED> that function returns bytes: file names are B<not
+printable strings> because the encoding used for file names on disk is
+not defined (on UNIXes).  Read more in L</Filenames to string>
+
+=option  flags INTEGER
+=default flags GLOB_NOSORT|GLOB_NOESCAPE|GLOB_BRACE
+There are many interesting flags to tune the expansion.  Sorting should
+happen in a locale context, so there is no use having glob() do it on
+bytes.  GLOB_APPEND will be used automatically, when needed.  GLOB_DOOFFS
+cannot be used (not needed)
+
+=option   unique BOOLEAN
+=default  unique <false>
+When you use patterns which overlap, you may want to remove doubles.
+Still, this happens on bytes... there is a possibility that different
+byte strings display the same in utf8 space.
+
+=option   on_error CODE
+=default  on_error C<undef>
+What to do when an error is encountered.  The CODE will be called with
+the path causing the problem, and its error code.  This is B<not
+thread safe>
+=cut
+
+sub posix_glob($%)
+{   my ($patterns, %args) = @_;
+    my $flags  = $args{flags}
+       // $glob{GLOB_NOSORT}|$glob{GLOB_NOESCAPE}|$glob{GLOB_BRACE};
+    my $errfun = $args{on_error} || sub {0};
+
+    my ($err, @fns);
+    if(ref $patterns eq 'ARRAY')
+    {   foreach my $pattern (@$patterns)
+        {   my $thiserr = _glob(@fns, $pattern, $flags, $errfun);
+            next if !$thiserr || $thiserr==$glob{GLOB_NOMATCH};
+
+            $err = $thiserr;
+            last;
+        }
+    }
+    else
+    {   $err = _glob(@fns, $patterns, $flags, $errfun);
+    }
+
+    if($args{unique} && @fns)
+    {   my %seen;
+        @fns = grep !$seen{$_}++, @fns;
+    }
+
+    $err //= @fns ? $glob{GLOB_NOMATCH} : 0;
+    ($err, \@fns);
+}
+
+#---------
 =section Additional
 
 =function major $device
@@ -198,14 +264,7 @@ as function.
 =for comment
 #TABLE_FSYS_STAT_START
 
-  S_IFBLK   24576       S_IFSOCK  49152       S_IWGRP   16
-  S_IFCHR   8192        S_IRGRP   32          S_IWOTH   2
-  S_IFDIR   16384       S_IROTH   4           S_IWUSR   128
-  S_IFIFO   4096        S_IRUSR   256         S_IXGRP   8
-  S_IFLNK   40960       S_IRWXG   56          S_IXOTH   1
-  S_IFMT    61440       S_IRWXO   7           S_IXUSR   64
-  S_IFREG   32768       S_IRWXU   448         
-
+  During installation, a symbol table will get inserted here.
 
 =for comment
 #TABLE_FSYS_STAT_END
@@ -216,10 +275,7 @@ Exports function M<access()> plus its related constants.
 =for comment
 #TABLE_FSYS_ACC_START
 
-  F_OK          0       NAME_MAX      255     W_OK          2
-  FILENAME_MAX  4096    PATH_MAX      4096    X_OK          1
-  MAX_CANON     255     R_OK          4       
-
+  During installation, a symbol table will get inserted here.
 
 =for comment
 #TABLE_FSYS_ACC_END
@@ -230,16 +286,7 @@ The M<glob()> and M<fnmatch()> related constants.
 =for comment
 #TABLE_FSYS_GLOB_START
 
-  GLOB_ALTDIRFUNC   512           GLOB_NOMAGIC      2048
-  GLOB_APPEND       32            GLOB_NOMATCH      3
-  GLOB_BRACE        1024          GLOB_NOSORT       4
-  GLOB_DOOFFS       8             GLOB_NOSPACE      1
-  GLOB_ERR          1             GLOB_ONLYDIR      8192
-  GLOB_MAGCHAR      256           GLOB_PERIOD       128
-  GLOB_MARK         2             GLOB_TILDE        4096
-  GLOB_NOCHECK      16            GLOB_TILDE_CHECK  16384
-  GLOB_NOESCAPE     64            
-
+  During installation, a symbol table will get inserted here.
 
 =for comment
 #TABLE_FSYS_GLOB_END

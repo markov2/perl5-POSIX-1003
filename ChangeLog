@@ -23,6 +23,18 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
+version 0.99_06: Tue Apr  7 09:51:30 CEST 2015
+
+	Fixes:
+	- openbsd has only one confstr.  Fix test [yary]
+	- windows major/minor/makedev/confstr/lockf missing [cpantesters]
+	- *posix_names failed for AF_DECnet, because of lowercase
+
+	Improvements:
+	- glob constants available everywhere (it seems)
+	- implementation of glob() interface and t/50glob.t
+	- document availability of ::FS::stat() and ::lstat()
+
 version 0.99_05: Wed Mar 18 11:44:50 CET 2015
 
 	Fixes:

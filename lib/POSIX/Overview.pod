@@ -619,10 +619,10 @@ are provided by L<Fcntl>.
   alphasort   perlfunc/sort
   getdelim    perlvar/$INPUT_RECORD_SEPARATOR
   getline     $a = <FH>           IO::Handle
-  glob        perlfunc/glob       File::Glob
+  glob        perlfunc/glob       ::FS File::Glob
   globfree    never needed
   mkdtemp     File::Temp/mkdtemp
-  scandir     perlfunc/glob
+  scandir     not supported
   dirfd       not supported
   fdopendir   not supported
 
@@ -638,7 +638,9 @@ supports their absolute brothers:
   nl_langinfo                     I18N::Langinfo/langinfo
 
 This interface is far to simple to really translate messages into various
-languages.  You may have a look at various implementations of C<gettext>.
+languages.  You may take a look at various implementations of C<gettext>,
+like L<Locale::gettext>, L<File::Gettext>, L<Locale::TextDomain>, and
+L<Log::Report::Lexicon>
 
   catclose                        Locale::Msgcat
   catgets                         Locale::Msgcat
@@ -869,7 +871,7 @@ B<Warning>, parameter order in POSIX.pm
   uname                           ::OS
   unsetenv    perlvar/%ENV        delete $ENV{PS1}
 
-The error constants are provided by M<Errno>.
+The error constants are provided by L<Errno|Errno>.
 
 =head2 Symbolic Link Interfaces
 
@@ -1104,8 +1106,8 @@ The XSI signal interface is not supported, so no
   setlogmask                      Sys::Syslog
   syslog                          Sys::Syslog
 
-See also the many logging frameworks, like M<Log::Log4perl>,
-M<Log::Dispatch>, or M<Log::Report>.
+See also the many logging frameworks, like L<Log::Log4perl>,
+L<Log::Dispatch>, or L<Log::Report>.
 
 =head2 XSI Timer Interfaces
 
@@ -1129,7 +1131,7 @@ M<Log::Dispatch>, or M<Log::Report>.
   setreuid     perlvar/$UID,$EUID ::User
   setutxent                       User::Utmp
 
-Non-standard, but commonly available.  See also M<POSIX::1003::User>.
+Non-standard, but commonly available.  See also L<POSIX::1003::User>.
 
   getresgid                       ::User
   getresuid                       ::User

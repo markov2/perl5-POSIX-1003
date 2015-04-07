@@ -75,6 +75,7 @@ t/29errno.t
 t/30sigaction.t
 t/31termios.t
 t/32fcntl.t
+t/50glob.t
 t/60sysconf.t
 t/61confstr.t
 t/62pathconf.t

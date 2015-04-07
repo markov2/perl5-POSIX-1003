@@ -6,7 +6,7 @@ package POSIX::1003::Module;
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.  Therefore, Makefile.PL
 # extracts the version from the line below.
-our $VERSION = '0.99_05';
+our $VERSION = '0.99_06';
 use Carp 'croak';
 
 # some other modules used by the program which uses POSIX::1003 may
@@ -95,11 +95,12 @@ sub import(@)
             # which is actually implemented in the $class namespace.
         }
         elsif(   is_missing($f)
-              || (exists $ok->{$f} && $f =~ /^[A-Z_][A-Z0-9_]*$/))
+              || (exists $ok->{$f} && $f =~ /^[A-Z_][A-Za-z0-9_]*$/))
         {   *{$class.'::'.$f} = $export = $class->_create_constant($f);
         }
         elsif( $f !~ m/[^A-Z0-9_]/ )  # faster than: $f =~ m!^[A-Z0-9_]+$!
         {   # other all-caps names are always from POSIX.xs
+#XXX MO: there should be any external names left
             if(exists $POSIX::{$f} && defined *{"POSIX::$f"}{CODE})
             {   # POSIX.xs croaks on undefined constants, we will return undef
                 my $const = eval "POSIX::$f()";
