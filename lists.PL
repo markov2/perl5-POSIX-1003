@@ -17,9 +17,9 @@ sub from_listing($$);
 my $system = lc ($ENV{OSNAME} || $^O);
 
 my %float_as_string = map +($_ => 1),
-    qw/DBL_MAX FLT_MAX HUGEVAL LDBL_MAX/;
+    qw/DBL_MAX FLT_MAX HUGE_VAL LDBL_MAX/;
 
-my ( %sc, %cs, %posix, %math, %pc, %ul, %rl, %poll, %sig
+my ( %sc, %cs, %posix, %math, %pc, %ul, %rl, %events, %sig
    , %fdio, %fsys, %errno, %fcntl, %socket, %locale, %osconsts
    , %proc, %time, %user);
 
@@ -32,7 +32,7 @@ from_listing \%locale,'locale.txt';
 from_listing \%math,  'math.txt';
 from_listing \%osconsts,'osconsts.txt';
 from_listing \%pc,    'pathconf.txt';
-from_listing \%poll,  'poll.txt';
+from_listing \%events,'events.txt';
 from_listing \%posix, 'posix.txt';
 from_listing \%proc,  'proc.txt';
 from_listing \%rl,    'rlimit.txt';
@@ -55,7 +55,7 @@ dump_table(\%locale,'locale_table','locale.c'    );
 dump_table(\%math,  'math_table',  'math.c'      );
 dump_table(\%osconsts,'os_table',  'osconsts.c'  );
 dump_table(\%pc,    'pc_table',    'pathconf.c'  );
-dump_table(\%poll,  'poll_table',  'poll.c'      );
+dump_table(\%events,'events_table','events.c'    );
 dump_table(\%posix, 'pr_table',    'properties.c');
 dump_table(\%proc,  'proc_table',  'proc.c'      );
 dump_table(\%rl,    'rl_table',    'rlimit.c'    );
@@ -91,13 +91,24 @@ sub dump_table($$$)
 
     foreach my $const (sort keys %$consts)
     {   my $klen = length $const;
-        my $cast = $const =~ m/^SIG_/ ? '(long)' : '';
-        my $data = "newSViv($cast$const)";
+
+        my $store;
+        if($float_as_string{$const})
+        {   $store = <<_FLOAT;
+sprintf(float_string, "%g", $const);
+(void)hv_store($table, "$const", $klen, newSVpv(float_string, 0), 0);
+_FLOAT
+        }
+        else
+        {   my $cast = $const =~ m/^SIG_/ ? '(long)' : '';
+            $store = <<_INT;
+(void)hv_store($table, "$const", $klen, newSViv($cast$const), 0);
+_INT
+        }
 
         print TABLE <<_CONST
 #ifdef $const
-(void)hv_store($table, "$const", $klen, $data, 0);
-#else
+$store#else
 missing[nr_missing++] = "$const";
 #endif
 _CONST

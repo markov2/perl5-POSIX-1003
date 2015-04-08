@@ -221,10 +221,6 @@ static int _glob_on_error(epath, eerrno)
 #include <signal.h>
 #endif
 
-#ifdef HAS_WORDEXP
-#include <wordexp.h>
-#endif
-
 #ifdef HAS_FNMATCH
 #include <fnmatch.h>
 #endif
@@ -365,14 +361,14 @@ fill_rlimit()
     return rl_table;
 }
 
-HV * poll_table = NULL;
+HV * events_table = NULL;
 HV *
-fill_poll()
-{   if(poll_table) return poll_table;
+fill_events()
+{   if(events_table) return events_table;
 
-    poll_table = newHV();
-#include "poll.c"
-    return poll_table;
+    events_table = newHV();
+#include "events.c"
+    return events_table;
 }
 
 HV * errno_table = NULL;
@@ -402,6 +398,9 @@ HV * math_table = NULL;
 HV *
 fill_math()
 {   if(math_table) return math_table;
+
+    /* buffer to be able to convert float constants into float strings */
+    char float_string[1024];
 
     math_table = newHV();
 #include "math.c"
@@ -599,10 +598,13 @@ _glob(filenames, pattern, flags, errfun)
         SV   * errfun;
     PROTOTYPE:  \@$$$
     PREINIT:
+#ifdef HAS_GLOB
         glob_t   globbuf;
         char  ** pathv;
+#endif
         int      rc;
     CODE:
+#ifdef HAS_GLOB
         /* clear flags which are handled in Perl */
         flags     &= ~(GLOB_DOOFFS|GLOB_APPEND);
         globbuf.gl_offs = 0;
@@ -624,8 +626,29 @@ _glob(filenames, pattern, flags, errfun)
             }
             globfree(&globbuf);
         }
-
         RETVAL = rc;
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+
+    OUTPUT:
+	RETVAL
+
+int
+_fnmatch(pattern, name, flags)
+	char * pattern;
+	char * name;
+	int    flags;
+    PROTOTYPE:  $$$
+    PREINIT:
+    CODE:
+#ifdef HAS_FNMATCH
+        RETVAL = fnmatch(pattern, name, flags);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
 
     OUTPUT:
 	RETVAL
@@ -835,10 +858,10 @@ mknod(filename, mode, dev)
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Events
 
 HV *
-poll_table()
+events_table()
     PROTOTYPE:
     CODE:
-	RETVAL = fill_poll();
+	RETVAL = fill_events();
     OUTPUT:
 	RETVAL
 

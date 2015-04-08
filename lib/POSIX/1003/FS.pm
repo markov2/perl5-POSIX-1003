@@ -4,22 +4,7 @@ use strict;
 package POSIX::1003::FS;
 use base 'POSIX::1003::Module';
 
-# Blocks resp from unistd.h, stdio.h, limits.h
-my @constants;
-my @access = qw/access/;
-my @stat   = qw/stat lstat mkfifo mknod mkdir lchown
-  S_ISDIR S_ISCHR S_ISBLK S_ISREG S_ISFIFO S_ISLNK S_ISSOCK S_ISWHT
-/;
-my @glob = qw/posix_glob/;  # fnmatch
-
-sub S_ISDIR($)  { ($_[0] & S_IFMT()) == S_IFDIR()}
-sub S_ISCHR($)  { ($_[0] & S_IFMT()) == S_IFCHR()}
-sub S_ISBLK($)  { ($_[0] & S_IFMT()) == S_IFBLK()}
-sub S_ISREG($)  { ($_[0] & S_IFMT()) == S_IFREG()}
-sub S_ISFIFO($) { ($_[0] & S_IFMT()) == S_IFIFO()}
-sub S_ISLNK($)  { ($_[0] & S_IFMT()) == S_IFLNK()}
-sub S_ISSOCK($) { ($_[0] & S_IFMT()) == S_IFSOCK()}
-sub S_ISWHT($)  { ($_[0] & S_IFMT()) == S_IFWHT()}  # FreeBSD
+my (@constants, @access, @stat, @glob);
 
 # POSIX.xs defines L_ctermid L_cuserid L_tmpname: useless!
 
@@ -33,33 +18,38 @@ my @functions = qw/
 our @IN_CORE     = qw(utime mkdir stat lstat rename);
 
 our %EXPORT_TAGS =
- ( constants => \@constants
- , functions => \@functions
- , access    => \@access
- , stat      => \@stat
- , glob      => \@glob
- , tables    => [ qw/%access %stat/ ]
- );
+  ( constants => \@constants
+  , functions => \@functions
+  , access    => \@access
+  , stat      => \@stat
+  , glob      => \@glob
+  , tables    => [ qw/%access %stat/ ]
+  );
 
 my ($fsys, %access, %stat, %glob);
 
-BEGIN {
-    $fsys = fsys_table;
+BEGIN
+  { $fsys = fsys_table;
     push @constants, keys %$fsys;
 
     # initialize the :access export tag
+    @access = qw/access/;
     push @access, grep /_OK$|MAX/, keys %$fsys;
     my %access_subset;
     @access_subset{@access} = @{$fsys}{@access};
     tie %access,  'POSIX::1003::ReadOnlyTable', \%access_subset;
 
     # initialize the :stat export tag
+    @stat = qw/stat lstat mkfifo mknod mkdir lchown
+        S_ISDIR S_ISCHR S_ISBLK S_ISREG S_ISFIFO S_ISLNK S_ISSOCK S_ISWHT
+        /;
     push @stat, grep /^S_I/, keys %$fsys;
     my %stat_subset;
     @stat_subset{@stat} = @{$fsys}{@stat};
     tie %stat, 'POSIX::1003::ReadOnlyTable', \%stat_subset;
 
     # initialize the :fsys export tag
+    @glob = qw/posix_glob fnmatch/;
     push @glob, grep /^(?:GLOB|FNM|WRDE)_/, keys %$fsys;
     my %glob_subset;
     @glob_subset{@glob} = @{$fsys}{@glob};
@@ -92,6 +82,16 @@ You may also need M<POSIX::1003::Pathconf>.
 =chapter FUNCTIONS
 
 =section Standard POSIX
+=cut
+
+sub S_ISDIR($)  { ($_[0] & S_IFMT()) == S_IFDIR()}
+sub S_ISCHR($)  { ($_[0] & S_IFMT()) == S_IFCHR()}
+sub S_ISBLK($)  { ($_[0] & S_IFMT()) == S_IFBLK()}
+sub S_ISREG($)  { ($_[0] & S_IFMT()) == S_IFREG()}
+sub S_ISFIFO($) { ($_[0] & S_IFMT()) == S_IFIFO()}
+sub S_ISLNK($)  { ($_[0] & S_IFMT()) == S_IFLNK()}
+sub S_ISSOCK($) { ($_[0] & S_IFMT()) == S_IFSOCK()}
+sub S_ISWHT($)  { ($_[0] & S_IFMT()) == S_IFWHT()}  # FreeBSD
 
 =function mkfifo $filename, $mode
 
@@ -161,13 +161,19 @@ allowed.
 
 =function glob $pattern|\@patterns, %options
 Returns a list of file and directory names which match the $pattern
-(or any of the @patterns), using the libc implementation of glob().
+(or any of the @patterns), using the libc implementation of M<glob()>.
 Various system shells (sh, bash, tsh, etc) use this same function with
 different flags.  This function provides any possible combination.
 
 B<BE WARNED> that function returns bytes: file names are B<not
 printable strings> because the encoding used for file names on disk is
 not defined (on UNIXes).  Read more in L</Filenames to string>
+
+M<File::Glob> does not use the system's libc C<glob()>, but includes the
+bare code of that implementation.  For that reason, it's C<bsd_glob()>
+does work on Windows (and possibly other non-POSIX2 compliant systems)
+as well.  On the other hand, File::Glob does not support the C<on_error>
+callback.
 
 =option  flags INTEGER
 =default flags GLOB_NOSORT|GLOB_NOESCAPE|GLOB_BRACE
@@ -185,8 +191,13 @@ byte strings display the same in utf8 space.
 =option   on_error CODE
 =default  on_error C<undef>
 What to do when an error is encountered.  The CODE will be called with
-the path causing the problem, and its error code.  This is B<not
-thread safe>
+the path causing the problem, and the error code.  When you want the
+search to continue, you have to return '0'.
+This function is B<not thread safe>
+
+=example
+  my ($err, $fns) = glob(\@roots, flags => GLOB_NOSORT|GLOB_MARK,
+      on_error => sub { warn "skip $_[0]: error $_[1]"; 0} )
 =cut
 
 sub posix_glob($%)
@@ -216,6 +227,19 @@ sub posix_glob($%)
 
     $err //= @fns ? $glob{GLOB_NOMATCH} : 0;
     ($err, \@fns);
+}
+
+=function fnmatch $pattern, $name, [$flags]
+Check whether $name matches $pattern, under control of $flags (FNM_*
+constants).  Do always check the return value for FNM_NOMATCH (true!!!)
+=example
+  use POSIX::1003::FS  ':glob';
+  next if fnmatch('a*', 'ABC', FNM_CASEFOLD)==FNM_NOMATCH;
+=cut
+
+sub fnmatch($$;$)
+{   my ($pat, $name, $flags) = @_;
+    _fnmatch($pat, $name, $flags//0);
 }
 
 #---------

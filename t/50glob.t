@@ -5,7 +5,7 @@ use strict;
 
 use Test::More;
 
-use POSIX::1003::FS     qw/posix_glob GLOB_NOMATCH/;
+use POSIX::1003::FS     qw/posix_glob GLOB_NOMATCH GLOB_MARK/;
 use POSIX::1003::Errno  qw/EACCES/;
 
 $^O ne 'MSWin32'
@@ -25,10 +25,18 @@ cmp_ok(scalar @$fns2, '==', 0);
 
 mkdir '/tmp/aa';
 chmod 0, '/tmp/aa';
-my $called;
-my ($err3, $fns3) = posix_glob('/tmp/aa/*', on_error => sub{$called="@_"; 0});
-#warn "($err3, @$fns3)\n";
+
+my ($err3, $fns3) = posix_glob('/tmp/aa');
+diag("1: $err3, @$fns3");
+
+($err3, $fns3) = posix_glob('/tmp/aa', flags => GLOB_MARK);
+diag("2: $err3, @$fns3");
+
+my ($callfn, $callerr);
+my ($err4, $fns4) = posix_glob('/tmp/aa/*'
+  , on_error => sub { ($callfn, $callerr) = @_; 0});
+#warn "($err4, @$fns4)\n";
 rmdir '/tmp/aa';
-ok(defined $called, 'call on error');
-is($called, '/tmp/aa '.EACCES);
-cmp_ok($err3, '==', GLOB_NOMATCH);
+like($callfn, qr!^/tmp/aa/?$!, 'error fn');
+cmp_ok($callerr, '==', EACCES, 'error rc');
+cmp_ok($err4, '==', GLOB_NOMATCH);

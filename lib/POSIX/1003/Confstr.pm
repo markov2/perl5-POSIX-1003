@@ -15,14 +15,14 @@ our %EXPORT_TAGS =
   , tables    => [ '%confstr' ]
   );
 
-my  $confstr;
-our %confstr;
 sub confstr($);
+my $confstr;
+our %confstr;
 
 BEGIN {
-    $confstr = confstr_table;
-    push @constants, keys %$confstr;
-    tie %confstr, 'POSIX::1003::ReadOnlyTable', $confstr;
+   $confstr = confstr_table;
+   push @constants, keys %$confstr;
+   tie %confstr, 'POSIX::1003::ReadOnlyTable', $confstr;
 }
 
 =chapter NAME

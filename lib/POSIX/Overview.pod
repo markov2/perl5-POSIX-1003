@@ -387,18 +387,14 @@ Also, L<i18n::Langinfo::Wide> and L<POSIX::Wide> offer some extras.
 
 =head2 General C Library Extension Interfaces
 
-Function C<fnmatch> can usually be avoided using L<perlfunc/glob>
-for collecting filenames in the file system.  When you already have
-a filename in a string, you need to rewrite the pattern into a
-regular expression.
-
-  my @scripts = glob "*.pl";
-  my @scripts = grep /\.pl$/, @filenames;
-
 Process your command-line options with C<Getopt::Std> or C<Getopt::Long>,
 which are more platform indepent and more flexible than the POSIX version
 (therefore they are missing)
   getopt, getsubopt, optarg, opterr, optind, optopt
+
+Generic functions:
+
+  fnmatch                         ::FS
 
 Some string functions have simple Perl work-arounds:
 
@@ -619,7 +615,7 @@ are provided by L<Fcntl>.
   alphasort   perlfunc/sort
   getdelim    perlvar/$INPUT_RECORD_SEPARATOR
   getline     $a = <FH>           IO::Handle
-  glob        perlfunc/glob       ::FS File::Glob
+  glob        perlfunc/glob       ::FS/posix_glob File::Glob/bsd_glob
   globfree    never needed
   mkdtemp     File::Temp/mkdtemp
   scandir     not supported

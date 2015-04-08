@@ -137,6 +137,7 @@ my %tags =
   , fd =>          'POSIX::1003::FdIO'
   , filesystem =>  'POSIX::1003::FS'
   , fs =>          'POSIX::1003::FS'
+  , glob =>        'POSIX::1003::FS'
   , limit =>       'POSIX::1003::Limit'
   , limits =>      'POSIX::1003::Limit'
   , locale =>      'POSIX::1003::Locale'
@@ -227,8 +228,8 @@ sub import(@)
     # no need for separate symbols when we need all
     delete $from{$_} for keys %mods;
 
-#   print "from $_ all\n"          for keys %mods;
-#   print "from $_ @{$from{$_}}\n" for keys %from;
+#print "from $_ all\n"          for keys %mods;
+#print "from $_ @{$from{$_}}\n" for keys %from;
 
     my $up = '+' . ($level+1);
     foreach my $tag (keys %mods)     # whole tags

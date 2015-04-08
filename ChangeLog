@@ -23,6 +23,20 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
+version 0.99_07: Wed Apr  8 15:12:20 CEST 2015
+
+	Fixes:
+	- no glob() on Windows [cpantesters]
+	- freebsd glob error callback already shows trailing '/'
+	- export tags of some modules
+
+	Improvements:
+	- provide ::FS::fnmatch()
+	- remove preparations for unimplemented wordexp()
+	- start system/solaris.c [Abeltje]
+	- internally rename poll_table into events_table, to contain more
+	  collections.
+
 version 0.99_06: Tue Apr  7 09:51:30 CEST 2015
 
 	Fixes:

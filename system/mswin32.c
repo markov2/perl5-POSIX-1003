@@ -66,6 +66,8 @@
 #undef HAS_LOCKF
 #undef HAS_ULIMIT
 #undef HAS_GLOB
+#undef HAS_FNMATCH
+#undef HAS_WORDEXP
 #undef HAS_SETGROUPS
 #undef HAS_GETGROUPS
 #undef HAS_FCNTL

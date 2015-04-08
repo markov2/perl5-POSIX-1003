@@ -4,24 +4,27 @@ use strict;
 package POSIX::1003::Events;
 use base 'POSIX::1003::Module';
 
-my @constants;
+my (@constants, @poll);
+
 my @functions = qw/
   FD_CLR FD_ISSET FD_SET FD_ZERO select
-  poll poll_names
+  poll events_names
  /;
-
-my @poll = qw(poll poll_names);
 
 our %EXPORT_TAGS =
  ( constants => \@constants
+ , poll      => \@poll
  , functions => \@functions
  );
 
-my  $poll;
+my $events;
 
 BEGIN {
-    $poll = poll_table;
-    push @constants, keys %$poll;
+    $events = events_table;
+    push @constants, keys %$events;
+
+    @poll = qw(poll events_names);
+    push @poll, grep /^POLL/, keys %$events;
 }
 
 =chapter NAME
@@ -100,17 +103,15 @@ sub poll($;$)
 #----------------------
 =section Additional
 
-=function poll_names 
+=function events_names 
 Returns a list with all known names, unsorted.
 =cut
 
-sub poll_names() { keys %$poll }
+sub events_names() { keys %$events }
 
 sub _create_constant($)
 {   my ($class, $name) = @_;
-    $name =~ m/^POLL/
-        or die "constants expected to start with POLL, not $name\n";
-    my $val = $poll->{$name} // return sub() {undef};
+    my $val = $events->{$name} // return sub() {undef};
     sub() {$val};
 
 }

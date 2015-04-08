@@ -6,12 +6,12 @@ package POSIX::1003::Module;
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.  Therefore, Makefile.PL
 # extracts the version from the line below.
-our $VERSION = '0.99_06';
+our $VERSION = '0.99_07';
 use Carp 'croak';
 
 # some other modules used by the program which uses POSIX::1003 may
 # need POSIX.xs via POSIX.
-use POSIX ();
+use POSIX       ();
 
 use XSLoader;
 XSLoader::load 'POSIX::1003', $VERSION;
@@ -101,6 +101,7 @@ sub import(@)
         elsif( $f !~ m/[^A-Z0-9_]/ )  # faster than: $f =~ m!^[A-Z0-9_]+$!
         {   # other all-caps names are always from POSIX.xs
 #XXX MO: there should be any external names left
+#warn "$f from POSIX.pm";
             if(exists $POSIX::{$f} && defined *{"POSIX::$f"}{CODE})
             {   # POSIX.xs croaks on undefined constants, we will return undef
                 my $const = eval "POSIX::$f()";

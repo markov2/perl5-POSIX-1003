@@ -32,6 +32,7 @@ lib/POSIX/SigSet.pm
 lists.PL
 lists/confstr.txt
 lists/errno.txt
+lists/events.txt
 lists/fcntl.txt
 lists/fdio.txt
 lists/fsys.txt
@@ -39,7 +40,6 @@ lists/locale.txt
 lists/math.txt
 lists/osconsts.txt
 lists/pathconf.txt
-lists/poll.txt
 lists/posix.txt
 lists/proc.txt
 lists/rlimit.txt
@@ -61,6 +61,7 @@ system/mswin32.c
 system/netbsd.c
 system/netware.c
 system/openbsd.c
+system/solaris.c
 t/01use.t
 t/20math.t
 t/21fdio.t
@@ -76,6 +77,7 @@ t/30sigaction.t
 t/31termios.t
 t/32fcntl.t
 t/50glob.t
+t/51fnmatch.t
 t/60sysconf.t
 t/61confstr.t
 t/62pathconf.t

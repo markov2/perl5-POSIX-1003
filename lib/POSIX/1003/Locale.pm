@@ -23,8 +23,6 @@ BEGIN {
     tie %locale, 'POSIX::1003::ReadOnlyTable', $locale;
 }
 
-
-
 =chapter NAME
 
 POSIX::1003::Locale - POSIX handling locale settings
