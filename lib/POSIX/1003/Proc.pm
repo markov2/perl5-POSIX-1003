@@ -11,6 +11,7 @@ my @functions = qw/
  WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
  WSTOPSIG WTERMSIG 
 
+ getpid getppid
  _exit pause setpgid setsid tcgetpgrp tcsetpgrp
  ctermid cuserid getcwd nice
  /;
@@ -130,6 +131,11 @@ sub setpgid($$)   {goto &POSIX::setpgid}
 sub setsid()      {goto &POSIX::setsid}
 sub cgetpgrp($)   {goto &POSIX::cgetpgrp}
 sub tcsetpgrp($$) {goto &POSIX::tcsetpgrp}
+
+# getpid and getppid implemented in XS
+=function getpid
+Not exactly the same as C<$$>
+=function getppid
 
 =function nice $integer
   use POSIX::1003::Proc 'nice';

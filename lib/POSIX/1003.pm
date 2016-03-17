@@ -16,7 +16,7 @@ our (%EXPORT_TAGS, %IMPORT_FROM, %SUBSET);
 
 =chapter NAME
 
-POSIX::1003 - POSIX 1003:2008 provisioning
+POSIX::1003 - POSIX 1003.1-2008 provisioning
 
 =chapter SYNOPSIS
   use POSIX::1003           qw(:termios :pc PATH_MAX);
@@ -75,7 +75,7 @@ C<$Exporter::ExportLevel> (but a simpler syntax).
 
   use POSIX::1003 qw(PATH_MAX :math sin);
 
-  sub MyModule::import(@)   # your own tricky exporter
+  sub MyModule::import(@)      # your own tricky exporter
   {   POSIX::1003->import('+1', @_);
   }
 

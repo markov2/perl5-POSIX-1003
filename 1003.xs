@@ -134,6 +134,28 @@
 #define I_SYS_WAIT
 #endif
 
+#ifdef I_UNISTD
+#  ifndef HAS_GETPID
+#  define HAS_GETPID
+#  endif
+
+#  ifndef HAS_GETPPID
+#  define HAS_GETPPID
+#  endif
+#endif
+
+#ifdef I_TIME
+
+#  ifndef HAS_STRPTIME
+#  define HAS_STRPTIME
+#  endif
+
+#  ifndef HAS_MKTIME
+#  define HAS_MKTIME
+#  endif
+
+#endif
+
 /*
  * work-arounds for various operating systems
  */
@@ -590,7 +612,7 @@ fsys_table()
     OUTPUT:
 	RETVAL
 
-int
+SV *
 _glob(filenames, pattern, flags, errfun)
         AV   * filenames;
 	char * pattern;
@@ -626,7 +648,7 @@ _glob(filenames, pattern, flags, errfun)
             }
             globfree(&globbuf);
         }
-        RETVAL = rc;
+	RETVAL = newSViv(rc);
 #else
         errno  = ENOSYS;
         RETVAL = &PL_sv_undef;
@@ -874,39 +896,47 @@ _poll(handles, timeout)
 	struct pollfd * fds;
 	HV            * ret;
 	char          * key;
-        char            key_str[8];
+        char            key_str[16];
 	int             rc;
         HE            * entry;
         I32		len;
 	int		j;
+        int             nfd;
     PPCODE:
 #ifdef HAS_POLL
-	const int nfd = hv_iterinit(handles);
+	nfd = hv_iterinit(handles);
 	Newx(fds, nfd, struct pollfd);
 	for(j=0; j < nfd; j++)
-        {   entry          = hv_iternext(handles);
+        {   /* Get hash key into 'C' space */
+            entry          = hv_iternext(handles);
 	    key            = hv_iterkey(entry, &len);
-	    key[len]       = 0;
-            fds[j].fd      = atoi(key_str);
+            if(len > 15) len = 15;    /* fd-num is always small */
+	    strncpy(key_str, key, len);
+            key_str[len]   = 0;
+            fds[j].fd      = strtoul(key_str, NULL, 10);
+
 	    fds[j].events  = SvUV(hv_iterval(handles, entry));
-	    fds[j].revents = 0;    // returned events
+	    fds[j].revents = 0;       /* returned events */
 	}
 	rc = poll(fds, nfd, timeout);
         if(rc==-1)
         {   XPUSHs(&PL_sv_undef);
         }
-        else
+        else if(rc==0)
 	{   ret = newHV();
-            if(rc > 0)
-            {   for(j=0; j < nfd; j++)
-                {   if(fds[j].revents)
-	            {   sprintf((char *)key_str, "%d", fds[j].fd);
-                        (void)hv_store(ret, key_str, strlen(key_str), newSVuv(fds[j].revents), 0);
-                    }
+            XPUSHs(sv_2mortal((SV*)ret));
+        }
+	else
+	{   ret = newHV();
+            for(j=0; j < nfd; j++)
+            {   if(fds[j].revents)
+	        {   sprintf((char *)key_str, "%15d", fds[j].fd);
+                    (void)hv_store(ret, key_str, strlen(key_str), newSVuv(fds[j].revents), 0);
                 }
-	    }
-	    XPUSHs((SV*)ret);
+            }
+	    XPUSHs(sv_2mortal((SV*)ret));
 	}
+        Safefree(fds);
 	XSRETURN(1);
 #else
 	errno = ENOSYS;
@@ -1283,6 +1313,35 @@ proc_table()
     OUTPUT:
         RETVAL
 
+int
+getpid()
+    PROTOTYPE:
+    CODE:
+#ifdef HAS_GETPID
+        RETVAL = getpid();
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+        RETVAL
+
+int
+getppid()
+    PROTOTYPE:
+    CODE:
+#ifdef HAS_GETPPID
+        RETVAL = getpid();
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+        RETVAL
+
+MODULE = POSIX::1003	PACKAGE = POSIX::1003::Time
+
+
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Time
 
 HV *
@@ -1292,6 +1351,110 @@ time_table()
 	RETVAL = fill_time();
     OUTPUT:
         RETVAL
+
+void
+_strptime(input, format)
+    const char *input
+    const char *format
+    PREINIT:
+#ifdef I_TIME
+        struct tm t  = { -1,-1,-1,-1,-1,-1,-1,-1 };
+#endif
+    PPCODE:
+#ifdef HAS_STRPTIME
+        strptime(input, format, &t);
+        if(t.tm_sec  == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_sec);
+        if(t.tm_min  == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_min);
+        if(t.tm_hour == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_hour);
+        if(t.tm_mday == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_mday);
+        if(t.tm_mon  == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_mon);
+        if(t.tm_year == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_year);
+        if(t.tm_wday == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_wday);
+        if(t.tm_yday == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_yday);
+        if(t.tm_isdst== -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_isdst);
+#else
+        errno  = ENOSYS;
+#endif
+
+void
+_mktime(sec, min, hour, mday, mon, year, wday, yday, isdst)
+    int  sec
+    int  min
+    int  hour
+    int  mday
+    int  mon
+    int  year
+    int  wday
+    int  yday
+    int  isdst
+    PREINIT:
+#ifdef I_TIME
+        struct tm t;
+        time_t    ts;
+#endif
+    PPCODE:
+#ifdef HAS_MKTIME
+        t.tm_sec  = sec;
+        t.tm_min  = min;
+        t.tm_hour = hour;
+        t.tm_mday = mday;
+        t.tm_mon  = mon;
+        t.tm_year = year;
+        t.tm_wday = wday;
+        t.tm_yday = yday;
+        t.tm_isdst = isdst;
+        ts = mktime(&t);
+        if(ts != -1)
+        {   mXPUSHi(ts);
+            if(t.tm_sec  == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_sec);
+            if(t.tm_min  == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_min);
+            if(t.tm_hour == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_hour);
+            if(t.tm_mday == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_mday);
+            if(t.tm_mon  == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_mon);
+            if(t.tm_year == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_year);
+            if(t.tm_wday == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_wday);
+            if(t.tm_yday == -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_yday);
+            if(t.tm_isdst== -1) XPUSHs(&PL_sv_undef); else mXPUSHi(t.tm_isdst);
+        }
+#else
+        errno  = ENOSYS;
+#endif
+
+SV *
+_strftime(fmt, sec, min, hour, mday, mon, year, wday= -1, yday= -1, isdst= -1)
+    char *fmt
+    int   sec
+    int   min
+    int   hour
+    int   mday
+    int   mon
+    int   year
+    int   wday
+    int   yday
+    int   isdst
+    INIT:
+        char buf[1024];
+        struct tm t;
+    CODE:
+#ifdef HAS_STRFTIME
+        t.tm_sec  = sec;
+        t.tm_min  = min;
+        t.tm_hour = hour;
+        t.tm_mday = mday;
+        t.tm_mon  = mon;
+        t.tm_year = year;
+        t.tm_wday = wday;
+        t.tm_yday = yday;
+        t.tm_isdst = isdst;
+	buf[1023] = '\0';
+	RETVAL = strftime(buf, 1024, fmt, &t)==0 ? &PL_sv_undef
+            : newSVpv(buf, 0);
+#else
+        errno  = ENOSYS;
+        RETVAL = &PL_sv_undef;
+#endif
+    OUTPUT:
+	RETVAL
 
 MODULE = POSIX::1003	PACKAGE = POSIX::1003::Socket
 

@@ -13,7 +13,7 @@ my @constants;
 my @functions = qw/
   asctime ctime strftime
   clock difftime mktime
-  tzset tzname/;
+  tzset tzname strptime/;
 push @functions, @IN_CORE;
 
 our %EXPORT_TAGS =
@@ -46,9 +46,13 @@ POSIX::1003::Time - POSIX handling time
   $str = asctime(localtime($timestamp))
 
   $str = strftime("%A, %B %d, %Y", 0, 0, 0, 12, 11, 95, 2);
+  $str = strftime("%A, %B %d, %Y", {day => 12, month => 12
+    , year => 1995, wday => 2});
   # $str contains "Tuesday, December 12, 1995"
 
   $timestamp = mktime(0, 30, 10, 12, 11, 95);
+  $timestamp = mktime {min => 30, hour => 10, day => 12
+    , month => 12, year => 1995};
   print "Date = ", ctime($timestamp);
 
   print scalar localtime;
@@ -95,23 +99,58 @@ Difference between two TIMESTAMPs, which are floats.
 
   $timespan = difftime($end, $begin);
 
-=function mktime $sec, $min, $hour, $mday, $mon, $year, ...
-Convert date/time info to a calendar time.
-Returns "undef" on failure.
+=function mktime @tm|\%date
 
-   my $t = mktime(sec, min, hour, mday, mon, year,
-              wday = 0, yday = 0, isdst = -1)
+Convert date/time info to a calendar time.  Returns "undef" on failure.
 
   # Calendar time for December 12, 1995, at 10:30 am
-  $timestamp = mktime(0, 30, 10, 12, 11, 95);
-  print "Date = ", ctime($time_t);
+  my $ts = mktime 0, 30, 10, 12, 11, 95;
+  print "Date = ", ctime($ts);
 
-=function strftime $format, $sec, $min, $hour, $mday, $mon, $year, ...
+  my %tm = (min => 30, hour => 10, day => 12, month => 12, year => 1995);
+  my $ts = mktime \%tm;   # %tm will get updated, mday and yday added
+=cut
+
+sub _tm_flatten($)
+{   my $tm = shift;
+    ( $tm->{sec}  // 0, $tm->{min}  // 0, $tm->{hour} // 0
+    , $tm->{day}-1, $tm->{month}-1, $tm->{year}-1900
+    , $tm->{wday} // -1, $tm->{yday} // -1, $tm->{is_dst} // -1
+    );
+}
+
+sub _tm_build($@)
+{   my $tm = shift;
+    @{$tm}{qw/sec min hour day month year wday yday isdst/} = @_;
+    $tm->{month}++;
+    $tm->{year}  += 1900;
+    $tm;
+}
+
+sub mktime(@)
+{   my @p;
+
+    my $time;
+    if(@_==1)
+    {   my $tm = shift;
+        ($time, my @t) = _mktime _tm_flatten $tm;
+        _tm_build $tm, @t if defined $time;  # All fields may have changed
+    }
+    else
+    {   ($time) = _mktime @_;
+    }
+
+    $time;
+}
+
+=function strftime $format, @tm|\%date
 The formatting of C<strftime> is extremely flexible but the parameters
 are quite tricky.  Read carefully!
 
   my $str = strftime($fmt, $sec, $min, $hour,
       $mday, $mon, $year, $wday, $yday, $isdst);
+
+  my $str = strftime($fmt, {month => 12, year => 2015};
 
 If you want your code to be portable, your $format argument
 should use only the conversion specifiers defined by the ANSI C
@@ -125,6 +164,7 @@ even when the LC_TIME table does not match the type of the format string.
 
 sub strftime($@)
 {   my $fmt = shift;
+    local @_ = _tm_flatten $_[0] if @_==1;
 
 #XXX See https://github.com/abeltje/lc_time for the correct implementation,
 #    using nl_langinfo(CODESET)
@@ -134,17 +174,17 @@ sub strftime($@)
     {   # enforce the format string (may contain any text) to the same
         # charset as the locale is using.
         my $rawfmt = $enc->encode($fmt);
-        return $enc->decode(POSIX::strftime($rawfmt, @_));
+        return $enc->decode(_strftime($rawfmt, @_));
     }
 
     if(is_utf8($fmt))
     {   # no charset in locale, hence ascii inserts
-        my $out = POSIX::strftime(encode($fmt, 'utf8'), @_);
+        my $out = _strftime(encode($fmt, 'utf8'), @_);
         return decode $out, 'utf8';
     }
 
     # don't know about the charset
-    POSIX::strftime($fmt, @_);
+    _strftime($fmt, @_);
 }
 
 =function tzset 
@@ -156,15 +196,40 @@ respectively Daylight Savings Time (DST).
 
   tzset();
   my ($std, $dst) = tzname;
-=cut
 
-# Everything in POSIX.xs
+=cut
 
 =function gmtime [$time]
 Simply L<perlfunc/gmtime>
 
 =function localtime [$time]
 Simply L<perlfunc/localtime>
+
+=function strptime $timestring, $format
+Translate the TIMESTRING into a time-stamp (seconds since epoch).
+The $format describes how the $timestring should be interpreted.
+
+Returned is a HASH with the usefull data from the 'tm' structure (as
+described in the standard strptime manual page)  The keys are stripped
+from the C<tm_> prefix.
+
+=example
+   # traditional interface
+   my ($sec, $min, ...) = strptime "12:24", "%H:%S";
+
+   # date as hash
+   my $tm = strptime "12:24", "%H:%S";
+   print "$tm->{hour}/$tm->{min}\n";
+   my $time = mktime $tm;
+=cut
+
+sub strptime($$)
+{   return _strptime @_
+        if wantarray;
+
+    my $tm = {};
+    _tm_build $tm, _strptime @_;
+}
 
 =chapter CONSTANTS
 

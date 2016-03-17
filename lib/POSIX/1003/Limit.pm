@@ -97,9 +97,15 @@ sub exampleValue($)
 {   my ($class, $name) = @_;
     if($name =~ m/^RLIMIT_/)
     {   my ($soft, $hard, $success) = getrlimit $name;
-        $soft //= 'undef';
-        $hard //= 'undef';
-        return "$soft, $hard";
+        for($soft,$hard)
+        {   $_ //= 'undef';
+            s/18446744073709551615/2**64-1/g;
+            s/9223372036854775807/2**63-1/g;
+        }
+        return "$rlimit->{$name}, $soft, $hard";
+    }
+    elsif($name =~ m/^RLIM_/)
+    {   return $rlimit->{$name} // 'undef';
     }
     elsif($name =~ m/^UL_GET|^GET_/)
     {   my $val = ulimit $name;

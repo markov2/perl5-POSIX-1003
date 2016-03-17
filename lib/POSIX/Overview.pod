@@ -684,8 +684,8 @@ all ending on C<_l>, like C<isalnum_l()>.
   fork          perlfunc          Windows::perlfork
   getpgrp       perlfunc    
   getpgid                         ::Proc
-  getpid        perlvar/$PID  $$
-  getppid       perlvar/$PPID
+  getpid        perlvar/$PID  $$  ::Proc
+  getppid       perlvar/$PPID     ::Proc
   getsid        not supported
   setsid                          ::Proc
   sleep         perlfunc          POSIX.pm (see warning)
@@ -992,7 +992,7 @@ Comparible functionality for functions which never made it into POSIX:
   l64a                            MIME::Base64/decode
   memccpy      $b = $1 if $a =~ m/(.*{,n}?)(?:c|$)/
   signgam      math, probably not supported
-  strptime                        Time::Piece
+  strptime                        ::Time Time::Piece
   swab         ($b,$a) = ($a,$b)
   timezone                        ::Time/tzname
   toascii      $c & 0x7f

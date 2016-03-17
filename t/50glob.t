@@ -11,7 +11,7 @@ use POSIX::1003::Errno  qw/EACCES/;
 $^O ne 'MSWin32'
     or plan skip_all => 'tests unix specific';
 
-plan tests => 8;
+#plan tests => 8;
 
 my ($err, $fns) = posix_glob('/etc/a*');
 #warn "  f=$_\n" for @$fns;
@@ -32,11 +32,20 @@ diag("1: $err3, @$fns3");
 ($err3, $fns3) = posix_glob('/tmp/aa', flags => GLOB_MARK);
 diag("2: $err3, @$fns3");
 
-my ($callfn, $callerr);
-my ($err4, $fns4) = posix_glob('/tmp/aa/*'
-  , on_error => sub { ($callfn, $callerr) = @_; 0});
-#warn "($err4, @$fns4)\n";
+### Test "on_error" callback
+if($^O eq 'cygwin')
+{   # chmod is fake on cygwin
+    diag("$^O tests for on_error skipped");
+}
+else
+{   my ($callfn, $callerr);
+    my ($err4, $fns4) = posix_glob('/tmp/aa/*'
+      , on_error => sub { ($callfn, $callerr) = @_; 0});
+    #warn "($err4, @$fns4)\n";
+    like($callfn, qr!^/tmp/aa/?$!, 'error fn');
+    cmp_ok($callerr, '==', EACCES, 'error rc');
+    cmp_ok($err4, '==', GLOB_NOMATCH);
+}
 rmdir '/tmp/aa';
-like($callfn, qr!^/tmp/aa/?$!, 'error fn');
-cmp_ok($callerr, '==', EACCES, 'error rc');
-cmp_ok($err4, '==', GLOB_NOMATCH);
+
+done_testing;

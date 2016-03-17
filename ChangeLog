@@ -23,6 +23,21 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
+version 0.99_08: Thu 17 Mar 12:10:13 CET 2016
+
+	Fixes:
+	- glob may return undef which is an SV*
+	- windows: no mknod
+	- cygwin glob test fails
+	- rlimit show example values of RLIM_
+
+	Improvements:
+	- rlimit display large contants as 2**
+	- added ::Time::strptime()
+	- use own ::Time::strftime() and ::mktime() with a simple hash
+	- added ::Proc::getpid() and ::getppid()
+	- add EPOLLEXCLUSIVE (Linux 4.5) EPOLLWAKEUP, and EPOLL_CLOEXEC
+
 version 0.99_07: Wed Apr  8 15:12:20 CEST 2015
 
 	Fixes:
