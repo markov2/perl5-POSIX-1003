@@ -1,8 +1,12 @@
-use warnings;
-use strict;
+# This code is part of distribution POSIX-1003.  Meta-POD processed with
+# OODoc into POD and HTML manual-pages.  See README.md
+# Copyright Mark Overmeer.  Licensed under the same terms as Perl itself.
 
 package POSIX::1003::Sysconf;
 use base 'POSIX::1003::Module';
+
+use warnings;
+use strict;
 
 use Carp    'croak';
 

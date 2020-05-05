@@ -1,8 +1,12 @@
-use warnings;
-use strict;
+# This code is part of distribution POSIX-1003.  Meta-POD processed with
+# OODoc into POD and HTML manual-pages.  See README.md
+# Copyright Mark Overmeer.  Licensed under the same terms as Perl itself.
 
 package POSIX::1003::Termios;
 use base 'POSIX::1003::Module', 'POSIX::Termios';
+
+use warnings;
+use strict;
 
 my @speed = qw/
  B0 B110 B1200 B134 B150 B1800 B19200 B200 B2400

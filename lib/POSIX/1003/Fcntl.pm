@@ -1,8 +1,12 @@
-use warnings;
-use strict;
+# This code is part of distribution POSIX-1003.  Meta-POD processed with
+# OODoc into POD and HTML manual-pages.  See README.md
+# Copyright Mark Overmeer.  Licensed under the same terms as Perl itself.
 
 package POSIX::1003::Fcntl;
 use base 'POSIX::1003::Module';
+
+use warnings;
+use strict;
 
 use POSIX::1003::FdIO   qw/SEEK_SET O_CLOEXEC/;
 use POSIX::1003::Errno  qw/ENOSYS/;
@@ -105,8 +109,8 @@ implemented via M<fcntl()>, which is more complex to use.
 
 =examples
   use POSIX::1003::Fcntl ':lockfd';
-  if(lockf $fd, $fcntl->{F_LOCK}) ...
-  lockf $fd, $fcntl->{F_ULOCK};
+  if(lockf $fd, F_LOCK) ...
+  lockf $fd, F_ULOCK;
 =cut
 
 sub lockf($$;$)
@@ -115,11 +119,12 @@ sub lockf($$;$)
     _lockf($fd, $flags, $len//0);
 }
 
+#---------------
+
 =section Additional
 
 =function fcntl_dup $fd|$fh, %options
-
-Functions $fcntl->{F_DUPFD} and $fcntl->{F_DUPFD_CLOEXEC}: dupplicate a file-descriptor
+Commands F_DUPFD and F_DUPFD_CLOEXEC: dupplicate a file-descriptor
 to the lowest free fd number.
 
 =option  close_on_exec BOOLEAN
@@ -147,7 +152,7 @@ sub fcntl_dup($%)
 }
 
 =function getfd_control $fd|$fh
-Control the file descriptor flags, function $fcntl->{F_GETFD}.
+Control the file descriptor flags, command F_GETFD.
 =cut
 
 sub getfd_control($)
@@ -156,8 +161,9 @@ sub getfd_control($)
     _fcntl $fd, $fcntl->{F_GETFD}, UNUSED;
 }
 
+
 =function setfd_control $fd|$fh, $flags
-Change the file descriptor flags, function $fcntl->{F_SETFD}.
+Change the file descriptor flags, command F_SETFD.
 =cut
 
 sub setfd_control($$)
@@ -166,8 +172,9 @@ sub setfd_control($$)
     _fcntl $fd, $fcntl->{F_SETFD}, $flags;
 }
 
+
 =function getfd_flags $fd|$fh
-Get the file status flags and access modes, function $fcntl->{F_GETFL}.
+Get the file status flags and access modes, command F_GETFL.
 
 =example
   my $flags = getfd_flags(fd);
@@ -181,7 +188,7 @@ sub getfd_flags($)
 }
 
 =function setfd_flags $fd|$fh, $flags
-Change the file status flags and access modes, function $fcntl->{F_SETFL}.
+Change the file status flags and access modes, command F_SETFL.
 =cut
 
 sub setfd_flags($$)
@@ -190,12 +197,14 @@ sub setfd_flags($$)
     _fcntl $fd, $fcntl->{F_SETFL}, $flags;
 }
 
+
 =function setfd_lock $fd|$fh, %options
 
-Functions $fcntl->{F_SETLK} and $fcntl->{F_SETLKW}: request a lock for (a section of) a file.
+Commands F_SETLKP and F_SETLKWP.
+Request a lock for (a section of) a file.
 
-=option  type  $fcntl->{F_RDLCK}|$fcntl->{F_WRLCK}|$fcntl->{F_UNLCK}
-=default type  $fcntl->{F_RDLCK}
+=option  type  F_RDLCK|F_WRLCK|F_UNLCK
+=default type  F_RDLCK
 
 =option  whence SEEK_SET|SEEK_CUR|SEEK_END
 =default whence SEEK_SET
@@ -215,7 +224,7 @@ Linux kernel >= 3.15 provides "open file description locks", also known
 as "file-private POSIX locks".  Use them when available.
 
 =example
-  setfd_lock \*IN, type => $fcntl->{F_WRLCK}, wait => 1
+  setfd_lock \*IN, type => F_WRLCK, wait => 1
       or die "cannot lock IN: $!\n";
 =cut
 
@@ -236,9 +245,10 @@ sub setfd_lock($%)
     _lock $fd, $func, \%args;
 }
 
+
 =function getfd_islocked $fd|$fh, %options
 
-Function $fcntl->{F_GETLCK}. Returns the first lock which would prevent getting
+Command F_GETLCK. Returns the first lock which would prevent getting
 the lock.  The %options are the same as for M<setfd_lock()>.
 
 =example
@@ -261,13 +271,15 @@ sub getfd_islocked($%)
     $lock->{type}==$fcntl->{F_UNLCK} ? undef : $lock;
 }
 
+
 =function getfd_owner $fd|$fh, %options
-Function $fcntl->{F_GETOWN} or $fcntl->{F_GETOWN_EX}.
+
+Commands F_GETOWN and F_GETOWN_EX.
 
 =examples
   my ($type, $pid) = getfd_owner($fd);
   defined $type or die $!;
-  if($type==$fcntl->{F_OWNER_PGRP}) ...
+  if($type==F_OWNER_PGRP) ...
 
   my $pid = getfd_owner($fd) or die $!;
 =cut
@@ -291,18 +303,19 @@ sub getfd_owner($%)
     wantarray ? ($type, $pid) : $pid;
 }
 
+
 =function setfd_owner $fd|$fh, $pid, %options
 
-Function $fcntl->{F_GETOWN} or $fcntl->{F_GETOWN_EX}.  The _EX version is attempted
+Commands F_GETOWN and F_GETOWN_EX.  The _EX version is attempted
 if provided.
 
-=option  type $fcntl->{F_OWNER_TID}|$fcntl->{F_OWNER_PID}|$fcntl->{F_OWNER_PGRP}
+=option  type F_OWNER_TID|F_OWNER_PID|F_OWNER_PGRP
 =default type <looks at sign>
 
 =examples
   setfd_owner($fh, $pid) or die $!;
-  setfd_owner($fh, $pid, type => $fcntl->{F_OWNER_TID}) or die $!;
-  setfd_owner($fh, -9);  # $pid=9, type=$fcntl->{F_OWNER_PGRP}
+  setfd_owner($fh, $pid, type => F_OWNER_TID) or die $!;
+  setfd_owner($fh, -9);  # $pid=9, type=F_OWNER_PGRP
 
 =cut
 
@@ -311,7 +324,7 @@ sub setfd_owner($$%)
     my $fd   = ref $file ? fileno($file) : $file;
 
     my $type = $args{type}
-            || ($pid < 0 ? ($fcntl->{F_OWNER_PGRP}//2) : ($fcntl->{F_OWNER_PID}//1));
+       || ($pid < 0 ? ($fcntl->{F_OWNER_PGRP}//2) : ($fcntl->{F_OWNER_PID}//1));
 
     $pid     = -$pid if $pid < 0;
 
@@ -325,7 +338,7 @@ sub setfd_owner($$%)
 }
 
 =function setfd_signal $fd|$fh, $signal
-Function $fcntl->{F_SETSIG}.
+Command F_SETSIG.
 
 =examples
  setfd_signal(\*STDOUT, SIGINT) or die $!;
@@ -337,8 +350,9 @@ sub setfd_signal($$)
     _fcntl $fd, $fcntl->{F_SETSIG}, $signal;
 }
 
+
 =function getfd_signal $fd|$fh
-Function $fcntl->{F_GETSIG}.
+Command F_GETSIG.
 
 =examples
  my $signal = getfd_signal(\*STDOUT) or die $!;
@@ -350,11 +364,12 @@ sub getfd_signal($)
     _fcntl $fd, $fcntl->{F_SETSIG}, UNUSED;
 }
 
+
 =function setfd_lease $fd|$fh, $flags
-Function $fcntl->{F_SETLEASE}.
+Command F_SETLEASE.
 
 =examples
- setfd_lease(\*STDOUT, $fcntl->{F_WRLCK}) or die $!;
+ setfd_lease(\*STDOUT, F_WRLCK) or die $!;
 =cut
 
 sub setfd_lease($$)
@@ -363,12 +378,13 @@ sub setfd_lease($$)
     _fcntl $fd, $fcntl->{F_SETLEASE}, $flags;
 }
 
+
 =function getfd_lease $fd|$fh
-Function $fcntl->{F_GETLEASE}.
+Command F_GETLEASE.
 
 =examples
  my $lease = getfd_lease(\*STDIN) or die $!;
- if($lease != $fcntl->{F_RDLCK}) ...
+ if($lease != F_RDLCK) ...
 =cut
 
 sub getfd_lease($)
@@ -379,7 +395,7 @@ sub getfd_lease($)
 
 
 =function setfd_notify $fd|$fh, $flags
-Function $fcntl->{F_NOTIFY}.
+Command F_NOTIFY.
 
 =example
   my $d = openfd('/etc', O_RDONLY|O_DIRECTORY) or die $!;
@@ -393,8 +409,9 @@ sub setfd_notify($$)
     _fcntl $fd, $fcntl->{F_NOTIFY}, $flags;
 }
 
+
 =function setfd_pipe_size $fd|$fh, $size
-Function $fcntl->{F_SETPIPE_SZ}.
+Command F_SETPIPE_SZ.
 
 =examples
  setfd_pipe_size($pipe, 16384) or die $!;
@@ -406,8 +423,9 @@ sub setfd_pipe_size($$)
     _fcntl $fd, $fcntl->{F_SETPIPE_SZ}, $size;
 }
 
+
 =function getfd_pipe_size $fd|$fh
-Function $fcntl->{F_GETPIPE_SZ}.
+Command F_GETPIPE_SZ.
 
 =examples
  my $size = getfd_pipe_size($pipe) or die $!;
@@ -418,6 +436,8 @@ sub getfd_pipe_size($)
     my $fd   = ref $file ? fileno($file) : $file;
     _fcntl $fd, $fcntl->{F_GETPIPE_SZ}, UNUSED;
 }
+
+#-----------------
 
 =chapter CONSTANTS
 

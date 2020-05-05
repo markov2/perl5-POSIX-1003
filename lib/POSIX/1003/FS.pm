@@ -1,8 +1,12 @@
-use warnings;
-use strict;
+# This code is part of distribution POSIX-1003.  Meta-POD processed with
+# OODoc into POD and HTML manual-pages.  See README.md
+# Copyright Mark Overmeer.  Licensed under the same terms as Perl itself.
 
 package POSIX::1003::FS;
 use base 'POSIX::1003::Module';
+
+use warnings;
+use strict;
 
 my (@constants, @access, @stat, @glob);
 
@@ -169,11 +173,12 @@ B<BE WARNED> that function returns bytes: file names are B<not
 printable strings> because the encoding used for file names on disk is
 not defined (on UNIXes).  Read more in L</Filenames to string>
 
-M<File::Glob> does not use the system's libc C<glob()>, but includes the
-bare code of that implementation.  For that reason, it's C<bsd_glob()>
-does work on Windows (and possibly other non-POSIX2 compliant systems)
-as well.  On the other hand, File::Glob does not support the C<on_error>
-callback.
+B<BE WARNED> that M<File::Glob> does not use the system's libc C<glob()>,
+but includes the bare code of that implementation.  For that reason,
+it's C<bsd_glob()> does work on Windows and other platforms in the same
+way.  Also, C<bsd_glob()> supports the non-posix '{}' syntax as BSD has.
+It also adapts the defaults of the flags to match the default OS behavior.
+On the other hand, File::Glob does not support the C<on_error> callback.
 
 =option  flags INTEGER
 =default flags GLOB_NOSORT|GLOB_NOESCAPE|GLOB_BRACE

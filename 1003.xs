@@ -70,6 +70,8 @@
    Overrule via files in the "system" sub-directory of this distribution.
  */
 
+#include <sys/types.h>
+
 #ifndef HAS_CONFSTR
 #define HAS_CONFSTR
 #endif
@@ -156,6 +158,11 @@
 
 #endif
 
+#define I_TIME
+#define I_RESOURCE
+#define I_SYS_RESOURCE
+#define I_GRP
+
 /*
  * work-arounds for various operating systems
  */
@@ -199,6 +206,10 @@
 
 #ifdef I_TIME
 #include <time.h>
+#endif
+
+#ifdef I_GRP
+#include <grp.h>
 #endif
 
 #ifdef HAS_GLOB
@@ -735,9 +746,9 @@ _getrlimit(resource)
     PPCODE:
 	/* on linux, rlim64_t is a __UQUAD_TYPE */
 	result = getrlimit64(resource, &rlim);
-	PUSHs(sv_2mortal(newSVuv(rlim.rlim_cur)));
-	PUSHs(sv_2mortal(newSVuv(rlim.rlim_max)));
-	PUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
+	XPUSHs(sv_2mortal(newSVuv(rlim.rlim_cur)));
+	XPUSHs(sv_2mortal(newSVuv(rlim.rlim_max)));
+	XPUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
 
 SV *
 _setrlimit(resource, cur, max)
@@ -769,9 +780,9 @@ _getrlimit(resource)
     PPCODE:
 	/* on linux, rlim64_t is a __ULONGWORD_TYPE */
 	result = getrlimit(resource, &rlim);
-	PUSHs(sv_2mortal(newSVuv(rlim.rlim_cur)));
-	PUSHs(sv_2mortal(newSVuv(rlim.rlim_max)));
-	PUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
+	XPUSHs(sv_2mortal(newSVuv(rlim.rlim_cur)));
+	XPUSHs(sv_2mortal(newSVuv(rlim.rlim_max)));
+	XPUSHs(result==-1 ? &PL_sv_no : &PL_sv_yes);
 
 SV *
 _setrlimit(resource, cur, max)
@@ -798,9 +809,9 @@ _getrlimit(resource)
 	int		resource;
     PROTOTYPE: $
     PPCODE:
-	PUSHs(&PL_sv_undef);
-	PUSHs(&PL_sv_undef);
-	PUSHs(&PL_sv_no);
+	XPUSHs(&PL_sv_undef);
+	XPUSHs(&PL_sv_undef);
+	XPUSHs(&PL_sv_no);
 
 SV *
 _setrlimit(resource, cur, max)
@@ -820,6 +831,10 @@ MODULE = POSIX::1003	PACKAGE = POSIX::1003::FS
 
 #ifdef HAS_SYSMKDEV
 #include <sys/mkdev.h>
+#endif
+
+#ifdef __GNU_LIBRARY__
+#include <sys/sysmacros.h>
 #endif
 
 SV *

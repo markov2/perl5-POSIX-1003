@@ -1,11 +1,15 @@
-use warnings;
-use strict;
+# This code is part of distribution POSIX-1003.  Meta-POD processed with
+# OODoc into POD and HTML manual-pages.  See README.md
+# Copyright Mark Overmeer.  Licensed under the same terms as Perl itself.
 
 package POSIX::1003::FdIO;
 use base 'POSIX::1003::Module';
 
+use warnings;
+use strict;
+
 # Blocks resp from unistd.h, limits.h, and stdio.h
-my (@constants, @seek, @mode);
+my (@constants, @seek, @mode, @at);
 my @functions = qw/closefd creatfd dupfd dup2fd openfd pipefd
   readfd seekfd writefd tellfd truncfd fdopen/;
 
@@ -14,11 +18,12 @@ our %EXPORT_TAGS =
  , functions => \@functions
  , seek      => \@seek
  , mode      => \@mode
- , tables    => [ qw/%seek %mode/ ]
+ , at        => \@at
+ , tables    => [ qw/%seek %mode %at/ ]
  );
 
 my $fdio;
-our (%fdio, %seek, %mode);
+our (%fdio, %seek, %mode, %at);
 
 BEGIN {
     $fdio = fdio_table;
@@ -35,6 +40,12 @@ BEGIN {
     my %mode_subset;
     @mode_subset{@mode} = @{$fdio}{@mode};
     tie %mode,  'POSIX::1003::ReadOnlyTable', \%mode_subset;
+
+    # initialize the :at export tag
+    push @at, grep /^AT_/, keys %$fdio;
+    my %at_subset;
+    @at_subset{@at} = @{$fdio}{@at};
+    tie %at,  'POSIX::1003::ReadOnlyTable', \%at_subset;
 }
 
 =chapter NAME

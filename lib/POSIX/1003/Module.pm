@@ -1,12 +1,16 @@
-use strict;
-use warnings;
+# This code is part of distribution POSIX-1003.  Meta-POD processed with
+# OODoc into POD and HTML manual-pages.  See README.md
+# Copyright Mark Overmeer.  Licensed under the same terms as Perl itself.
 
 package POSIX::1003::Module;
+
+use strict;
+use warnings;
 
 # The VERSION of the distribution is sourced from this file, because
 # this module also loads the XS extension.  Therefore, Makefile.PL
 # extracts the version from the line below.
-our $VERSION = '0.99_08';
+our $VERSION = '1.01';
 use Carp 'croak';
 
 # some other modules used by the program which uses POSIX::1003 may

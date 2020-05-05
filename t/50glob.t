@@ -13,24 +13,25 @@ $^O ne 'MSWin32'
 
 #plan tests => 8;
 
-my ($err, $fns) = posix_glob('/etc/a*');
+my ($err, $fns) = posix_glob('/et*');
 #warn "  f=$_\n" for @$fns;
 ok(!$err, 'ran glob');
-cmp_ok(scalar @$fns, '>', 2, 'found filenames');
-like($fns->[0], qr!^/etc/a!, "match $fns->[0]");
+cmp_ok(scalar @$fns, '>=', 1, 'found filenames');
+like($fns->[0], qr!^/et!, "match $fns->[0]");
 
 my ($err2, $fns2) = posix_glob('/xx');
 cmp_ok($err2, '==', GLOB_NOMATCH);
 cmp_ok(scalar @$fns2, '==', 0);
 
-mkdir '/tmp/aa';
-chmod 0, '/tmp/aa';
+my $tmp = '/tmp/s23DSaba';
+mkdir $tmp;
+chmod 0, $tmp;
 
-my ($err3, $fns3) = posix_glob('/tmp/aa');
-diag("1: $err3, @$fns3");
+my ($err3, $fns3) = posix_glob($tmp);
+#diag("1: $err3, @$fns3");
 
-($err3, $fns3) = posix_glob('/tmp/aa', flags => GLOB_MARK);
-diag("2: $err3, @$fns3");
+($err3, $fns3) = posix_glob($tmp, flags => GLOB_MARK);
+#diag("2: $err3, @$fns3");
 
 ### Test "on_error" callback
 if($^O eq 'cygwin')
@@ -39,13 +40,13 @@ if($^O eq 'cygwin')
 }
 else
 {   my ($callfn, $callerr);
-    my ($err4, $fns4) = posix_glob('/tmp/aa/*'
+    my ($err4, $fns4) = posix_glob($tmp.'/*'
       , on_error => sub { ($callfn, $callerr) = @_; 0});
     #warn "($err4, @$fns4)\n";
-    like($callfn, qr!^/tmp/aa/?$!, 'error fn');
+    like($callfn, qr!^\Q$tmp\E/?$!, 'error fn');
     cmp_ok($callerr, '==', EACCES, 'error rc');
     cmp_ok($err4, '==', GLOB_NOMATCH);
 }
-rmdir '/tmp/aa';
+rmdir $tmp;
 
 done_testing;

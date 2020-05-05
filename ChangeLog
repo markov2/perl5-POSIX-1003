@@ -2,6 +2,7 @@
 ====== version history of POSIX::1003
 
 All changes are made by Mark Overmeer, unless stated otherwise.
+# TODO:
 # . ::FS manual needs cleanup, f.i. split lists of constants
 # . the main component of exporter in POSIX::1003 useful enough to become
 #   a separate module.
@@ -18,10 +19,29 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . hpux: PRIV_*, pstat, priv_add_effective, priv_remove, privgrp
 # . aix: PV_*
 # . linux memfd* and F_*SEAL*
+# . *at() commands for FdIO
+# . proc  get/setpriority  (see BSD::Resource)
 
 # . implementation of nl_langinfo
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
+
+version 1.01:
+
+version 1.00: Tue  5 May 14:49:33 CEST 2020
+
+FreeBSD has no _PC_LINK_MAX (t/62pathconf.t)
+http://www.cpantesters.org/cpan/report/153c7110-1a79-11e8-92d0-ae77c247440e
+Use _PC_FILESIZEBITS ?
+
+	Fixes:
+	- SETLK was missing
+	- The manual-page POSIX::1003::Fcntl was messed-up
+	- Use XPUSHs, not PUSHs [Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯]
+
+	Improvements
+	- add AT_ constants for dirfd *at commands
+	- converted to GitHub
 
 version 0.99_08: Thu 17 Mar 12:10:13 CET 2016
 

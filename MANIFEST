@@ -3,6 +3,7 @@ ChangeLog
 MANIFEST
 Makefile.PL
 PODTAIL.txt
+README.md
 TODO
 lib/POSIX/1003.pm
 lib/POSIX/1003/Confstr.pm
