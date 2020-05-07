@@ -1,4 +1,4 @@
-#define PERL_EXT_POSIX_1003
+ysdefine PERL_EXT_POSIX_1003
 
 #include "EXTERN.h"
 
