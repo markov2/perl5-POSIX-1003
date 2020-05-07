@@ -28,6 +28,11 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 
 version 1.01:
 
+	Improvements:
+	- more float constants treated as strings [cpantesters]
+	- apparently strptime not supported on FreeBSD [cpantesters]
+	  (although manual page exists)
+
 version 1.00: Tue  5 May 14:49:33 CEST 2020
 
 FreeBSD has no _PC_LINK_MAX (t/62pathconf.t)
