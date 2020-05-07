@@ -392,7 +392,7 @@ Provides an OO interface around C<getgr*()>
 The POSIX module as distributed with Perl itself is ancient (it dates
 before Perl5)  Although it proclaims that it provides access to all
 POSIX functions, it only lists about 200 out of 1200. From that subset,
-half of the functions with croak when you use them, complaining that
+half of the functions will croak when you use them, complaining that
 they cannot get implemented in Perl for some reason.
 
 Many other functions provided by POSIX-in-Core simply forward the caller
