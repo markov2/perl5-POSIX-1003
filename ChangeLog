@@ -32,6 +32,7 @@ version 1.01:
 	- more float constants treated as strings [cpantesters]
 	- apparently strptime not supported on FreeBSD [cpantesters]
 	  (although manual page exists)
+	- also on netbsd only one confstr
 
 version 1.00: Tue  5 May 14:49:33 CEST 2020
 
