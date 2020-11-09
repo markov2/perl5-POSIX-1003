@@ -18,7 +18,7 @@ use POSIX::1003::Time;  # try load all
 
 my $date1 = "2015-04-22T21:06:52";
 my $tm = strptime $date1, "%Y-%m-%dT%H:%M:%S";
-if(defined $sec)
+if(defined $tm)
 {   is($tm->{year},'2015', 'strptime year');
     is($tm->{month},  '4', 'strptime month');
     is($tm->{day},   '22', 'strptime day');
