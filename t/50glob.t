@@ -38,6 +38,10 @@ if($^O eq 'cygwin')
 }
 else
 {   my ($callfn, $callerr);
+
+    # Drop privileges if we are running as superuser.
+    local $> = 1 if !$>;
+
     my ($err4, $fns4) = posix_glob($tmp.'/*'
       , on_error => sub { ($callfn, $callerr) = @_; 0});
     #warn "($err4, @$fns4)\n";
