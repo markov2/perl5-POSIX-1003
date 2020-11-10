@@ -11,8 +11,6 @@ use POSIX::1003::Errno  qw/EACCES/;
 $^O ne 'MSWin32'
     or plan skip_all => 'tests unix specific';
 
-#plan tests => 8;
-
 my ($err, $fns) = posix_glob('/et*');
 #warn "  f=$_\n" for @$fns;
 ok(!$err, 'ran glob');
