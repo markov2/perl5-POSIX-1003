@@ -26,6 +26,8 @@ All changes are made by Mark Overmeer, unless stated otherwise.
 # . change in ::Module of detection of constants which need autogeneration
 # . charset of locale only via nl_langinfo(CODESET)
 
+version 1.03:
+
 version 1.02: Tue 10 Nov 16:45:33 CET 2020
 
 	Fixes:
