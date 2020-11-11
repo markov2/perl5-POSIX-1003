@@ -1,0 +1,39 @@
+name: CI Makefile
+
+on:
+    push:
+        branches: '*'
+    pull_request:
+        branches: '*'
+
+jobs:
+  native-perl:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, macos-latest] # windows-latest currently has issues
+        perl: [ '5.32', '5.30' ]
+    runs-on: ${{matrix.runner}}
+    name: OS ${{matrix.runner}} Perl ${{matrix.perl}}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+            perl-version: ${{ matrix.perl }}
+            #distribution: strawberry
+
+      - name: View environment
+        run: |
+          uname -a
+          printenv | sort
+          perl -v
+
+      - name: Regular tests
+        run: |
+            cpanm --installdeps --notest .
+            perl Makefile.PL
+            make
+            make test
+
