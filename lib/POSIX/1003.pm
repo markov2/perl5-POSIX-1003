@@ -457,7 +457,7 @@ This simplifies code like this:
   use POSIX::1003::PathConfig '_PC_PATH_MAX';
   my $max_fn = _PC_PATH_MAX($fn) // PATH_MAX // 1024;
 
-With the tranditional POSIX, you have to C<eval()> each use
+With the traditional POSIX, you have to C<eval()> each use
 of a constant.
 
 =back
