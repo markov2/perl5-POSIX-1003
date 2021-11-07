@@ -38,7 +38,7 @@ POSIX::1003 - POSIX 1003.1-2008 provisioning
 
 =chapter DESCRIPTION
 
-The M<POSIX::1003> suite provides access to b<many> POSIX functions. The
+The M<POSIX::1003> suite provides access to B<many> POSIX functions. The
 M<POSIX> module in I<core> (distributed with Perl itself) is ancient, the
 documentation is usually wrong, and it has too much unusable code in it.
 C<POSIX::1003> tries to provide cleaner access to the operating system.
