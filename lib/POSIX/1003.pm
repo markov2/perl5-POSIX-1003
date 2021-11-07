@@ -38,7 +38,7 @@ POSIX::1003 - POSIX 1003.1-2008 provisioning
 
 =chapter DESCRIPTION
 
-The M<POSIX::1003> suite provides access to b<many> POSIX functions. The
+The M<POSIX::1003> suite provides access to B<many> POSIX functions. The
 M<POSIX> module in I<core> (distributed with Perl itself) is ancient, the
 documentation is usually wrong, and it has too much unusable code in it.
 C<POSIX::1003> tries to provide cleaner access to the operating system.
@@ -457,7 +457,7 @@ This simplifies code like this:
   use POSIX::1003::PathConfig '_PC_PATH_MAX';
   my $max_fn = _PC_PATH_MAX($fn) // PATH_MAX // 1024;
 
-With the tranditional POSIX, you have to C<eval()> each use
+With the traditional POSIX, you have to C<eval()> each use
 of a constant.
 
 =back
